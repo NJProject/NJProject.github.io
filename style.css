@@ -333,6 +333,139 @@ footer{
 }
 footer a{color:var(--muted);}
 
+/* ---------------- City teaser cards (index) ---------------- */
+.city-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+.city-teaser{
+  display:block;
+  text-decoration:none;
+  color:var(--ink);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  transition:transform .15s, box-shadow .15s;
+}
+.city-teaser:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 14px rgba(27,42,65,.08);
+}
+.city-teaser .ct-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.city-teaser .ct-icon{font-size:24px;}
+.city-teaser h4{margin:0;font-size:16px;}
+.city-teaser p{font-size:12.8px;color:var(--muted);margin:0;}
+.city-teaser .ct-more{
+  display:inline-block;
+  margin-top:10px;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--indigo);
+}
+
+/* ---------------- City sub-page header ---------------- */
+.city-header{
+  padding:34px 20px 26px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+}
+.city-header .back{
+  display:inline-block;
+  font-size:13px;
+  color:var(--muted);
+  text-decoration:none;
+  margin-bottom:14px;
+}
+.city-header .back:hover{color:var(--indigo);}
+.city-header .city-icon-big{font-size:40px;display:block;margin-bottom:10px;}
+.city-header h1{font-size:clamp(24px,4.5vw,36px);margin:0 0 6px;}
+.city-header p{margin:0;color:var(--muted);font-size:14.5px;}
+.city-nav{
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+  max-width:900px;
+  margin:16px auto 0;
+  padding:0 20px;
+}
+.city-nav a{font-size:12.5px;color:var(--indigo);text-decoration:none;font-weight:600;}
+.city-nav a:hover{text-decoration:underline;}
+
+.city-main{max-width:900px;margin:0 auto;padding:32px 22px 90px;}
+
+/* ---------------- Category filter chips ---------------- */
+.filter-bar{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:26px;
+  position:sticky;
+  top:0;
+  background:var(--paper);
+  padding:12px 0;
+  z-index:5;
+  border-bottom:1px solid var(--line);
+}
+.filter-chip{
+  border:1.5px solid var(--line);
+  background:var(--card);
+  color:var(--ink);
+  font-size:12.5px;
+  font-weight:600;
+  padding:6px 14px;
+  border-radius:16px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.filter-chip:hover{border-color:var(--indigo);}
+.filter-chip.active{
+  background:var(--indigo);
+  border-color:var(--indigo);
+  color:#fff;
+}
+
+/* ---------------- POI cards ---------------- */
+.poi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+}
+.poi-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  transition:opacity .15s, transform .15s;
+}
+.poi-card.hidden{display:none;}
+.poi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.poi-icon{font-size:24px;flex:none;}
+.poi-card h4{margin:0 0 2px;font-size:15.5px;}
+.poi-cat{
+  font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  padding:3px 9px;border-radius:10px;white-space:nowrap;
+}
+.cat-touristique{background:var(--indigo-tint);color:var(--indigo);}
+.cat-culturel{background:var(--gold-tint);color:var(--gold);}
+.cat-commerces{background:var(--green-tint);color:var(--green);}
+.cat-gastronomie{background:var(--seal-tint);color:var(--seal);}
+.cat-otaku{background:#EDE7F6;color:#5E35B1;}
+.poi-card p{font-size:13.5px;margin:0 0 8px;color:var(--ink);}
+.poi-meta{
+  font-size:12px;color:var(--muted);
+  border-top:1px dashed var(--line);
+  padding-top:8px;margin-top:8px;
+}
+.poi-meta strong{color:var(--ink);}
+
+@media (max-width:620px){
+  .filter-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+  .filter-chip{white-space:nowrap;}
+}
+
 /* ================= RESPONSIVE ================= */
 @media (max-width:860px){
   .wrap{flex-direction:column;}
