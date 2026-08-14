@@ -468,6 +468,10 @@ footer a{color:var(--muted);}
 .cat-gastronomie{background:var(--seal-tint);color:var(--seal);}
 .cat-loisirs{background:#FDECEF;color:#C2185B;}
 .cat-otaku{background:#EDE7F6;color:#5E35B1;}
+.cat-kamakura{background:var(--indigo-tint);color:var(--indigo);}
+.cat-nikko{background:var(--gold-tint);color:var(--gold);}
+.cat-fuji{background:var(--green-tint);color:var(--green);}
+.cat-yokohama{background:var(--seal-tint);color:var(--seal);}
 .poi-card p{font-size:13.5px;margin:0 0 8px;color:var(--ink);}
 .poi-meta{
   font-size:12px;color:var(--muted);
