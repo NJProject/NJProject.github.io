@@ -466,6 +466,7 @@ footer a{color:var(--muted);}
 .cat-culturel{background:var(--gold-tint);color:var(--gold);}
 .cat-commerces{background:var(--green-tint);color:var(--green);}
 .cat-gastronomie{background:var(--seal-tint);color:var(--seal);}
+.cat-loisirs{background:#FDECEF;color:#C2185B;}
 .cat-otaku{background:#EDE7F6;color:#5E35B1;}
 .poi-card p{font-size:13.5px;margin:0 0 8px;color:var(--ink);}
 .poi-meta{
