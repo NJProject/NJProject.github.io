@@ -6,6 +6,8 @@ CATS = {
     "commerces": ("🛍️", "Commerces"),
     "gastronomie": ("🍜", "Gastronomie"),
     "loisirs": ("🎢", "Parcs & loisirs"),
+    "nightlife": ("🌃", "Vie nocturne"),
+    "randonnee": ("🥾", "Randonnée"),
     "otaku": ("🎮", "Otaku / Geek"),
 }
 
@@ -27,7 +29,7 @@ CITIES = {
         "name": "Osaka",
         "dates": "18 – 22 février 2027 · 6 personnes",
         "intro": "Base du séjour côté Tsuruhashi, à quelques minutes de Dotonbori. Osaka est la ville la plus \"vivante\" et gourmande du Kansai — moins de temples qu'à Kyoto, beaucoup plus de rue, de néons et de nourriture de rue. C'est aussi la ville avec le plus de grosses attractions à visiter (parc à thème, aquarium, musées) si vous voulez varier avec le patrimoine.",
-        "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs"],
+        "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs","nightlife"],
         "pois": [
             poi("🏯","Château d'Osaka","touristique","Reconstruction du XXe siècle mais superbe, entouré de douves et d'un grand parc — vue panoramique depuis le sommet.", "Accès : 20-25 min depuis Tsuruhashi en métro"),
             poi("🌆","Umeda Sky Building","touristique","Tours jumelles reliées par un observatoire circulaire suspendu, vue à 360° sur toute la ville, particulièrement belle au coucher du soleil.", "Quartier de Kita/Umeda"),
@@ -45,6 +47,9 @@ CITIES = {
             poi("🐳","Osaka Aquarium Kaiyukan","loisirs","L'un des plus grands aquariums du monde, bassin central de 9m de profondeur avec requins-baleines, tour en spirale qui descend à travers les écosystèmes du Pacifique.", "Quartier de Tempozan, à côté du Ferris wheel"),
             poi("🧱","Legoland Discovery Center Osaka","loisirs","Attraction indoor pour tous âges, zones de jeu, mini-Osaka en Lego, montagne russe douce, plutôt pour une pause de 2h que pour la journée.", "Centre commercial LaLaport Osaka Expocity, Suita"),
             poi("🍜","Cup Noodles Museum Osaka Ikeda","loisirs","Musée dédié à l'invention des nouilles instantanées par Momofuku Ando, atelier pour créer son propre pot de nouilles personnalisé.", "Ikeda, ~30 min du centre — réservation atelier conseillée"),
+            poi("🍶","Soemoncho (bar-hopping)","nightlife","Juste sous Dotonbori — izakaya, bars à karaoké et clubs serrés sur quelques rues, réputé accueillant pour les visiteurs étrangers.", "5 min à pied du logement"),
+            poi("🎤","Karaoke Dotonbori","nightlife","Chaînes de karaoké ouvertes tard (Big Echo, Karaoke Kan) avec vue sur le canal pour certaines salles — format classique par petite pièce privative, pas de scène.", "Plusieurs enseignes autour de Dotonbori/Namba"),
+            poi("🕺","Amerikamura by night","nightlife","Le quartier bascule en clubs indie/hip-hop/électro après la tombée de la nuit, ambiance plus underground que Namba.", "Proche Shinsaibashi"),
         ],
     },
     "nara": {
@@ -52,13 +57,13 @@ CITIES = {
         "name": "Nara",
         "dates": "22 – 23 février 2027 · 6 personnes · 1 nuit",
         "intro": "Étape courte mais dense : ancienne capitale du Japon (710-784), premier grand foyer bouddhiste du pays. L'essentiel se fait à pied depuis le logement, à côté du Tōdai-ji.",
-        "cats_used": ["touristique","culturel","commerces","gastronomie"],
+        "cats_used": ["touristique","culturel","commerces","gastronomie","randonnee"],
         "pois": [
             poi("🦌","Parc de Nara","touristique","Plus de 1 200 daims sacrés en liberté totale, considérés comme des messagers divins depuis la fondation du sanctuaire Kasuga Taisha. Ils s'inclinent pour réclamer des biscuits (shika senbei).", "Daims parfois brusques — ne pas les taquiner avec la nourriture"),
             poi("🗿","Tōdai-ji","touristique","Abrite le Daibutsu, l'un des plus grands Bouddhas en bronze du Japon, dans le plus grand bâtiment en bois du monde.", "À 30 min à pied du logement, dans le parc"),
             poi("⛩️","Kasuga Taisha","culturel","Sanctuaire shinto célèbre pour ses milliers de lanternes de pierre et de bronze couvertes de mousse, offertes par les fidèles au fil des siècles.", "Patrimoine mondial UNESCO"),
             poi("🏯","Kōfuku-ji","culturel","Pagode à cinq étages, l'une des plus hautes du Japon, vestige de l'ancien pouvoir du clan Fujiwara.", "Patrimoine mondial UNESCO, dans le parc"),
-            poi("🌲","Forêt primaire du Mont Kasuga","touristique","Forêt sacrée classée UNESCO derrière Kasuga Taisha, jamais coupée depuis plus de 1000 ans — belle balade tranquille loin des foules du parc principal.", "Départ juste derrière le sanctuaire Kasuga Taisha"),
+            poi("🌲","Forêt primaire du Mont Kasuga","randonnee","Forêt sacrée classée UNESCO derrière Kasuga Taisha, jamais coupée depuis plus de 1000 ans — belle balade tranquille loin des foules du parc principal.", "Départ juste derrière le sanctuaire Kasuga Taisha"),
             poi("🎋","Naramachi","commerces","Ancien quartier marchand aux maisons machiya restaurées, aujourd'hui plein de boutiques d'artisanat, galeries et cafés à thème.", "15 min à pied du logement"),
             poi("🌸","Isui-en Garden","touristique","Jardin japonais traditionnel avec vue sur le Tōdai-ji en arrière-plan (technique du \"paysage emprunté\"), plus calme que le parc principal.", "Juste à côté du Tōdai-ji"),
             poi("🍡","Kudzu mochi & kakinoha zushi","gastronomie","Spécialités locales : gâteau de riz à base de racine de kudzu, et sushi enveloppé de feuille de plaqueminier (kaki) — typiques de la cuisine d'ancienne capitale.", "À goûter à Naramachi"),
@@ -70,7 +75,7 @@ CITIES = {
         "name": "Kyoto",
         "dates": "23 – 26 février 2027 · 6 personnes",
         "intro": "Capitale impériale pendant plus de 1000 ans. Logement dans le quartier de la gare, avec 6 vélos gratuits fournis — pratique pour enchaîner les quartiers sans dépendre des bus bondés.",
-        "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs"],
+        "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs","randonnee","nightlife"],
         "pois": [
             poi("⛩️","Fushimi Inari-taisha","touristique","Des milliers de torii vermillon qui grimpent la colline sacrée du renard Inari — accessible directement en train depuis la ligne JR Nara.", "Ouvert 24h/24, gratuit"),
             poi("🌟","Kinkaku-ji","touristique","Le Pavillon d'or, recouvert de feuilles d'or véritables, reflété dans son étang — l'un des symboles les plus connus du Japon.", "Nord-ouest de Kyoto"),
@@ -84,6 +89,9 @@ CITIES = {
             poi("🎮","Nintendo Museum (Uji)","loisirs","Ouvert en 2024 dans l'ancienne usine Nintendo, retrace toute l'histoire de la marque des cartes Hanafuda à la Switch, expositions interactives. Billets uniquement par tirage au sort en ligne, pas de vente sur place ni le jour même.", "À Uji, ~45-60 min du logement (Kintetsu via Ogura) — réserver via museum-tickets.nintendo.com bien à l'avance"),
             poi("🎬","Toei Kyoto Studio Park","loisirs","Parc à thème dans un vrai studio de tournage de films de samouraïs (jidaigeki), figurants en costume, rues de l'époque Edo reconstituées.", "Ouest de Kyoto, proche d'Arashiyama"),
             poi("🚂","Musée ferroviaire de Kyoto","loisirs","Grande collection de locomotives et Shinkansen historiques, simulateurs de conduite, très bien fait pour petits et grands.", "10 min à pied de la gare de Kyoto"),
+            poi("🥾","Fushimi Inari jusqu'au sommet","randonnee","Au-delà du point de vue habituel de Yotsutsuji, la foule se dissipe et le sentier continue à travers la forêt jusqu'au sommet du mont Inari — environ 2h30-3h aller-retour complet.", "Départ depuis le sanctuaire, même accès que la visite classique"),
+            poi("🍁","Higashiyama & Mont Daimonji","randonnee","Depuis le Pavillon d'argent (Ginkaku-ji) et le Chemin du philosophe, montée courte mais soutenue (~1h) jusqu'au point de vue de Daimonji pour une vue d'ensemble sur Kyoto.", "Bus Raku 100 depuis la gare de Kyoto jusqu'à Ginkaku-ji"),
+            poi("🍶","Pontocho & Kiyamachi","nightlife","Ruelle étroite en maisons machiya le long de la rivière Kamo (Pontocho, plus haut de gamme) et rue parallèle plus jeune et animée (Kiyamachi) — bars, izakaya, quelques terrasses sur l'eau.", "Entre Gion et le centre-ville, Kyoto ferme plus tôt que Tokyo/Osaka (23h-minuit)"),
         ],
     },
     "kanazawa": {
@@ -91,7 +99,7 @@ CITIES = {
         "name": "Kanazawa",
         "dates": "26 – 28 février 2027 · 5 personnes",
         "intro": "\"Petite Kyoto\" du bord de mer du Japon, épargnée par les bombardements de la Seconde Guerre mondiale — samouraïs, geishas et art contemporain à taille humaine, tout se fait à pied.",
-        "cats_used": ["touristique","culturel","commerces","gastronomie"],
+        "cats_used": ["touristique","culturel","commerces","gastronomie","nightlife"],
         "pois": [
             poi("🌳","Kenrokuen","touristique","L'un des trois plus beaux jardins du Japon, sublime toute l'année (pruniers en février-mars), célèbre lanterne de pierre Kotoji-tōrō.", "5 min à pied du logement"),
             poi("🏯","Château de Kanazawa","touristique","Reconstruction impressionnante juste en face de Kenrokuen, remarquable pour ses murs blancs en plâtre plutôt qu'en bois foncé.", "Juste à côté de Kenrokuen"),
@@ -103,6 +111,7 @@ CITIES = {
             poi("✨","Glace à la feuille d'or","gastronomie","Spécialité unique de Kanazawa, qui produit 99% de la feuille d'or du Japon — un cône de glace entièrement recouvert d'une feuille d'or comestible, en vente à Higashi Chaya.", "Higashi Chaya, plusieurs boutiques"),
             poi("🛍️","Kōrinbō & Tatemachi","commerces","Quartier commerçant central, grands magasins et rues piétonnes plus locales, bon complément après la journée culturelle.", "Centre-ville de Kanazawa"),
             poi("🏔️","Shirakawa-go (excursion à la journée)","touristique","Village classé UNESCO aux fermes traditionnelles au toit de chaume pentu (style gassho-zukuri), superbe même sous la neige. Faisable en bus direct depuis Kanazawa.", "~1h15 en bus depuis Kanazawa, réservation du bus conseillée en hiver"),
+            poi("🍶","Katamachi (bar-hopping)","nightlife","Le quartier des bars de Kanazawa — ruelles denses en izakaya et petits bars à saké, prix environ 30% sous Tokyo, ambiance beaucoup plus locale que touristique.", "Centre-ville, proche Korinbo"),
         ],
     },
     "tokyo": {
@@ -110,14 +119,14 @@ CITIES = {
         "name": "Tokyo",
         "dates": "26 février – 10 mars 2027 · groupe séparé puis réuni",
         "intro": "La plus longue étape du voyage, en plusieurs temps : 1 personne côté est dès le 26, tout le monde réuni à Shibuya (ouest) du 28 fév. au 3 mars, puis 5 personnes repartent côté est jusqu'au 9, avant la dernière nuit près de Haneda. Tokyo est énorme — mieux vaut grouper les visites par quartier plutôt que sauter d'un bout à l'autre.",
-        "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs","otaku"],
+        "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs","nightlife","otaku"],
         "pois": [
             poi("🚦","Shibuya Crossing & Shibuya Sky","touristique","Le carrefour piéton le plus célèbre du monde, à voir de nuit depuis la fenêtre du Starbucks (gratuit) ou depuis l'observatoire Shibuya Sky (payant, coucher de soleil).", "Quartier du logement Shibuya"),
             poi("🌲","Meiji Jingu","culturel","Sanctuaire shinto au cœur d'une forêt de 100 000 arbres en plein Tokyo, contraste total avec l'agitation de Harajuku juste à côté.", "Idéal tôt le matin, avant les groupes"),
             poi("🏮","Senso-ji & Nakamise-dori","touristique","Le plus vieux temple de Tokyo (628), rue commerçante Nakamise bordée de boutiques traditionnelles et de stands de street food.", "Quartier d'Asakusa, côté est"),
             poi("🗼","Tokyo Skytree","touristique","La plus haute tour du Japon (634m), vue sur tout le Kanto et, par temps clair, jusqu'au Mont Fuji.", "Juste à côté d'Asakusa"),
             poi("🗼","Tokyo Tower","touristique","La tour historique de Tokyo (1958), moins haute que le Skytree mais plus centrale et emblématique, jolie vue sur le sanctuaire Zojo-ji juste à côté.", "Quartier de Minato, entre Shibuya et Asakusa"),
-            poi("🍶","Golden Gai & Omoide Yokocho","culturel","Shinjuku : plus de 150 minuscules bars dans des ruelles d'après-guerre (Golden Gai) et \"l'allée des souvenirs\" pour du yakitori sous les rails (Omoide Yokocho).", "Quartier de Shinjuku"),
+            poi("🍶","Golden Gai & Omoide Yokocho","nightlife","Shinjuku : plus de 150 minuscules bars dans des ruelles d'après-guerre (Golden Gai, ~500-1000¥ de couvert par bar) et \"l'allée des souvenirs\" pour du yakitori sous les rails (Omoide Yokocho).", "Quartier de Shinjuku"),
             poi("🎏","Takeshita-dori, Harajuku","commerces","L'épicentre de la mode jeune et excentrique du Japon, crêpes colorées, boutiques de streetwear et de kawaii.", "Entre Shibuya et Harajuku"),
             poi("🧥","Shimokitazawa","commerces","Le quartier vintage par excellence de Tokyo — friperies, disquaires, cafés indépendants, ambiance bohème à 2 stations de Shibuya.", "Ligne Keio Inokashira depuis Shibuya"),
             poi("🍣","Sushi tournant Uobei (Shibuya)","gastronomie","Sushi au tapis roulant nouvelle génération : commande sur tablette, assiettes à 100-200¥, service ultra-rapide.", "Quartier de Shibuya, Dogenzaka"),
@@ -131,6 +140,8 @@ CITIES = {
             poi("🌃","Kabukicho, le vrai Kamurocho","otaku","Modèle réel du quartier fictif de la saga Yakuza/Like a Dragon — porte d'entrée Ichibangai, Don Quijote, Golden Gai juste à côté.", "Quartier de Shinjuku"),
             poi("🪚","Pèlerinage Chainsaw Man — Reze Arc","otaku","5 lieux du film dans le triangle Jinbōchō-Ochanomizu : cabine téléphonique, immeuble Aoi, escalier Onnazaka, café Vale.", "Départ gare de Suidōbashi, ~2-3h de balade"),
             poi("🐎","Uma Musume — Animate & Tokyo Racecourse","otaku","Animate Akihabara pour le merchandising permanent, pop-ups Cygames à vérifier début 2027, Tokyo Racecourse (Fuchu) pour le pèlerinage complet.", "Racecourse excentré, prévoir une demi-journée dédiée"),
+            poi("🎤","Karaoke-kan Shibuya","nightlife","Chaîne de karaoké la plus connue de Tokyo (rendue célèbre par le film Lost in Translation), box privatif à l'heure, ouvert très tard.", "Quartier du logement Shibuya"),
+            poi("🍸","Bars de Shibuya/Dogenzaka","nightlife","Au-delà de Golden Gai (Shinjuku), Shibuya a ses propres izakaya et bars à cocktails autour de Dogenzaka, ambiance plus jeune et moins \"institution\" que Shinjuku.", "Quartier du logement Shibuya"),
         ],
     },
 }

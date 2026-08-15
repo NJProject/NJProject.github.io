@@ -467,6 +467,8 @@ footer a{color:var(--muted);}
 .cat-commerces{background:var(--green-tint);color:var(--green);}
 .cat-gastronomie{background:var(--seal-tint);color:var(--seal);}
 .cat-loisirs{background:#FDECEF;color:#C2185B;}
+.cat-nightlife{background:#EDE0F5;color:#6A1B9A;}
+.cat-randonnee{background:#E3F2E9;color:#2E7D32;}
 .cat-otaku{background:#EDE7F6;color:#5E35B1;}
 .cat-kamakura{background:var(--indigo-tint);color:var(--indigo);}
 .cat-nikko{background:var(--gold-tint);color:var(--gold);}
