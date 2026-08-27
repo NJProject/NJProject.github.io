@@ -258,6 +258,6 @@ for key, data in CITIES.items():
         filter_bar=render_filter_bar(data["cats_used"]),
         poi_cards=poi_cards,
     )
-    with open(f"/home/claude/site/{key}.html", "w", encoding="utf-8") as f:
+    with open(f"{key}.html", "w", encoding="utf-8") as f:
         f.write(page)
     print(f"Wrote {key}.html ({len(data['pois'])} POIs)")

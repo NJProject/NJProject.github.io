@@ -21,7 +21,7 @@ Tous les liens (CSS, JS, favicons, navigation entre pages) utilisent des **chemi
 
 ```
 / (racine du repo njproject.github.io)
-├── index.html         → guide principal (itinéraire, logements, transports, réservations & festivals, docs admin, infos pratiques)
+├── index.html          → guide principal (itinéraire, logements, transports, réservations & festivals, docs admin, infos pratiques)
 ├── osaka.html          → points d'intérêt Osaka (19)
 ├── nara.html           → points d'intérêt Nara (9)
 ├── kyoto.html          → points d'intérêt Kyoto (15)
@@ -29,7 +29,8 @@ Tous les liens (CSS, JS, favicons, navigation entre pages) utilisent des **chemi
 ├── tokyo.html           → points d'intérêt Tokyo (21, + spots otaku/geek)
 ├── excursions.html      → Kamakura, Nikko, Fuji Five Lakes, Yokohama, Takao & Mitake (20)
 ├── style.css           → mise en forme partagée (responsive, cartes, timeline, filtres)
-├── script.js           → nav active au scroll, menu mobile, filtre par catégorie
+├── deadlines.js         → données des échéances de réservation (calendrier section 4) — à éditer à chaque nouvelle attraction/fenêtre de résa
+├── script.js           → logique : nav active au scroll, menu mobile, filtre par catégorie, rendu du calendrier
 ├── generate_cities.py   → script Python qui génère les 5 pages villes (source de vérité pour leur contenu)
 └── README.md
 ```
