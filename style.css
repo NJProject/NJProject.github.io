@@ -641,6 +641,32 @@ footer a{color:var(--muted);}
   text-decoration:none;
 }
 .poi-link a:hover{text-decoration:underline;}
+.poi-vote{
+  margin-top:8px;
+  display:flex;
+  justify-content:flex-end;
+}
+.poi-vote-btn{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  border:1.5px solid var(--line);
+  background:var(--paper);
+  color:var(--ink);
+  font-size:12.5px;
+  font-weight:600;
+  padding:5px 10px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.poi-vote-btn:hover:not(:disabled){border-color:var(--indigo);}
+.poi-vote-btn.voted{
+  background:var(--indigo);
+  border-color:var(--indigo);
+  color:#fff;
+}
+.poi-vote-btn:disabled{cursor:default;opacity:.85;}
 
 @media (max-width:620px){
   .filter-bar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
