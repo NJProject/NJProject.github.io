@@ -347,7 +347,6 @@ tbody tr:hover td{background:#F4F0E4;}
   display:grid;
   grid-template-columns:minmax(0,1.4fr) minmax(220px,0.8fr);
   gap:18px;
-  align-items:start;
 }
 .cal-panel{
   background:var(--card);
@@ -421,9 +420,11 @@ tbody tr:hover td{background:#F4F0E4;}
   border:1px solid var(--line);
   border-radius:var(--radius);
   padding:14px 16px;
+  display:flex;
+  flex-direction:column;
 }
 .cal-upcoming h3{margin:0 0 10px;}
-.cal-upcoming ul{list-style:none;margin:0;padding:0;}
+.cal-upcoming ul{list-style:none;margin:0;padding:0;flex:1;}
 .cal-upcoming li{
   display:flex;gap:10px;align-items:flex-start;
   padding:10px 0;
@@ -438,6 +439,39 @@ tbody tr:hover td{background:#F4F0E4;}
 .cal-up-date{font-weight:700;font-size:12px;color:var(--gold);display:block;}
 .cal-up-title{display:block;font-weight:600;}
 .cal-up-time{display:block;font-size:12px;color:var(--muted);}
+.cal-upcoming-empty{
+  color:var(--muted);
+  font-style:italic;
+  font-size:13px;
+  padding:10px 0;
+}
+.cal-upcoming-pager{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px dashed var(--line);
+}
+.cal-upcoming-pager button{
+  width:32px;height:32px;
+  border:1px solid var(--line);
+  background:var(--paper);
+  border-radius:8px;
+  color:var(--indigo);
+  font-size:14px;
+  cursor:pointer;
+}
+.cal-upcoming-pager button:hover{background:var(--indigo-tint);}
+.cal-upcoming-pager button:disabled{opacity:.35;cursor:not-allowed;}
+.cal-upcoming-pager span{
+  font-size:12.5px;
+  color:var(--muted);
+  font-weight:600;
+  min-width:38px;
+  text-align:center;
+}
 
 /* ---------------- Link grid (section 9) ---------------- */
 .linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;}

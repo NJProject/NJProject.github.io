@@ -174,29 +174,72 @@ if (calGrid && calMonthLabel && calPrev && calNext && calDetail) {
     render();
   });
 
+  const calUpcomingPager = document.getElementById('calUpcomingPager');
+  const calUpcomingPrev = document.getElementById('calUpcomingPrev');
+  const calUpcomingNext = document.getElementById('calUpcomingNext');
+  const calUpcomingPageLabel = document.getElementById('calUpcomingPageLabel');
+  const UPCOMING_PAGE_SIZE = 4;
+
   if (calUpcoming) {
-    const sorted = [...DEADLINES].sort((a, b) => a.date.localeCompare(b.date));
-    calUpcoming.innerHTML = sorted.map(e => `
-      <li>
-        <span class="cal-type-dot type-${e.type}"></span>
-        <button type="button" data-date="${e.date}">
-          <span class="cal-up-date">${formatShort(e.date)}</span>
-          <span class="cal-up-title">${e.title}</span>
-          <span class="cal-up-time">${TYPE_LABELS[e.type]} · ${e.time}</span>
-        </button>
-      </li>
-    `).join('');
-    calUpcoming.querySelectorAll('button[data-date]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const d = parseISODate(btn.dataset.date);
-        viewY = d.getFullYear();
-        viewM = d.getMonth();
-        selected = btn.dataset.date;
-        render();
-        showDetail(selected);
-        calGrid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const todayIso = ymd(new Date());
+    const upcoming = DEADLINES
+      .filter(e => e.date >= todayIso)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const pageCount = Math.max(1, Math.ceil(upcoming.length / UPCOMING_PAGE_SIZE));
+    let upcomingPage = 0;
+
+    function renderUpcoming() {
+      const start = upcomingPage * UPCOMING_PAGE_SIZE;
+      const pageItems = upcoming.slice(start, start + UPCOMING_PAGE_SIZE);
+
+      calUpcoming.innerHTML = pageItems.length
+        ? pageItems.map(e => `
+          <li>
+            <span class="cal-type-dot type-${e.type}"></span>
+            <button type="button" data-date="${e.date}">
+              <span class="cal-up-date">${formatShort(e.date)}</span>
+              <span class="cal-up-title">${e.title}</span>
+              <span class="cal-up-time">${TYPE_LABELS[e.type]} · ${e.time}</span>
+            </button>
+          </li>
+        `).join('')
+        : '<li class="cal-upcoming-empty">Aucune échéance à venir.</li>';
+
+      calUpcoming.querySelectorAll('button[data-date]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const d = parseISODate(btn.dataset.date);
+          viewY = d.getFullYear();
+          viewM = d.getMonth();
+          selected = btn.dataset.date;
+          render();
+          showDetail(selected);
+          calGrid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
       });
-    });
+
+      if (calUpcomingPager && calUpcomingPrev && calUpcomingNext && calUpcomingPageLabel) {
+        const showPager = upcoming.length > UPCOMING_PAGE_SIZE;
+        calUpcomingPager.hidden = !showPager;
+        if (showPager) {
+          calUpcomingPrev.disabled = upcomingPage === 0;
+          calUpcomingNext.disabled = upcomingPage >= pageCount - 1;
+          calUpcomingPageLabel.textContent = `${upcomingPage + 1} / ${pageCount}`;
+        }
+      }
+    }
+
+    if (calUpcomingPrev) {
+      calUpcomingPrev.addEventListener('click', () => {
+        if (upcomingPage > 0) { upcomingPage -= 1; renderUpcoming(); }
+      });
+    }
+    if (calUpcomingNext) {
+      calUpcomingNext.addEventListener('click', () => {
+        if (upcomingPage < pageCount - 1) { upcomingPage += 1; renderUpcoming(); }
+      });
+    }
+
+    renderUpcoming();
   }
 
   render();
