@@ -1,8 +1,10 @@
 // votes.js
 import { db } from "/firebase-config.js";
 import {
-  doc, getDoc, setDoc, updateDoc, increment, onSnapshot
+  doc, onSnapshot, updateDoc, setDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const NAME_KEY = "voterName";
 
 function slugify(str) {
   return str
@@ -17,56 +19,114 @@ function getCityKey() {
   return path || "index";
 }
 
-function votedKey(poiId) {
-  return `voted:${poiId}`;
+function getVoterName() {
+  return (localStorage.getItem(NAME_KEY) || "").trim();
+}
+
+function setVoterName(name) {
+  localStorage.setItem(NAME_KEY, name.trim());
+}
+
+// ---------- Badge nom (persistant, en bas à droite) ----------
+function buildNameBadge() {
+  const badge = document.createElement("div");
+  badge.className = "voter-badge";
+  const current = getVoterName();
+  badge.innerHTML = `
+    <span class="voter-badge-icon">👤</span>
+    <span class="voter-badge-name">${current || "Définir mon nom"}</span>
+    <button type="button" class="voter-badge-edit" aria-label="Changer de nom">✏️</button>
+  `;
+  document.body.appendChild(badge);
+
+  const editBtn = badge.querySelector(".voter-badge-edit");
+  const nameEl = badge.querySelector(".voter-badge-name");
+
+  function promptName() {
+    const input = prompt("Ton prénom (affiché à côté de tes votes) :", getVoterName());
+    if (input === null) return;
+    const trimmed = input.trim().slice(0, 24);
+    if (!trimmed) return;
+    setVoterName(trimmed);
+    nameEl.textContent = trimmed;
+    document.dispatchEvent(new CustomEvent("voterNameChanged"));
+  }
+
+  editBtn.addEventListener("click", promptName);
+  if (!current) badge.querySelector(".voter-badge-name").addEventListener("click", promptName);
+
+  return { promptName };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const cityKey = getCityKey();
+  const { promptName } = buildNameBadge();
 
   document.querySelectorAll(".poi-card").forEach((card) => {
     const titleEl = card.querySelector("h4");
     if (!titleEl) return;
     const poiId = `${cityKey}--${slugify(titleEl.textContent)}`;
+    const ref = doc(db, "votes", poiId);
 
     const wrap = document.createElement("div");
     wrap.className = "poi-vote";
     wrap.innerHTML = `
       <button type="button" class="poi-vote-btn" aria-label="Voter pour ce lieu">
-        🗳️ <span class="poi-vote-count">–</span>
+        🗳️ <span class="poi-vote-count">0</span>
       </button>
+      <div class="poi-vote-names" hidden></div>
     `;
     card.appendChild(wrap);
 
     const btn = wrap.querySelector(".poi-vote-btn");
     const countEl = wrap.querySelector(".poi-vote-count");
-    const ref = doc(db, "votes", poiId);
+    const namesEl = wrap.querySelector(".poi-vote-names");
 
-    onSnapshot(ref, (snap) => {
-      countEl.textContent = snap.exists() ? (snap.data().count || 0) : 0;
-    });
+    let currentVoters = {};
 
-    if (localStorage.getItem(votedKey(poiId))) {
-      btn.classList.add("voted");
-      btn.disabled = true;
+    function render() {
+      const names = Object.keys(currentVoters);
+      countEl.textContent = names.length;
+      namesEl.textContent = names.length ? names.join(", ") : "Aucun vote pour l'instant";
+      const me = getVoterName();
+      btn.classList.toggle("voted", !!me && !!currentVoters[me]);
     }
 
+    onSnapshot(ref, (snap) => {
+      currentVoters = snap.exists() ? (snap.data().voters || {}) : {};
+      render();
+    });
+
+    // Affiche/masque la liste des votants au clic sur le compteur
+    countEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      namesEl.hidden = !namesEl.hidden;
+    });
+
     btn.addEventListener("click", async () => {
-      if (localStorage.getItem(votedKey(poiId))) return;
+      const me = getVoterName();
+      if (!me) { promptName(); return; }
+
       btn.disabled = true;
+      const alreadyVoted = !!currentVoters[me];
       try {
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          await updateDoc(ref, { count: increment(1) });
+        if (alreadyVoted) {
+          await updateDoc(ref, { [`voters.${me}`]: deleteField() });
         } else {
-          await setDoc(ref, { count: 1 });
+          try {
+            await updateDoc(ref, { [`voters.${me}`]: true });
+          } catch {
+            // Le document n'existe pas encore
+            await setDoc(ref, { voters: { [me]: true } });
+          }
         }
-        localStorage.setItem(votedKey(poiId), "1");
-        btn.classList.add("voted");
       } catch (e) {
         console.error("Erreur de vote :", e);
+      } finally {
         btn.disabled = false;
       }
     });
+
+    document.addEventListener("voterNameChanged", render);
   });
 });
