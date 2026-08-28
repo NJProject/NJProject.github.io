@@ -27,6 +27,17 @@
   <p>Guide complet du groupe · Osaka → Nara → Kyoto → Kanazawa → Tokyo</p>
 </header>
 
+<div id="nextDeadlineBanner" class="next-deadline" hidden></div>
+
+<div class="city-nav home-citynav">
+  <a href="/osaka.html">🏯 Osaka</a>
+  <a href="/nara.html">🦌 Nara</a>
+  <a href="/kyoto.html">⛩️ Kyoto</a>
+  <a href="/kanazawa.html">🎋 Kanazawa</a>
+  <a href="/tokyo.html">🌆 Tokyo</a>
+  <a href="/excursions.html">🗻 Excursions</a>
+</div>
+
 <button id="navToggle" aria-label="Ouvrir le menu">☰ Sommaire</button>
 
 <div class="wrap">
@@ -604,7 +615,8 @@
 
     <!-- 7. ADMINISTRATIF -->
     <section id="administratif">
-      <div class="section-head"><span class="kanji">七</span><h2>Documents administratifs</h2></div>
+      <details class="section-collapse">
+      <summary><span class="kanji">七</span><h2>Documents administratifs</h2></summary>
       <p class="note">Pour des voyageurs français.</p>
 
       <h3>Avant le départ</h3>
@@ -650,11 +662,13 @@
           <div><strong>Permis international</strong><p>Uniquement en cas de location de voiture — non indispensable vu l'itinéraire 100% transports en commun.</p></div>
         </div>
       </div>
+      </details>
     </section>
 
     <!-- 8. INFOS PRATIQUES -->
     <section id="pratique">
-      <div class="section-head"><span class="kanji">八</span><h2>Infos pratiques</h2></div>
+      <details class="section-collapse">
+      <summary><span class="kanji">八</span><h2>Infos pratiques</h2></summary>
 
       <h3>Connectivité</h3>
       <div class="icon-grid">
@@ -779,6 +793,7 @@
           <div><strong>Saison</strong><p>Fin février-début mars = tout début de la saison des pruniers (ume), légère hausse d'affluence à prévoir.</p></div>
         </div>
       </div>
+      </details>
     </section>
 
     <!-- 9. LIENS OFFICIELS -->

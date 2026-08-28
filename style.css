@@ -560,7 +560,59 @@ footer a{color:var(--muted);}
 .city-nav a{font-size:12.5px;color:var(--indigo);text-decoration:none;font-weight:600;}
 .city-nav a:hover{text-decoration:underline;}
 
+.home-citynav{
+  margin:20px auto 0;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+
+@media (max-width:620px){
+  .home-citynav{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    justify-content:flex-start;
+    gap:14px;
+    padding:0 16px 16px;
+  }
+  .home-citynav a{white-space:nowrap;}
+}
+
 .city-main{max-width:900px;margin:0 auto;padding:32px 22px 90px;}
+
+.section-collapse{margin:0;}
+.section-collapse summary{
+  display:flex;align-items:baseline;gap:14px;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:10px;margin-bottom:22px;
+  cursor:pointer;
+  list-style:none;
+}
+.section-collapse summary::-webkit-details-marker{display:none;}
+.section-collapse summary::after{
+  content:"▾";
+  margin-left:auto;
+  color:var(--muted);
+  transition:transform .15s;
+}
+.section-collapse[open] summary::after{transform:rotate(180deg);}
+.section-collapse summary .kanji{
+  font-family:Georgia,serif;font-size:15px;color:var(--seal);
+  border:1.5px solid var(--seal);border-radius:50%;
+  width:30px;height:30px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.section-collapse summary h2{font-size:21px;margin:0;font-weight:700;}
+
+.next-deadline{
+  background:var(--gold-tint);
+  color:var(--gold);
+  text-align:center;
+  font-size:13.5px;
+  font-weight:600;
+  padding:10px 16px;
+}
+.next-deadline a{color:var(--indigo);}
 
 /* ---------------- Category filter chips ---------------- */
 .filter-bar{

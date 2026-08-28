@@ -2,6 +2,24 @@
 const links = document.querySelectorAll('#sidenav a');
 const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
 
+// Bandeau "prochaine échéance"
+const nextDeadlineBanner = document.getElementById('nextDeadlineBanner');
+if (nextDeadlineBanner && typeof DEADLINES !== 'undefined') {
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const next = DEADLINES
+    .filter(e => e.date >= todayIso)
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+  if (next) {
+    const days = Math.ceil((new Date(next.date) - new Date(todayIso)) / 86400000);
+    nextDeadlineBanner.hidden = false;
+    nextDeadlineBanner.innerHTML = `
+      ⏳ Prochaine échéance dans <strong>${days} jour${days > 1 ? 's' : ''}</strong> :
+      <a href="#calendrier">${next.title}</a>
+    `;
+  }
+}
+
 function onScroll() {
   let idx = 0;
   const y = window.scrollY + 120;
