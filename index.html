@@ -436,13 +436,7 @@
 
       <div class="warn">⚠️ À faire dès maintenant — pas de jour unique : hôtel capsule Tokyo est (26–28 fév.), Airbnb Shibuya (28 fév.–3 mars), Airbnb est Tokyo (3–9 mars), Airbnb proche Haneda (9–10 mars). teamLab Planets : lots mensuels ~2–3 mois avant, à surveiller dès nov./déc. 2026. Gundam Base : tirage le weekend / réservation le matin même en semaine. Pokémon Café : pas de date unique non plus, chaque jour de visite s'ouvre individuellement J-31 à 18h JST.</div>
 
-      <div class="cal-flex-item cal-card-note">
-        <span class="cal-type-dot type-transport"></span>
-        <div>
-          <strong>JR Fuji Excursion</strong>
-          <p>Ouverture 1 mois avant la date d’excursion choisie, 10h00 JST — pas de jour unique tant que la date n’est pas fixée. <a href="https://www.eki-net.com/en/jreast-train-reservation/Top/Index" target="_blank" rel="noopener noreferrer">eki-net.com ↗</a></p>
-        </div>
-      </div>
+      <div id="calRecurringNotes"></div>
 
       <div class="cal-legend" aria-label="Légende des types">
         <span><i class="cal-type-dot type-logement"></i> Logement</span>
@@ -483,58 +477,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>Attraction</th><th>Fenêtre de réservation</th><th>Où réserver</th></tr></thead>
-          <tbody>
-            <tr>
-              <td data-label="Attraction">Musée Ghibli — visite le 22 ou 23 fév.</td>
-              <td data-label="Fenêtre">Ouverture le 10 janvier 2027, 10h00 JST</td>
-              <td data-label="Où"><a href="https://www.ghibli-museum.jp/en/tickets/" target="_blank" rel="noopener noreferrer">ghibli-museum.jp ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">Musée Ghibli — visite entre le 1ᵉʳ et le 9 mars</td>
-              <td data-label="Fenêtre">Ouverture le 10 février 2027, 10h00 JST</td>
-              <td data-label="Où"><a href="https://www.ghibli-museum.jp/en/tickets/" target="_blank" rel="noopener noreferrer">ghibli-museum.jp ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">teamLab Planets (Toyosu)</td>
-              <td data-label="Fenêtre">Billets par lots mensuels, ~2-3 mois avant — vérifier dès nov./déc. 2026</td>
-              <td data-label="Où"><a href="https://www.teamlab.art/e/planets/" target="_blank" rel="noopener noreferrer">teamlab.art ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">Thunderbird (Kyoto→Kanazawa, 26 fév.)</td>
-              <td data-label="Fenêtre">26 janvier 2027, 10h00 JST</td>
-              <td data-label="Où"><a href="https://www.westjr.co.jp/global/en/ticket/overview/" target="_blank" rel="noopener noreferrer">westjr.co.jp ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">Hokuriku Shinkansen (Kanazawa→Tokyo, 28 fév.)</td>
-              <td data-label="Fenêtre">28 janvier 2027, 10h00 JST</td>
-              <td data-label="Où"><a href="https://www.eki-net.com/en/jreast-train-reservation/Top/Index" target="_blank" rel="noopener noreferrer">eki-net.com ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">JR Fuji Excursion (si excursion Fuji)</td>
-              <td data-label="Fenêtre">1 mois avant la date choisie, 10h00 JST</td>
-              <td data-label="Où"><a href="https://www.eki-net.com/en/jreast-train-reservation/Top/Index" target="_blank" rel="noopener noreferrer">eki-net.com ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">Gundam Base Tokyo (Odaiba)</td>
-              <td data-label="Fenêtre">Créneaux tirés au sort le weekend, réservation matin même en semaine — vérifier règles à l'approche (statue Unicorn démontée fin août 2026)</td>
-              <td data-label="Où"><a href="https://www.gundam-base.net/en/" target="_blank" rel="noopener noreferrer">gundam-base.net ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">Nintendo Museum (Uji)</td>
-              <td data-label="Fenêtre">Candidature loterie : 1-30 nov. 2026 · Tirage : 1er déc. · Paiement si gagné avant le 7 déc. 2026, 23h59 JST</td>
-              <td data-label="Où"><a href="https://museum-tickets.nintendo.com/en/" target="_blank" rel="noopener noreferrer">museum-tickets.nintendo.com ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">PokéPark Kanto (Yomiuriland)</td>
-              <td data-label="Fenêtre">Portail international (pas de tirage) : billets ouverts ≈2 mois avant la date choisie, ~18h JST — date exacte à vérifier une fois le jour de visite fixé</td>
-              <td data-label="Où"><a href="https://ticket-en.pokepark-kanto.co.jp/" target="_blank" rel="noopener noreferrer">ticket-en.pokepark-kanto.co.jp ↗</a></td>
-            </tr>
-            <tr>
-              <td data-label="Attraction">Pokémon Café (Tokyo Nihombashi ou Osaka)</td>
-              <td data-label="Fenêtre">Fenêtre glissante : ouverture 31 jours avant chaque date souhaitée, à 18h00 JST — Osaka généralement plus facile à obtenir que Tokyo</td>
-              <td data-label="Où"><a href="https://www.pokemon-cafe.jp/en/cafe/reservation.html" target="_blank" rel="noopener noreferrer">pokemon-cafe.jp ↗</a></td>
-            </tr>
-          </tbody>
+          <tbody id="reservationsTableBody"></tbody>
         </table>
       </div>
 

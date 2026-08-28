@@ -262,3 +262,39 @@ if (calGrid && calMonthLabel && calPrev && calNext && calDetail) {
 
   render();
 }
+
+// Rendu du tableau Réservations (section 5) à partir de DEADLINES + RECURRING_RESERVATIONS
+const reservationsTableBody = document.getElementById('reservationsTableBody');
+if (reservationsTableBody && typeof DEADLINES !== 'undefined') {
+  const fromDeadlines = DEADLINES
+    .filter(e => e.table)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map(e => e.table);
+
+  const fromRecurring = typeof RECURRING_RESERVATIONS !== 'undefined' ? RECURRING_RESERVATIONS : [];
+
+  const rows = [...fromDeadlines, ...fromRecurring];
+
+  reservationsTableBody.innerHTML = rows.map(r => `
+    <tr>
+      <td data-label="Attraction">${r.attraction}</td>
+      <td data-label="Fenêtre">${r.window}</td>
+      <td data-label="Où"><a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.urlLabel}</a></td>
+    </tr>
+  `).join('');
+}
+
+// Rendu des notes "fenêtre glissante" dans le calendrier (section 4)
+const calRecurringNotes = document.getElementById('calRecurringNotes');
+if (calRecurringNotes && typeof RECURRING_RESERVATIONS !== 'undefined') {
+  const notes = RECURRING_RESERVATIONS.filter(r => r.calendarNote);
+  calRecurringNotes.innerHTML = notes.map(r => `
+    <div class="cal-flex-item cal-card-note">
+      <span class="cal-type-dot type-transport"></span>
+      <div>
+        <strong>${r.attraction}</strong>
+        <p>${r.window} <a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.urlLabel}</a></p>
+      </div>
+    </div>
+  `).join('');
+}
