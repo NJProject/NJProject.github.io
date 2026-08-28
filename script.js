@@ -267,9 +267,13 @@ if (calGrid && calMonthLabel && calPrev && calNext && calDetail) {
 const reservationsTableBody = document.getElementById('reservationsTableBody');
 if (reservationsTableBody && typeof DEADLINES !== 'undefined') {
   const fromDeadlines = DEADLINES
-    .filter(e => e.table)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map(e => e.table);
+  .filter(e => e.table)
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .map(e => ({
+    ...e.table,
+    url: e.url,
+    urlLabel: e.urlLabel
+  }));
 
   const fromRecurring = typeof RECURRING_RESERVATIONS !== 'undefined' ? RECURRING_RESERVATIONS : [];
 
