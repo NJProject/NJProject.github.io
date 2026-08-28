@@ -33,7 +33,6 @@ img{max-width:100%;}
 header{
   padding:clamp(32px,6vw,56px) 20px clamp(24px,5vw,40px);
   text-align:center;
-  border-bottom:1px solid var(--line);
 }
 .seal{
   width:70px;height:70px;
@@ -59,7 +58,7 @@ header .eyebrow{
   margin-bottom:10px;
 }
 
-header p.header-cities{
+.header-cities{
   position:sticky;
   top:0;
   z-index:25;
@@ -71,15 +70,15 @@ header p.header-cities{
   background:var(--paper);
   border-bottom:1px solid var(--line);
 }
-header p.header-cities a{
+.header-cities a{
   color:var(--indigo);
   font-weight:600;
   text-decoration:none;
 }
-header p.header-cities a:hover{text-decoration:underline;}
+.header-cities a:hover{text-decoration:underline;}
 
 @media (max-width:480px){
-  header p.header-cities{
+  .header-cities{
     overflow-x:auto;
     white-space:nowrap;
     justify-content:flex-start;
