@@ -27,8 +27,56 @@ function setVoterName(name) {
   localStorage.setItem(NAME_KEY, name.trim());
 }
 
+// ---------- Modale de saisie du prénom ----------
+function buildNameModal() {
+  const overlay = document.createElement("div");
+  overlay.className = "name-modal-overlay";
+  overlay.hidden = true;
+  overlay.innerHTML = `
+    <div class="name-modal" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
+      <div class="name-modal-seal">印</div>
+      <h3 id="nameModalTitle">Ton prénom</h3>
+      <p class="name-modal-sub">Affiché à côté de tes votes, pour que le groupe sache qui a voté quoi.</p>
+      <input type="text" id="nameModalInput" maxlength="24" placeholder="Ex. Nicolas" autocomplete="off">
+      <div class="name-modal-actions">
+        <button type="button" class="name-modal-cancel">Annuler</button>
+        <button type="button" class="name-modal-save">Valider</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const input = overlay.querySelector("#nameModalInput");
+  const saveBtn = overlay.querySelector(".name-modal-save");
+  const cancelBtn = overlay.querySelector(".name-modal-cancel");
+  let resolveFn = null;
+
+  function onKeydown(e) {
+    if (e.key === "Escape") close(null);
+    if (e.key === "Enter") close(input.value.trim());
+  }
+
+  function close(value) {
+    overlay.hidden = true;
+    document.removeEventListener("keydown", onKeydown);
+    if (resolveFn) { resolveFn(value); resolveFn = null; }
+  }
+
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(null); });
+  saveBtn.addEventListener("click", () => close(input.value.trim()));
+  cancelBtn.addEventListener("click", () => close(null));
+
+  return function open(currentValue) {
+    input.value = currentValue || "";
+    overlay.hidden = false;
+    document.addEventListener("keydown", onKeydown);
+    setTimeout(() => input.focus(), 50);
+    return new Promise((resolve) => { resolveFn = resolve; });
+  };
+}
+
 // ---------- Badge nom (persistant, en bas à droite) ----------
-function buildNameBadge() {
+function buildNameBadge(openNameModal) {
   const badge = document.createElement("div");
   badge.className = "voter-badge";
   const current = getVoterName();
@@ -42,8 +90,8 @@ function buildNameBadge() {
   const editBtn = badge.querySelector(".voter-badge-edit");
   const nameEl = badge.querySelector(".voter-badge-name");
 
-  function promptName() {
-    const input = prompt("Ton prénom (affiché à côté de tes votes) :", getVoterName());
+  async function promptName() {
+    const input = await openNameModal(getVoterName());
     if (input === null) return;
     const trimmed = input.trim().slice(0, 24);
     if (!trimmed) return;
@@ -53,14 +101,15 @@ function buildNameBadge() {
   }
 
   editBtn.addEventListener("click", promptName);
-  if (!current) badge.querySelector(".voter-badge-name").addEventListener("click", promptName);
+  if (!current) nameEl.addEventListener("click", promptName);
 
   return { promptName };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const cityKey = getCityKey();
-  const { promptName } = buildNameBadge();
+  const openNameModal = buildNameModal();
+  const { promptName } = buildNameBadge(openNameModal);
 
   document.querySelectorAll(".poi-card").forEach((card) => {
     const titleEl = card.querySelector("h4");
@@ -97,15 +146,18 @@ document.addEventListener("DOMContentLoaded", () => {
       render();
     });
 
-    // Affiche/masque la liste des votants au clic sur le compteur
     countEl.addEventListener("click", (e) => {
       e.stopPropagation();
       namesEl.hidden = !namesEl.hidden;
     });
 
     btn.addEventListener("click", async () => {
-      const me = getVoterName();
-      if (!me) { promptName(); return; }
+      let me = getVoterName();
+      if (!me) {
+        await promptName();
+        me = getVoterName();
+        if (!me) return;
+      }
 
       btn.disabled = true;
       const alreadyVoted = !!currentVoters[me];
@@ -116,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
           try {
             await updateDoc(ref, { [`voters.${me}`]: true });
           } catch {
-            // Le document n'existe pas encore
             await setDoc(ref, { voters: { [me]: true } });
           }
         }
