@@ -872,6 +872,105 @@ footer a{color:var(--muted);}
 }
 .name-modal-save:hover{background:var(--ink);}
 
+.poi-custom-badge{
+  margin-top:8px;
+  font-size:11px;
+  color:var(--gold);
+  font-weight:600;
+}
+.poi-custom-delete{
+  display:block;
+  margin-top:8px;
+  border:1.5px solid var(--seal);
+  background:var(--seal-tint);
+  color:var(--seal);
+  font-size:11.5px;
+  font-weight:600;
+  padding:4px 10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.add-poi-fab{
+  position:fixed;
+  bottom:14px;
+  left:14px;
+  background:var(--indigo);
+  color:#fff;
+  border:none;
+  border-radius:20px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+  z-index:30;
+}
+.add-poi-fab:hover{background:var(--ink);}
+
+.poi-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(27,42,65,.55);
+  backdrop-filter:blur(2px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.poi-modal-overlay[hidden]{display:none;}
+.poi-modal{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:26px 24px;
+  max-width:420px;
+  width:100%;
+  max-height:90vh;
+  overflow-y:auto;
+  box-shadow:0 12px 40px rgba(27,42,65,.25);
+}
+.poi-modal h3{
+  font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+  font-size:19px;
+  margin:0 0 16px;
+  text-align:center;
+  color:var(--ink);
+}
+.poi-modal label{
+  display:block;
+  font-size:12.5px;
+  font-weight:700;
+  color:var(--ink);
+  margin-bottom:12px;
+}
+.poi-modal .opt{font-weight:400;color:var(--muted);}
+.poi-modal input,
+.poi-modal select,
+.poi-modal textarea{
+  width:100%;
+  font-size:14px;
+  font-family:inherit;
+  padding:8px 10px;
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  background:var(--card);
+  color:var(--ink);
+  margin-top:5px;
+  box-sizing:border-box;
+  resize:vertical;
+}
+.poi-modal input:focus,
+.poi-modal select:focus,
+.poi-modal textarea:focus{outline:none;border-color:var(--indigo);}
+.poi-modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:6px;
+}
+.poi-modal-actions button{flex:1;}
+
 /* ================= RESPONSIVE ================= */
 @media (max-width:620px){
   .voter-badge{bottom:8px;right:8px;font-size:11.5px;padding:6px 10px;}

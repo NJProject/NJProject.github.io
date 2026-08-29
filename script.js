@@ -44,23 +44,22 @@ if (navToggle && sidenav) {
   }));
 }
 
-// Category filter (city pages)
-const filterChips = document.querySelectorAll('.filter-chip');
-const poiCards = document.querySelectorAll('.poi-card');
+// Category filter (city pages) — délégation d'événement pour inclure les cartes ajoutées après coup
+const filterBar = document.querySelector('.filter-bar');
 
-if (filterChips.length && poiCards.length) {
-  filterChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      filterChips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const cat = chip.dataset.cat;
-      poiCards.forEach(card => {
-        if (cat === 'all' || card.dataset.cat === cat) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
-      });
+if (filterBar) {
+  filterBar.addEventListener('click', (e) => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip) return;
+    filterBar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const cat = chip.dataset.cat;
+    document.querySelectorAll('.poi-card').forEach(card => {
+      if (cat === 'all' || card.dataset.cat === cat) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
     });
   });
 }

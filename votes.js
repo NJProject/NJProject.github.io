@@ -106,78 +106,85 @@ function buildNameBadge(openNameModal) {
   return { promptName };
 }
 
+let promptNameFn = null;
+
+// Attache le bouton de vote à une carte .poi-card donnée.
+// Exportée pour être réutilisée par custom-pois.js sur les cartes ajoutées dynamiquement.
+export function attachVoting(card, cityKey) {
+  const titleEl = card.querySelector("h4");
+  if (!titleEl) return;
+  const poiId = `${cityKey}--${slugify(titleEl.textContent)}`;
+  const ref = doc(db, "votes", poiId);
+
+  const wrap = document.createElement("div");
+  wrap.className = "poi-vote";
+  wrap.innerHTML = `
+    <button type="button" class="poi-vote-btn" aria-label="Voter pour ce lieu">
+      🗳️ <span class="poi-vote-count">0</span>
+    </button>
+    <div class="poi-vote-names" hidden></div>
+  `;
+  card.appendChild(wrap);
+
+  const btn = wrap.querySelector(".poi-vote-btn");
+  const countEl = wrap.querySelector(".poi-vote-count");
+  const namesEl = wrap.querySelector(".poi-vote-names");
+
+  let currentVoters = {};
+
+  function render() {
+    const names = Object.keys(currentVoters);
+    countEl.textContent = names.length;
+    namesEl.textContent = names.length ? names.join(", ") : "Aucun vote pour l'instant";
+    const me = getVoterName();
+    btn.classList.toggle("voted", !!me && !!currentVoters[me]);
+  }
+
+  onSnapshot(ref, (snap) => {
+    currentVoters = snap.exists() ? (snap.data().voters || {}) : {};
+    render();
+  });
+
+  countEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    namesEl.hidden = !namesEl.hidden;
+  });
+
+  btn.addEventListener("click", async () => {
+    let me = getVoterName();
+    if (!me) {
+      if (promptNameFn) await promptNameFn();
+      me = getVoterName();
+      if (!me) return;
+    }
+
+    btn.disabled = true;
+    const alreadyVoted = !!currentVoters[me];
+    try {
+      if (alreadyVoted) {
+        await updateDoc(ref, { [`voters.${me}`]: deleteField() });
+      } else {
+        try {
+          await updateDoc(ref, { [`voters.${me}`]: true });
+        } catch {
+          await setDoc(ref, { voters: { [me]: true } });
+        }
+      }
+    } catch (e) {
+      console.error("Erreur de vote :", e);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.addEventListener("voterNameChanged", render);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const cityKey = getCityKey();
   const openNameModal = buildNameModal();
   const { promptName } = buildNameBadge(openNameModal);
+  promptNameFn = promptName;
 
-  document.querySelectorAll(".poi-card").forEach((card) => {
-    const titleEl = card.querySelector("h4");
-    if (!titleEl) return;
-    const poiId = `${cityKey}--${slugify(titleEl.textContent)}`;
-    const ref = doc(db, "votes", poiId);
-
-    const wrap = document.createElement("div");
-    wrap.className = "poi-vote";
-    wrap.innerHTML = `
-      <button type="button" class="poi-vote-btn" aria-label="Voter pour ce lieu">
-        🗳️ <span class="poi-vote-count">0</span>
-      </button>
-      <div class="poi-vote-names" hidden></div>
-    `;
-    card.appendChild(wrap);
-
-    const btn = wrap.querySelector(".poi-vote-btn");
-    const countEl = wrap.querySelector(".poi-vote-count");
-    const namesEl = wrap.querySelector(".poi-vote-names");
-
-    let currentVoters = {};
-
-    function render() {
-      const names = Object.keys(currentVoters);
-      countEl.textContent = names.length;
-      namesEl.textContent = names.length ? names.join(", ") : "Aucun vote pour l'instant";
-      const me = getVoterName();
-      btn.classList.toggle("voted", !!me && !!currentVoters[me]);
-    }
-
-    onSnapshot(ref, (snap) => {
-      currentVoters = snap.exists() ? (snap.data().voters || {}) : {};
-      render();
-    });
-
-    countEl.addEventListener("click", (e) => {
-      e.stopPropagation();
-      namesEl.hidden = !namesEl.hidden;
-    });
-
-    btn.addEventListener("click", async () => {
-      let me = getVoterName();
-      if (!me) {
-        await promptName();
-        me = getVoterName();
-        if (!me) return;
-      }
-
-      btn.disabled = true;
-      const alreadyVoted = !!currentVoters[me];
-      try {
-        if (alreadyVoted) {
-          await updateDoc(ref, { [`voters.${me}`]: deleteField() });
-        } else {
-          try {
-            await updateDoc(ref, { [`voters.${me}`]: true });
-          } catch {
-            await setDoc(ref, { voters: { [me]: true } });
-          }
-        }
-      } catch (e) {
-        console.error("Erreur de vote :", e);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    document.addEventListener("voterNameChanged", render);
-  });
+  document.querySelectorAll(".poi-card").forEach((card) => attachVoting(card, cityKey));
 });
