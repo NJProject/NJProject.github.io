@@ -1,5 +1,6 @@
 node_modules/
 dist/
+/../planner-build/
 .env
 .env.*
 !.env.example
