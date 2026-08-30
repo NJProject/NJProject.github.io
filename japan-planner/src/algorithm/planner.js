@@ -30,13 +30,19 @@ function minutesFromHHMM(value) {
   return h * 60 + m;
 }
 
-function openingWindow(activity) {
+function openingWindow(activity, bounds) {
+  let open = DEFAULT_DAY_START;
+  let close = DEFAULT_DAY_END;
   const h = activity.openingHours;
-  if (!h) return [DEFAULT_DAY_START, DEFAULT_DAY_END];
-  if (typeof h === "object" && h.open && h.close) {
-    return [minutesFromHHMM(h.open), minutesFromHHMM(h.close)];
+  if (h && typeof h === "object" && h.open && h.close) {
+    open = minutesFromHHMM(h.open);
+    close = minutesFromHHMM(h.close);
   }
-  return [DEFAULT_DAY_START, DEFAULT_DAY_END];
+  if (bounds) {
+    if (bounds.after != null) open = Math.max(open, bounds.after);
+    if (bounds.before != null) close = Math.min(close, bounds.before);
+  }
+  return [open, close];
 }
 
 function distancePenalty(routeMinutes) {
@@ -47,12 +53,18 @@ function separationPenalty(groupCount) {
   return Math.max(0, groupCount - 1) * 12;
 }
 
-async function orderActivities(activities, dayStart = DEFAULT_DAY_START) {
+function toDepartureDate(dateStr, minutes) {
+  const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const m = String(minutes % 60).padStart(2, "0");
+  return new Date(`${dateStr}T${h}:${m}:00+09:00`);
+}
+
+async function orderActivities(activities, { dayStart = DEFAULT_DAY_START, dateStr = null, timeBounds = null } = {}) {
   const remaining = [...activities];
   const ordered = [];
   let current = null;
   let totalTravel = 0;
-  let cursor = dayStart;
+  let cursor = Math.max(dayStart, timeBounds?.after ?? dayStart);
 
   while (remaining.length) {
     let bestIndex = 0;
@@ -61,10 +73,12 @@ async function orderActivities(activities, dayStart = DEFAULT_DAY_START) {
     for (let i = 0; i < remaining.length; i++) {
       const candidate = remaining[i];
       const route = current?.location && candidate.location
-        ? await routeBetween(current.location, candidate.location)
+        ? await routeBetween(current.location, candidate.location, {
+            departureTime: dateStr ? toDepartureDate(dateStr, cursor) : undefined
+          })
         : { durationMin: current ? 60 : 0, estimated: true };
 
-      const [open, close] = openingWindow(candidate);
+      const [open, close] = openingWindow(candidate, timeBounds);
       const start = Math.max(cursor + route.durationMin, open);
       const duration = candidate.durationMin || DEFAULT_DURATION;
       if (start + duration > close) continue;
@@ -81,10 +95,12 @@ async function orderActivities(activities, dayStart = DEFAULT_DAY_START) {
 
     const candidate = remaining.splice(bestIndex, 1)[0];
     const route = current?.location && candidate.location
-      ? await routeBetween(current.location, candidate.location)
+      ? await routeBetween(current.location, candidate.location, {
+          departureTime: dateStr ? toDepartureDate(dateStr, cursor) : undefined
+        })
       : { durationMin: current ? 60 : 0, distanceKm: null, estimated: true };
 
-    const [open] = openingWindow(candidate);
+    const [open] = openingWindow(candidate, timeBounds);
     const start = Math.max(cursor + route.durationMin, open);
     const duration = candidate.durationMin || DEFAULT_DURATION;
 
@@ -104,14 +120,11 @@ async function orderActivities(activities, dayStart = DEFAULT_DAY_START) {
   return { ordered, totalTravelMin: Math.round(totalTravel) };
 }
 
-function buildGroupCandidates(activities, people) {
-  const candidates = [];
+function buildGroupCandidates(activities, people, constraints) {
+  const keepTogether = constraints.some(c => c.type === "keepTogether");
+  const candidates = [{ groups: [people], label: "Tout le monde" }];
+  if (keepTogether) return candidates;
 
-  // 1) Tout le monde.
-  candidates.push({ groups: [people], label: "Tout le monde" });
-
-  // 2) Séparations simples autour des affinités de votes.
-  // On cherche des partitions 1+(n-1), 2+(n-2), etc., puis on déduplique.
   for (let mask = 1; mask < (1 << people.length) - 1; mask++) {
     const a = people.filter((_, i) => mask & (1 << i));
     const b = people.filter(p => !a.includes(p));
@@ -126,22 +139,33 @@ function buildGroupCandidates(activities, people) {
   return candidates;
 }
 
-function selectActivitiesForGroup(activities, group, date) {
+function selectActivitiesForGroup(activities, group, date, excluded) {
   return activities
     .filter(a => compatibleWithDate(a, date))
+    .filter(a => !excluded.has(a.id))
     .filter(a => a.voters?.some(v => group.includes(v)))
-    .sort((a, b) => {
-      const sa = satisfaction(a, group);
-      const sb = satisfaction(b, group);
-      return sb - sa;
-    })
+    .sort((a, b) => satisfaction(b, group) - satisfaction(a, group))
     .slice(0, 5);
 }
 
-export async function generatePlans({ activities, people, date, constraints = [] }) {
-  const relevant = activities.filter(a => compatibleWithDate(a, date));
+function getTimeBounds(constraints) {
+  const c = constraints.find(x => x.type === "timeWindow");
+  if (!c) return null;
+  return {
+    after: c.after ? minutesFromHHMM(c.after) : null,
+    before: c.before ? minutesFromHHMM(c.before) : null
+  };
+}
 
-  const candidates = buildGroupCandidates(relevant, people);
+export async function generatePlans({ activities, people, date, constraints = [] }) {
+  const excluded = new Set(constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId));
+  const timeBounds = getTimeBounds(constraints);
+
+  const relevant = activities
+    .filter(a => compatibleWithDate(a, date))
+    .filter(a => !excluded.has(a.id));
+
+  const candidates = buildGroupCandidates(relevant, people, constraints);
   const plans = [];
 
   for (const candidate of candidates) {
@@ -150,7 +174,7 @@ export async function generatePlans({ activities, people, date, constraints = []
     let travel = 0;
 
     for (const group of candidate.groups) {
-      let selected = selectActivitiesForGroup(relevant, group, date);
+      let selected = selectActivitiesForGroup(relevant, group, date, excluded);
 
       for (const constraint of constraints) {
         if (constraint.type === "required" && constraint.activityId) {
@@ -161,17 +185,12 @@ export async function generatePlans({ activities, people, date, constraints = []
         }
       }
 
-      const result = await orderActivities(selected);
+      const result = await orderActivities(selected, { dateStr: date, timeBounds });
       const satisfactionScore = selected.length
         ? selected.reduce((sum, a) => sum + satisfaction(a, group), 0) / selected.length
         : 0;
 
-      groupResults.push({
-        people: group,
-        satisfaction: satisfactionScore,
-        ...result
-      });
-
+      groupResults.push({ people: group, satisfaction: satisfactionScore, ...result });
       score += satisfactionScore * 100;
       travel += result.totalTravelMin;
     }
@@ -181,13 +200,12 @@ export async function generatePlans({ activities, people, date, constraints = []
 
     plans.push({
       label: candidate.label,
+      date,
       groups: groupResults,
       score,
       totalTravelMin: travel,
       peopleSatisfied: new Set(groupResults.flatMap(g =>
-        g.people.filter(person =>
-          g.ordered.some(item => voters(item.activity).has(person))
-        )
+        g.people.filter(person => g.ordered.some(item => voters(item.activity).has(person)))
       )).size
     });
   }
@@ -196,4 +214,19 @@ export async function generatePlans({ activities, people, date, constraints = []
     .sort((a, b) => b.score - a.score)
     .filter((plan, index, arr) => index === 0 || Math.abs(plan.score - arr[index - 1].score) > 2)
     .slice(0, 3);
+}
+
+// Évalue chaque jour du séjour (ou uniquement le jour imposé par une contrainte "date")
+// et classe les jours du meilleur au moins bon.
+export async function generatePlansForDateRange({ activities, people, dates, constraints = [] }) {
+  const dateConstraint = constraints.find(c => c.type === "date" && c.date);
+  const datesToTry = dateConstraint ? [dateConstraint.date] : dates;
+
+  const perDate = [];
+  for (const date of datesToTry) {
+    const plans = await generatePlans({ activities, people, date, constraints });
+    if (plans.length) perDate.push({ date, plans, topScore: plans[0].score });
+  }
+
+  return perDate.sort((a, b) => b.topScore - a.topScore);
 }

@@ -54,4 +54,17 @@ export async function loadActivities() {
   return all;
 }
 
+export function datesInRange(cityKey) {
+  const city = cityForKey(cityKey);
+  if (!city) return [];
+  const dates = [];
+  let cur = new Date(`${city.start}T00:00:00`);
+  const end = new Date(`${city.end}T00:00:00`);
+  while (cur <= end) {
+    dates.push(cur.toISOString().slice(0, 10));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return dates;
+}
+
 export { CITIES };

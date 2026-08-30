@@ -57,6 +57,17 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 .editor label{display:grid;gap:5px;font-weight:700}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .search{width:100%;margin:10px 0 14px}
+.day-overview{list-style:none;margin:12px 0 0;padding:0;}
+.day-overview li{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:12px 14px;border:1px solid #ddd7ca;border-radius:12px;margin-bottom:8px;background:#faf8f3;
+}
+.day-overview li.best{border-color:#253c63;background:#eef2f8;}
+.day-overview .day-label{font-weight:800;}
+.day-overview .day-summary{color:#6f6a61;font-size:.85rem;}
+.day-overview button{border:0;background:#253c63;color:#fff;border-radius:8px;padding:8px 12px;font-weight:700;font-size:.8rem;cursor:pointer;}
+.time-inputs{display:flex;gap:8px;flex:1;}
+.time-inputs input{flex:1;}
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}
