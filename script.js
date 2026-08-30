@@ -1,6 +1,6 @@
-// Scroll-spy: highlight the active section in the nav
-const links = document.querySelectorAll('#sidenav a');
-const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+const allSidenavLinks = document.querySelectorAll('#sidenav a');
+const links = Array.from(allSidenavLinks).filter(a => a.getAttribute('href')?.startsWith('#'));
+const sections = links.map(a => document.querySelector(a.getAttribute('href')));
 
 // Bandeau "prochaine échéance"
 const nextDeadlineBanner = document.getElementById('nextDeadlineBanner');
