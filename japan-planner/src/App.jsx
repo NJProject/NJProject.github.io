@@ -260,7 +260,14 @@ export default function App() {
                   <h2>Les parcours que les votes rendent possibles</h2>
                 </div>
                 {dateResults[0].plans.map((p, i) => (
-                  <PlanCard plan={p} rank={i + 1} totalPeople={people.length} key={i} />
+                  <PlanCard
+                    plan={p}
+                    rank={i + 1}
+                    totalPeople={people.length}
+                    cityName={cities.find(c => c[0] === city)?.[1]}
+                    dateLabel={formatDateFr(dateResults[0].date)}
+                    key={i}
+                  />
                 ))}
               </section>
             )}

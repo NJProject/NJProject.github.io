@@ -20,6 +20,9 @@ CITY_NAV = [
     ("excursions.html", "Excursions"),
 ]
 
+# À incrémenter à chaque fois que votes.js ou custom-pois.js changent de version
+VOTES_JS_VERSION = 5
+CUSTOM_POIS_JS_VERSION = 2
 def poi(icon, title, cat, desc, meta=None, link=None, link_label="Réserver / infos ↗"):
     return {"icon": icon, "title": title, "cat": cat, "desc": desc, "meta": meta, "link": link, "link_label": link_label}
 
@@ -151,7 +154,7 @@ CITIES = {
             poi("🥢","Fabrication de baguettes + tournée izakaya","loisirs","Ateliers pratiques (Ginza ou Shibuya) pour tailler et personnaliser sa propre paire de baguettes en bois, gravure incluse — certaines formules enchaînent avec une tournée d'izakaya le soir même.", "Ginza ou Shibuya, ~1-2h30 selon la formule", "https://www.getyourguide.com/fr-fr/tokyo-l193/tokyo-fabrication-de-baguettes-personnalisees-pour-votre-tournee-des-izakayas-t1277613", "Réserver sur GetYourGuide ↗"),
             poi("🏹","Kyudo, tir à l'arc japonais","culturel","Initiation au tir à l'arc traditionnel japonais (considéré comme une forme de méditation zen) en tenue de kyudo, dans un vrai dojo — encadrement en anglais, 20 flèches à tirer sur cible officielle dès la première séance.", "Dojos à Marunouchi ou Harajuku selon les disponibilités, ~2-3h", "https://www.getyourguide.com/fr-fr/tokyo-l193/harajuku-tokyo-experience-de-kyudo-tir-a-l-arc-japonais-avec-20-fleches-t1284957", "Réserver sur GetYourGuide ↗"),
             poi("🚤","Dîner-croisière Yakatabune, rivière Sumida","loisirs","Bateau traditionnel de style Edo illuminé de lanternes, descend la Sumida vers la baie de Tokyo avec vue sur le Skytree et Rainbow Bridge pendant un dîner japonais multi-plats (parfois boissons à volonté).", "Départ Azumabashi, Asakusa, ~2h30-3h, dès ~12 000¥/pers.", "https://www.getyourguide.com/fr-fr/tokyo-l193/riviere-sumida-diner-croisiere-traditionnel-japonais-yakatabune-t438005", "Réserver sur GetYourGuide ↗"),
-            poi("⚔️","Essai d'armure de samouraï","culturel","Au Samurai Ninja Museum d'Asakusa : visite guidée du musée puis essai d'une véritable armure de samouraï en métal pour une séance photo, sabre en option.", "Asakusa, à côté de Senso-ji, ~45-60 min", "https://mai-ko.com/tour/real-samurai-armor-trial-at-the-samurai-museum-in-asakusa-tokyo-copy-301c-2026-01-17/", "Réserver sur mai-ko.com ↗"),
+            poi("⚔️","Essai d'armure de samouraï","culturel","Au Samurai Ninja Museum de Shinjuku : visite guidée du musée puis essai d'une véritable armure de samouraï en métal pour une séance photo, sabre en option.", "Shinjuku, ~45-60 min — vérifier l'accès exact avant réservation", "https://mai-ko.com/tour/real-samurai-armor-trial-at-the-samurai-museum-in-asakusa-tokyo-copy-301c-2026-01-17/", "Réserver sur mai-ko.com ↗"),
             poi("🐹","Café à capybaras, Harajuku","loisirs","Moffu, l'un des cafés à capybaras les mieux notés de Tokyo (4,9/5) — séance de 30 min à 1h, câlins et photos, personnel anglophone.", "5 min à pied de la gare de Harajuku (sortie Takeshita)", "https://www.tablecheck.com/en/capibaramoffu-takeshitastreet", "Réserver ↗"),
             poi("🍡","Pokémon Café Tokyo (Nihombashi)","otaku","Le tout premier Pokémon Café au monde, ouvert en 2018 — spectacles de Pikachu, menu et desserts thématiques, boutique exclusive au sein du grand magasin Takashimaya.", "Nihombashi Takashimaya S.C. — réservation en ligne, ouverture 31 jours avant chaque date à 18h JST, forte demande", "https://www.pokemon-cafe.jp/en/cafe/reservation.html", "Réserver ↗"),
             poi("⚡","PokéPark Kanto (Yomiuriland)","loisirs","Premier parc Pokémon permanent en plein air au monde, ouvert en février 2026 — forêt peuplée de plus de 600 Pokémon grandeur nature et \"Sedge Town\" avec Pokémon Center dédié. Portail de billetterie international séparé de la loterie japonaise.", "Yomiuriland, Inagi — Keiō Line jusqu'à Chōfu puis Keiō Sagamihara jusqu'à Keiō-Yomiuriland ; dates clés dans le calendrier du guide principal", "https://ticket-en.pokepark-kanto.co.jp/", "Billetterie internationale ↗"),
@@ -214,7 +217,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <body>
 
 <div class="city-header">
-  <a class="back" href="/index.html">← Retour au guide complet</a>
+  <a class="back" href="/index.html#interets">← Retour au guide complet</a>
   <span class="city-icon-big">{icon}</span>
   <h1>{name}</h1>
   <p>{dates}</p>
@@ -237,10 +240,12 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 
 <footer>
   Guide généré le 14 août 2026 — infos à revérifier 1-2 mois avant le départ.<br>
-  <a href="/index.html">← Retour au guide complet</a> · <a href="https://njproject.github.io/" target="_blank" rel="noopener noreferrer">njproject.github.io ↗</a>
+  <a href="/index.html#interets">← Retour au guide complet</a> · <a href="https://njproject.github.io/" target="_blank" rel="noopener noreferrer">njproject.github.io ↗</a>
 </footer>
 
 <script src="/script.js"></script>
+<script type="module" src="/votes.js?v={votes_version}"></script>
+<script type="module" src="/custom-pois.js?v={custom_pois_version}"></script>
 </body>
 </html>
 """
@@ -257,6 +262,8 @@ for key, data in CITIES.items():
         city_nav=render_city_nav(key),
         filter_bar=render_filter_bar(data["cats_used"]),
         poi_cards=poi_cards,
+        votes_version=VOTES_JS_VERSION,
+        custom_pois_version=CUSTOM_POIS_JS_VERSION,
     )
     with open(f"{key}.html", "w", encoding="utf-8") as f:
         f.write(page)

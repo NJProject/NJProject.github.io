@@ -1,4 +1,5 @@
 import React from "react";
+import { downloadPlanAsText } from "../utils/exportPlan";
 
 function fmt(min) {
   const h = Math.floor(min / 60);
@@ -6,7 +7,7 @@ function fmt(min) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-export default function PlanCard({ plan, rank, totalPeople }) {
+export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel }) {
   return (
     <article className={`plan-card rank-${rank}`}>
       <header>
@@ -16,6 +17,14 @@ export default function PlanCard({ plan, rank, totalPeople }) {
         </div>
         <strong>{plan.peopleSatisfied}/{totalPeople} satisfaits</strong>
       </header>
+
+      <button
+        type="button"
+        className="download-plan"
+        onClick={() => downloadPlanAsText(plan, cityName, dateLabel)}
+      >
+        📥 Télécharger ce parcours
+      </button>
 
       <p className="plan-summary">
         {plan.groups.length > 1

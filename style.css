@@ -878,9 +878,23 @@ footer a{color:var(--muted);}
   color:var(--gold);
   font-weight:600;
 }
-.poi-custom-delete{
-  display:block;
+.poi-custom-actions{
+  display:flex;
+  gap:8px;
   margin-top:8px;
+}
+.poi-custom-edit{
+  border:1.5px solid var(--indigo);
+  background:var(--indigo-tint);
+  color:var(--indigo);
+  font-size:11.5px;
+  font-weight:600;
+  padding:4px 10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.poi-custom-delete{
   border:1.5px solid var(--seal);
   background:var(--seal-tint);
   color:var(--seal);
@@ -970,6 +984,15 @@ footer a{color:var(--muted);}
   margin-top:6px;
 }
 .poi-modal-actions button{flex:1;}
+
+.poi-modal-warning{
+  font-size:11.5px;
+  color:var(--seal);
+  background:var(--seal-tint);
+  border-radius:8px;
+  padding:6px 10px;
+  margin:-6px 0 12px;
+}
 
 /* ================= RESPONSIVE ================= */
 @media (max-width:620px){
