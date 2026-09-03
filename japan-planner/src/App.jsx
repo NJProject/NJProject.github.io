@@ -110,7 +110,8 @@ export default function App() {
     ["nara", "Nara", "22–23 fév."],
     ["kyoto", "Kyoto", "23–26 fév."],
     ["kanazawa", "Kanazawa", "26–28 fév."],
-    ["tokyo", "Tokyo", "26 fév.–10 mars"]
+    ["tokyo", "Tokyo", "26 fév.–10 mars"],
+    ["fuji", "Fuji Five Lakes", "28 fév.–2 mars"]
   ];
 
   return (

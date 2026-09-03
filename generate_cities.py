@@ -17,6 +17,7 @@ CITY_NAV = [
     ("kyoto.html", "Kyoto"),
     ("kanazawa.html", "Kanazawa"),
     ("tokyo.html", "Tokyo"),
+    ("fuji.html", "Fuji"),
     ("excursions.html", "Excursions"),
 ]
 
@@ -125,8 +126,8 @@ CITIES = {
     "tokyo": {
         "icon": "🌆",
         "name": "Tokyo",
-        "dates": "26 février – 10 mars 2027 · groupe séparé puis réuni",
-        "intro": "La plus longue étape du voyage, en plusieurs temps : 1 personne côté est dès le 26, tout le monde réuni à Shibuya (ouest) du 28 fév. au 3 mars, puis 5 personnes repartent côté est jusqu'au 9, avant la dernière nuit près de Haneda. Tokyo est énorme — mieux vaut grouper les visites par quartier plutôt que sauter d'un bout à l'autre.",
+        "dates": "26 février – 10 mars 2027 · groupe séparé, réuni, interlude Fuji, puis réuni de nouveau",
+        "intro": "La plus longue étape du voyage, en plusieurs temps : 1 personne côté est dès le 26, tout le monde réuni le 28 fév. avant un interlude au Mont Fuji jusqu'au 2 mars, retour à Shibuya (ouest) du 2 au 3 mars, puis 5 personnes repartent côté est jusqu'au 9, avant la dernière nuit près de Haneda. Tokyo est énorme — mieux vaut grouper les visites par quartier plutôt que sauter d'un bout à l'autre.",
         "cats_used": ["touristique","culturel","commerces","gastronomie","loisirs","nightlife","otaku"],
         "pois": [
             poi("🚦","Shibuya Crossing & Shibuya Sky","touristique","Le carrefour piéton le plus célèbre du monde, à voir de nuit depuis la fenêtre du Starbucks (gratuit) ou depuis l'observatoire Shibuya Sky (payant, coucher de soleil).", "Quartier du logement Shibuya"),
@@ -158,6 +159,20 @@ CITIES = {
             poi("🐹","Café à capybaras, Harajuku","loisirs","Moffu, l'un des cafés à capybaras les mieux notés de Tokyo (4,9/5) — séance de 30 min à 1h, câlins et photos, personnel anglophone.", "5 min à pied de la gare de Harajuku (sortie Takeshita)", "https://www.tablecheck.com/en/capibaramoffu-takeshitastreet", "Réserver ↗"),
             poi("🍡","Pokémon Café Tokyo (Nihombashi)","otaku","Le tout premier Pokémon Café au monde, ouvert en 2018 — spectacles de Pikachu, menu et desserts thématiques, boutique exclusive au sein du grand magasin Takashimaya.", "Nihombashi Takashimaya S.C. — réservation en ligne, ouverture 31 jours avant chaque date à 18h JST, forte demande", "https://www.pokemon-cafe.jp/en/cafe/reservation.html", "Réserver ↗"),
             poi("⚡","PokéPark Kanto (Yomiuriland)","loisirs","Premier parc Pokémon permanent en plein air au monde, ouvert en février 2026 — forêt peuplée de plus de 600 Pokémon grandeur nature et \"Sedge Town\" avec Pokémon Center dédié. Portail de billetterie international séparé de la loterie japonaise.", "Yomiuriland, Inagi — Keiō Line jusqu'à Chōfu puis Keiō Sagamihara jusqu'à Keiō-Yomiuriland ; dates clés dans le calendrier du guide principal", "https://ticket-en.pokepark-kanto.co.jp/", "Billetterie internationale ↗"),
+        ],
+    },
+    "fuji": {
+        "icon": "🗻",
+        "name": "Fuji Five Lakes",
+        "dates": "28 février – 2 mars 2027 · 6 personnes",
+        "intro": "Interlude au calme après les grandes villes — vues emblématiques sur le Mont Fuji, onsen et spécialités locales, avant de retourner à Tokyo pour la suite du séjour.",
+        "cats_used": ["touristique","gastronomie"],
+        "pois": [
+            poi("🗻","Chureito Pagoda","touristique","La vue la plus emblématique et photographiée du Mont Fuji — pagode à 5 étages avec le volcan en arrière-plan, ~400 marches depuis le sanctuaire Arakura Sengen.", "Gare de Shimo-Yoshida (ligne Fujikyu), ~10 min à pied depuis Kawaguchiko"),
+            poi("💧","Oshino Hakkai","touristique","Village aux huit étangs alimentés par les eaux de fonte du Mont Fuji filtrées par la roche volcanique, eau d'une clarté remarquable, classé UNESCO. Boutiques et restaurants autour.", "Bus depuis Kawaguchiko (ligne Fujikko-go)"),
+            poi("🌊","Lac Kawaguchiko & Oishi Park","touristique","Le plus accessible des 5 lacs, reflets classiques du Fuji sur l'eau, promenade à vélo, croisière en bateau, vue depuis Oishi Park particulièrement photogénique.", "Juste à côté de la gare de Kawaguchiko"),
+            poi("🍜","Hōtō (spécialité locale)","gastronomie","Plat de nouilles épaisses plates mijotées avec légumes dans un bouillon miso — LE plat réconfortant de la région, parfait après une journée dehors en hiver.", "Disponible dans la plupart des restaurants autour de Kawaguchiko"),
+            poi("🚡","Mt Tenjo Ropeway","touristique","Téléphérique panoramique au-dessus du lac Kawaguchiko, vue combinée lac + Mont Fuji depuis le sommet — point connu sous le nom de \"Kachikachi Yama\".", "Départ à 5 min à pied de la gare de Kawaguchiko"),
         ],
     },
 }

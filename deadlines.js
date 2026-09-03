@@ -76,6 +76,24 @@ const DEADLINES = [
     // pas de "table" : la ligne générique vit dans RECURRING_RESERVATIONS
   },
   {
+    date: '2027-01-28',
+    type: 'transport',
+    title: 'JR Fuji Excursion (Tokyo→Kawaguchiko, 28 fév.)',
+    time: '10h00 JST',
+    url: 'https://www.eki-net.com/en/jreast-train-reservation/Top/Index',
+    urlLabel: 'eki-net.com ↗',
+    table: { attraction: 'JR Fuji Excursion (Tokyo→Kawaguchiko, 28 fév.)', window: '28 janvier 2027, 10h00 JST' }
+  },
+  {
+    date: '2027-02-02',
+    type: 'transport',
+    title: 'JR Fuji Excursion (Kawaguchiko→Tokyo, 2 mars)',
+    time: '10h00 JST',
+    url: 'https://www.eki-net.com/en/jreast-train-reservation/Top/Index',
+    urlLabel: 'eki-net.com ↗',
+    table: { attraction: 'JR Fuji Excursion (Kawaguchiko→Tokyo, 2 mars)', window: '2 février 2027, 10h00 JST' }
+  },
+  {
     date: '2027-01-18',
     type: 'attraction',
     title: 'Pokémon Café Osaka — ouverture réservation pour le 18 fév. (J-31)',
@@ -95,13 +113,6 @@ const RECURRING_RESERVATIONS = [
     url: 'https://www.teamlab.art/e/planets/',
     urlLabel: 'teamlab.art ↗',
     calendarNote: false
-  },
-  {
-    attraction: 'JR Fuji Excursion (si excursion Fuji)',
-    window: '1 mois avant la date choisie, 10h00 JST',
-    url: 'https://www.eki-net.com/en/jreast-train-reservation/Top/Index',
-    urlLabel: 'eki-net.com ↗',
-    calendarNote: true
   },
   {
     attraction: 'Gundam Base Tokyo (Odaiba)',
