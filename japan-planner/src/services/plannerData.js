@@ -26,3 +26,20 @@ export async function savePlannerMetadata(id, data) {
 export async function removePlannerMetadata(id) {
   await deleteDoc(doc(db, COLLECTION, id));
 }
+
+export async function savePlannerMetadataBulk(entries) {
+  // entries: { [activityId]: { location, durationMin, openingHours, availableDates } }
+  const results = { ok: [], failed: [] };
+  for (const [id, data] of Object.entries(entries)) {
+    try {
+      await setDoc(doc(db, COLLECTION, id), {
+        ...data,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      results.ok.push(id);
+    } catch (e) {
+      results.failed.push({ id, error: e.message });
+    }
+  }
+  return results;
+}

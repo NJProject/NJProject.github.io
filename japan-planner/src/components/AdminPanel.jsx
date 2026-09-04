@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { savePlannerMetadata } from "../services/plannerData";
+import { savePlannerMetadata, savePlannerMetadataBulk } from "../services/plannerData";
 
 export default function AdminPanel({ activities, metadata, onSaved }) {
   const [query, setQuery] = useState("");
@@ -35,6 +35,37 @@ export default function AdminPanel({ activities, metadata, onSaved }) {
     alert("Données enregistrées.");
   }
 
+  const [bulkText, setBulkText] = useState("");
+  const [bulkResult, setBulkResult] = useState(null);
+  const [skeletonCity, setSkeletonCity] = useState("osaka");
+
+  function generateSkeleton() {
+    const subset = activities.filter(a => a.city === skeletonCity);
+    const skeleton = {};
+    subset.forEach(a => {
+      skeleton[a.id] = {
+        _label: a.title,
+        location: a.location || null,
+        durationMin: a.durationMin || null,
+        openingHours: a.openingHours || null
+      };
+    });
+    setBulkText(JSON.stringify(skeleton, null, 2));
+  }
+
+  async function importBulk() {
+    let parsed;
+    try {
+      parsed = JSON.parse(bulkText);
+    } catch {
+      alert("JSON invalide — vérifie la syntaxe (virgules, guillemets).");
+      return;
+    }
+    const result = await savePlannerMetadataBulk(parsed);
+    setBulkResult(result);
+    onSaved();
+  }
+  
   const current = { ...existing, ...form };
   return (
     <section className="admin">
@@ -49,6 +80,44 @@ export default function AdminPanel({ activities, metadata, onSaved }) {
         value={query}
         onChange={e => setQuery(e.target.value)}
       />
+            <details className="bulk-import">
+        <summary>📋 Import groupé (coller un JSON)</summary>
+        <p className="muted">
+          Choisis une ville pour générer automatiquement le squelette avec les bons identifiants,
+          puis complète les coordonnées GPS (clic droit sur Google Maps → copier les coordonnées)
+          et la durée en minutes.
+        </p>
+
+        <div className="skeleton-row">
+          <select value={skeletonCity} onChange={e => setSkeletonCity(e.target.value)}>
+            <option value="osaka">Osaka</option>
+            <option value="nara">Nara</option>
+            <option value="kyoto">Kyoto</option>
+            <option value="kanazawa">Kanazawa</option>
+            <option value="tokyo">Tokyo</option>
+            <option value="fuji">Fuji Five Lakes</option>
+          </select>
+          <button onClick={generateSkeleton}>Générer le squelette</button>
+        </div>
+
+        <p className="muted">
+          Le champ <code>_label</code> est juste un repère pour toi (le titre du lieu) — tu peux le laisser,
+          il n'a aucun effet sur le planner. Seuls <code>location</code>, <code>durationMin</code> et <code>openingHours</code> comptent.
+        </p>
+
+        <textarea
+          rows={10}
+          placeholder={`{"osaka--chateau-d-osaka": {"_label":"Château d’Osaka","location":{"lat":34.6873,"lng":135.5259},"durationMin":90}}`}          value={bulkText}
+          onChange={e => setBulkText(e.target.value)}
+        />
+        <button className="primary" onClick={importBulk}>Importer</button>
+        {bulkResult && (
+          <p className="bulk-result">
+            ✅ {bulkResult.ok.length} importé(s)
+            {bulkResult.failed.length > 0 && ` · ❌ ${bulkResult.failed.length} échec(s)`}
+          </p>
+        )}
+      </details>
       <div className="admin-grid">
         <div className="activity-list">
           {options.map(a => (
