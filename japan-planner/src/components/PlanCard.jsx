@@ -1,5 +1,5 @@
 import React from "react";
-import { downloadPlanAsText } from "../utils/exportPlan";
+import { downloadPlanAsPdf } from "../utils/exportPlan";
 
 function fmt(min) {
   const h = Math.floor(min / 60);
@@ -21,9 +21,9 @@ export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel 
       <button
         type="button"
         className="download-plan"
-        onClick={() => downloadPlanAsText(plan, cityName, dateLabel)}
+        onClick={() => downloadPlanAsPdf(plan, cityName, dateLabel)}
       >
-        📥 Télécharger ce parcours
+        📄 Télécharger en PDF
       </button>
 
       <p className="plan-summary">
