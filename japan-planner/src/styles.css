@@ -116,6 +116,20 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 }
 .download-plan:hover{background:#253c63;color:#fff;}
 .download-plan:active{transform:scale(.98);}
+
+.travel-quality{
+  display:inline-block;
+  font-size:.78rem;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:20px;
+  margin:6px 0 10px;
+}
+.travel-quality.tq-good{background:#e6f4ea;color:#1e7a3d;}
+.travel-quality.tq-ok{background:#fdf3d9;color:#9a7015;}
+.travel-quality.tq-bad{background:#fbeae7;color:#b23a2e;}
+
+
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}

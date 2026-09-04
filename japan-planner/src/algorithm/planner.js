@@ -3,20 +3,19 @@ import { routeBetween } from "../services/routing";
 const DEFAULT_DURATION = 90;
 const DEFAULT_DAY_START = 10 * 60;
 const DEFAULT_DAY_END = 20 * 60;
+const POOL_CAP = 12; // borne le nb de candidats évalués géographiquement par groupe/jour
 
 function voters(activity) {
   return new Set(activity.voters || []);
 }
 
-function satisfaction(activity, group) {
-  if (!group.length) return 0;
-  const yes = group.filter(name => voters(activity).has(name)).length;
-  return yes / group.length;
+function groupVoteScore(activity, group) {
+  return group.filter(name => voters(activity).has(name)).length;
 }
 
-function averageVoteScore(activity, group) {
+function satisfaction(activity, group) {
   if (!group.length) return 0;
-  return group.reduce((sum, name) => sum + (voters(activity).has(name) ? 1 : 0), 0);
+  return groupVoteScore(activity, group) / group.length;
 }
 
 function compatibleWithDate(activity, date) {
@@ -45,76 +44,84 @@ function openingWindow(activity, bounds) {
   return [open, close];
 }
 
-function distancePenalty(routeMinutes) {
-  return Math.min(30, routeMinutes / 10);
-}
-
-function separationPenalty(groupCount) {
-  return Math.max(0, groupCount - 1) * 12;
-}
-
 function toDepartureDate(dateStr, minutes) {
   const h = String(Math.floor(minutes / 60)).padStart(2, "0");
   const m = String(minutes % 60).padStart(2, "0");
   return new Date(`${dateStr}T${h}:${m}:00+09:00`);
 }
 
-async function orderActivities(activities, { dayStart = DEFAULT_DAY_START, dateStr = null, timeBounds = null } = {}) {
-  const remaining = [...activities];
+function separationPenalty(groupCount) {
+  return Math.max(0, groupCount - 1) * 12;
+}
+
+/*
+ * Construction gloutonne géo-consciente : à chaque étape, on évalue tous les
+ * candidats restants (pas seulement un top-5 déjà figé), on calcule le trajet
+ * réel depuis l'arrêt précédent, et on choisit celui qui maximise
+ * "popularité − coût du trajet − temps d'attente avant ouverture".
+ * Les poids (25 / 1.1 / 0.3) sont un point de départ raisonnable avec
+ * l'estimation à vol d'oiseau — à recalibrer une fois l'API Google Maps
+ * branchée, quand les temps de trajet reflèteront la réalité des transports.
+ */
+async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [] } = {}) {
+  const remaining = [...pool];
   const ordered = [];
   let current = null;
+  let cursor = Math.max(DEFAULT_DAY_START, timeBounds?.after ?? DEFAULT_DAY_START);
   let totalTravel = 0;
-  let cursor = Math.max(dayStart, timeBounds?.after ?? dayStart);
 
   while (remaining.length) {
-    let bestIndex = 0;
+    let best = null;
     let bestScore = -Infinity;
+    let bestRoute = null;
+    let bestStart = null;
 
-    for (let i = 0; i < remaining.length; i++) {
-      const candidate = remaining[i];
+    for (const candidate of remaining) {
       const route = current?.location && candidate.location
         ? await routeBetween(current.location, candidate.location, {
             departureTime: dateStr ? toDepartureDate(dateStr, cursor) : undefined
           })
-        : { durationMin: current ? 60 : 0, estimated: true };
+        : { durationMin: current ? 45 : 0, estimated: true };
 
       const [open, close] = openingWindow(candidate, timeBounds);
-      const start = Math.max(cursor + route.durationMin, open);
+      const dayEnd = timeBounds?.before ?? DEFAULT_DAY_END;
+      const arrival = cursor + route.durationMin;
+      const start = Math.max(arrival, open);
       const duration = candidate.durationMin || DEFAULT_DURATION;
-      if (start + duration > close) continue;
 
-      const score = averageVoteScore(candidate, activities.flatMap(a => a.voters || []))
-        - distancePenalty(route.durationMin)
-        - Math.max(0, start - cursor) / 60;
+      if (start + duration > Math.min(close, dayEnd)) continue; // ne rentre pas dans la journée
+
+      const isRequired = requiredIds.includes(candidate.id);
+      const voteValue = groupVoteScore(candidate, group) * 25;
+      const travelCost = route.durationMin * 1.1;
+      const idleCost = Math.max(0, start - arrival) * 0.3;
+      const requiredBonus = isRequired ? 500 : 0;
+
+      const score = voteValue + requiredBonus - travelCost - idleCost;
 
       if (score > bestScore) {
         bestScore = score;
-        bestIndex = i;
+        best = candidate;
+        bestRoute = route;
+        bestStart = start;
       }
     }
 
-    const candidate = remaining.splice(bestIndex, 1)[0];
-    const route = current?.location && candidate.location
-      ? await routeBetween(current.location, candidate.location, {
-          departureTime: dateStr ? toDepartureDate(dateStr, cursor) : undefined
-        })
-      : { durationMin: current ? 60 : 0, distanceKm: null, estimated: true };
+    if (!best) break; // plus rien ne rentre dans le temps restant
 
-    const [open] = openingWindow(candidate, timeBounds);
-    const start = Math.max(cursor + route.durationMin, open);
-    const duration = candidate.durationMin || DEFAULT_DURATION;
-
+    const duration = best.durationMin || DEFAULT_DURATION;
     ordered.push({
-      activity: candidate,
-      start,
-      end: start + duration,
-      travelBeforeMin: route.durationMin,
-      travelEstimated: route.estimated
+      activity: best,
+      start: bestStart,
+      end: bestStart + duration,
+      travelBeforeMin: bestRoute.durationMin,
+      travelEstimated: bestRoute.estimated
     });
 
-    totalTravel += route.durationMin;
-    cursor = start + duration;
-    current = candidate;
+    totalTravel += bestRoute.durationMin;
+    cursor = bestStart + duration;
+    current = best;
+    remaining.splice(remaining.indexOf(best), 1);
   }
 
   return { ordered, totalTravelMin: Math.round(totalTravel) };
@@ -139,15 +146,6 @@ function buildGroupCandidates(activities, people, constraints) {
   return candidates;
 }
 
-function selectActivitiesForGroup(activities, group, date, excluded) {
-  return activities
-    .filter(a => compatibleWithDate(a, date))
-    .filter(a => !excluded.has(a.id))
-    .filter(a => a.voters?.some(v => group.includes(v)))
-    .sort((a, b) => satisfaction(b, group) - satisfaction(a, group))
-    .slice(0, 5);
-}
-
 function getTimeBounds(constraints) {
   const c = constraints.find(x => x.type === "timeWindow");
   if (!c) return null;
@@ -159,6 +157,7 @@ function getTimeBounds(constraints) {
 
 export async function generatePlans({ activities, people, date, constraints = [] }) {
   const excluded = new Set(constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId));
+  const requiredIds = constraints.filter(c => c.type === "required" && c.activityId).map(c => c.activityId);
   const timeBounds = getTimeBounds(constraints);
 
   const relevant = activities
@@ -172,31 +171,37 @@ export async function generatePlans({ activities, people, date, constraints = []
     const groupResults = [];
     let score = 0;
     let travel = 0;
+    let activeMin = 0;
 
     for (const group of candidate.groups) {
-      let selected = selectActivitiesForGroup(relevant, group, date, excluded);
+      let pool = relevant.filter(a => a.voters?.some(v => group.includes(v)));
+      pool.sort((a, b) => groupVoteScore(b, group) - groupVoteScore(a, group));
+      pool = pool.slice(0, POOL_CAP);
 
-      for (const constraint of constraints) {
-        if (constraint.type === "required" && constraint.activityId) {
-          const required = relevant.find(a => a.id === constraint.activityId);
-          if (required && !selected.some(a => a.id === required.id)) {
-            selected = [required, ...selected].slice(0, 5);
-          }
+      // Une activité marquée "obligatoire" doit rester disponible même si elle
+      // n'a pas été votée par ce groupe ou est sortie du top 12.
+      requiredIds.forEach(id => {
+        if (!pool.some(a => a.id === id)) {
+          const forced = relevant.find(a => a.id === id);
+          if (forced) pool.push(forced);
         }
-      }
+      });
 
-      const result = await orderActivities(selected, { dateStr: date, timeBounds });
-      const satisfactionScore = selected.length
-        ? selected.reduce((sum, a) => sum + satisfaction(a, group), 0) / selected.length
+      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds });
+      const satisfactionScore = result.ordered.length
+        ? result.ordered.reduce((sum, item) => sum + satisfaction(item.activity, group), 0) / result.ordered.length
         : 0;
 
       groupResults.push({ people: group, satisfaction: satisfactionScore, ...result });
       score += satisfactionScore * 100;
       travel += result.totalTravelMin;
+      activeMin += result.ordered.reduce((sum, item) => sum + (item.end - item.start), 0);
     }
 
     score -= travel * 0.35;
     score -= separationPenalty(candidate.groups.length);
+
+    const travelRatio = (travel + activeMin) > 0 ? travel / (travel + activeMin) : 0;
 
     plans.push({
       label: candidate.label,
@@ -204,6 +209,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       groups: groupResults,
       score,
       totalTravelMin: travel,
+      travelRatio,
       peopleSatisfied: new Set(groupResults.flatMap(g =>
         g.people.filter(person => g.ordered.some(item => voters(item.activity).has(person)))
       )).size
