@@ -1,6 +1,6 @@
 import { routeBetween } from "../services/routing";
+import { getDefaultDuration } from "../services/activities";
 
-const DEFAULT_DURATION = 90;
 const DEFAULT_DAY_START = 10 * 60;
 const DEFAULT_DAY_END = 20 * 60;
 const POOL_CAP = 12; // borne le nb de candidats évalués géographiquement par groupe/jour
@@ -87,7 +87,7 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
       const dayEnd = timeBounds?.before ?? DEFAULT_DAY_END;
       const arrival = cursor + route.durationMin;
       const start = Math.max(arrival, open);
-      const duration = candidate.durationMin || DEFAULT_DURATION;
+      const duration = candidate.durationMin || getDefaultDuration(candidate.category);
 
       if (start + duration > Math.min(close, dayEnd)) continue; // ne rentre pas dans la journée
 
@@ -109,7 +109,7 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
 
     if (!best) break; // plus rien ne rentre dans le temps restant
 
-    const duration = best.durationMin || DEFAULT_DURATION;
+    const duration = best.durationMin || getDefaultDuration(best.category);
     ordered.push({
       activity: best,
       start: bestStart,

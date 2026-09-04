@@ -38,14 +38,18 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
 
   paintBackground(doc);
 
-  // Sceau rouge circulaire
+  // Sceau rouge — anneau double façon tampon encreur.
+  // Pas de glyphe ici : les polices intégrées de jsPDF ne supportent ni les
+  // emoji ni les caractères japonais, d'où le rendu géométrique pur.
+  const sealCx = marginX + 6;
+  const sealCy = y - 2;
   doc.setDrawColor(...COLORS.seal);
-  doc.setLineWidth(0.6);
-  doc.circle(marginX + 6, y - 2, 6.5, "S");
-  doc.setTextColor(...COLORS.seal);
-  doc.setFont("times", "bold");
-  doc.setFontSize(12);
-  doc.text("印", marginX + 6, y - 0.5, { align: "center" });
+  doc.setLineWidth(0.9);
+  doc.circle(sealCx, sealCy, 6.5, "S");
+  doc.setLineWidth(0.4);
+  doc.circle(sealCx, sealCy, 4.4, "S");
+  doc.setFillColor(...COLORS.seal);
+  doc.circle(sealCx, sealCy, 1, "F");
 
   // Titre
   doc.setTextColor(...COLORS.ink);
@@ -80,7 +84,7 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
     doc.setFontSize(12.5);
     doc.setTextColor(...COLORS.indigo);
     doc.text(
-      plan.groups.length > 1 ? `Groupe ${gi + 1} — ${group.people.join(", ")}` : `👥 ${group.people.join(", ")}`,
+      plan.groups.length > 1 ? `Groupe ${gi + 1} — ${group.people.join(", ")}` : group.people.join(", "),
       marginX, y
     );
     y += 8;

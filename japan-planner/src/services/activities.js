@@ -68,4 +68,19 @@ export function datesInRange(cityKey) {
   return dates;
 }
 
+const CATEGORY_DURATION_DEFAULTS = {
+  touristique: 75,
+  culturel: 60,
+  commerces: 90,
+  gastronomie: 60,
+  loisirs: 240,
+  nightlife: 120,
+  randonnee: 150,
+  otaku: 60
+};
+
+export function getDefaultDuration(category) {
+  return CATEGORY_DURATION_DEFAULTS[category] || 90;
+}
+
 export { CITIES };
