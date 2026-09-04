@@ -227,7 +227,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <meta property="og:url" content="https://njproject.github.io/{key}.html">
 <title>{name} — Japon 2027</title>
 {favicons}
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
 
@@ -258,9 +258,9 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   <a href="/index.html#interets">← Retour au guide complet</a> · <a href="https://njproject.github.io/" target="_blank" rel="noopener noreferrer">njproject.github.io ↗</a>
 </footer>
 
-<script src="/script.js"></script>
-<script type="module" src="/votes.js?v={votes_version}"></script>
-<script type="module" src="/custom-pois.js?v={custom_pois_version}"></script>
+<script src="/assets/script.js"></script>
+<script type="module" src="/assets/votes.js?v={votes_version}"></script>
+<script type="module" src="/assets/custom-pois.js?v={custom_pois_version}"></script>
 </body>
 </html>
 """

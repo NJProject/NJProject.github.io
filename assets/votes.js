@@ -1,5 +1,5 @@
 // votes.js
-import { db } from "/firebase-config.js";
+import { db } from "./firebase-config.js";
 import {
   doc, onSnapshot, updateDoc, setDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";

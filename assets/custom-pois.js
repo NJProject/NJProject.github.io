@@ -1,6 +1,6 @@
 // custom-pois.js
-import { db } from "/firebase-config.js";
-import { attachVoting } from "/votes.js?v=5";
+import { db } from "./firebase-config.js";
+import { attachVoting } from "./votes.js?v=5";
 import {
   collection, query, where, onSnapshot,
   doc, setDoc, deleteDoc, serverTimestamp
