@@ -1,4 +1,6 @@
 import { slugify } from "../utils/slugify";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 
 const CITIES = [
   { key: "osaka", name: "Osaka", start: "2027-02-18", end: "2027-02-22" },
@@ -40,6 +42,25 @@ function parsePoiCard(card, city) {
   };
 }
 
+function parseCustomPoi(docSnap, city) {
+  const data = docSnap.data();
+  return {
+    id: docSnap.id,
+    city: city.key,
+    cityName: city.name,
+    title: data.title || "",
+    category: data.category || "",
+    description: data.description || "",
+    meta: data.meta || "",
+    location: null,
+    durationMin: null,
+    openingHours: null,
+    availableDates: null,
+    constraints: {},
+    isCustom: true
+  };
+}
+
 export async function loadActivities() {
   const all = [];
   for (const city of CITIES) {
@@ -50,6 +71,11 @@ export async function loadActivities() {
     doc.querySelectorAll(".poi-card").forEach(card => {
       const item = parsePoiCard(card, city);
       if (item) all.push(item);
+    });
+
+    const customSnap = await getDocs(query(collection(db, "customPois"), where("city", "==", city.key)));
+    customSnap.forEach(docSnap => {
+      all.push(parseCustomPoi(docSnap, city));
     });
   }
   return all;
