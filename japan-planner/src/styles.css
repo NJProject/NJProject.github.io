@@ -157,6 +157,9 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 .multiday-day summary::-webkit-details-marker{display:none;}
 .multiday-day summary::before{content:"▸ ";}
 .multiday-day[open] summary::before{content:"▾ ";}
+
+.lodging-note{font-size:.8rem;color:#6f6a61;margin:2px 0 10px;}
+
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}

@@ -3,6 +3,7 @@ import { loadActivities, cityForKey, datesInRange } from "./services/activities"
 import { loadVotes, allVoters } from "./services/votes";
 import { loadPlannerMetadata } from "./services/plannerData";
 import { generatePlansForDateRange, generateMultiDayPlan } from "./algorithm/planner";
+import { getLodgingLabel } from "./services/lodgings";
 import { downloadMultiDayPlanAsPdf } from "./utils/exportPlan";
 import PlanCard from "./components/PlanCard";
 import AdminPanel from "./components/AdminPanel";
@@ -94,7 +95,8 @@ export default function App() {
           activities: cityActivities,
           people,
           dates: multiDayConstraint.dates,
-          constraints
+          constraints,
+          city
         });
         setMultiDayResult(result);
       } else {
@@ -102,7 +104,8 @@ export default function App() {
           activities: cityActivities,
           people,
           dates: cityDates,
-          constraints
+          constraints,
+          city
         });
         setDateResults(result);
       }
@@ -370,6 +373,9 @@ export default function App() {
                     )}
                     <p className="eyebrow">3. Propositions pour {formatDateFr(activeEntry.date)}</p>
                     <h2>Les parcours que les votes rendent possibles</h2>
+                    {getLodgingLabel(city, activeEntry.date) && (
+                      <p className="lodging-note">🏠 Départ estimé depuis : {getLodgingLabel(city, activeEntry.date)}</p>
+                    )}
                   </div>
                   {activeEntry.plans.map((p, i) => (
                     <PlanCard

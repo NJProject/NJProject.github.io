@@ -1,5 +1,6 @@
 import { routeBetween } from "../services/routing";
 import { getDefaultDuration } from "../services/activities";
+import { getLodgingForDate } from "../services/lodgings";
 
 const DEFAULT_DAY_START = 10 * 60;
 const DEFAULT_DAY_END = 20 * 60;
@@ -63,10 +64,10 @@ function separationPenalty(groupCount) {
  * l'estimation à vol d'oiseau — à recalibrer une fois l'API Google Maps
  * branchée, quand les temps de trajet reflèteront la réalité des transports.
  */
-async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [] } = {}) {
+async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null } = {}) {
   const remaining = [...pool];
   const ordered = [];
-  let current = null;
+  let current = startLocation ? { location: startLocation } : null;
   let cursor = Math.max(DEFAULT_DAY_START, timeBounds?.after ?? DEFAULT_DAY_START);
   let totalTravel = 0;
 
@@ -155,7 +156,7 @@ function getTimeBounds(constraints) {
   };
 }
 
-export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set() }) {
+export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set(), city = null }) {
   const excluded = new Set([
     ...constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId),
     ...extraExcludedIds
@@ -190,7 +191,8 @@ export async function generatePlans({ activities, people, date, constraints = []
         }
       });
 
-      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds });
+      const startLocation = city ? getLodgingForDate(city, date) : null;
+      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation });
       const satisfactionScore = result.ordered.length
         ? result.ordered.reduce((sum, item) => sum + satisfaction(item.activity, group), 0) / result.ordered.length
         : 0;
@@ -227,13 +229,13 @@ export async function generatePlans({ activities, people, date, constraints = []
 
 // Évalue chaque jour du séjour (ou uniquement le jour imposé par une contrainte "date")
 // et classe les jours du meilleur au moins bon.
-export async function generatePlansForDateRange({ activities, people, dates, constraints = [] }) {
+export async function generatePlansForDateRange({ activities, people, dates, constraints = [], city = null }) {
   const dateConstraint = constraints.find(c => c.type === "date" && c.date);
   const datesToTry = dateConstraint ? [dateConstraint.date] : dates;
 
   const perDate = [];
   for (const date of datesToTry) {
-    const plans = await generatePlans({ activities, people, date, constraints });
+    const plans = await generatePlans({ activities, people, date, constraints, city });
     if (plans.length) perDate.push({ date, plans, topScore: plans[0].score });
   }
 
@@ -244,13 +246,13 @@ export async function generatePlansForDateRange({ activities, people, dates, con
 // Enchaîne plusieurs jours choisis, dans l'ordre chronologique, en excluant
 // au fil de l'eau les activités déjà casées un jour précédent — évite les
 // doublons sur un séjour de plusieurs jours dans la même ville.
-export async function generateMultiDayPlan({ activities, people, dates, constraints = [] }) {
+export async function generateMultiDayPlan({ activities, people, dates, constraints = [], city = null }) {
   const sortedDates = [...dates].sort();
   const used = new Set();
   const days = [];
 
   for (const date of sortedDates) {
-    const plans = await generatePlans({ activities, people, date, constraints, extraExcludedIds: used });
+    const plans = await generatePlans({ activities, people, date, constraints, extraExcludedIds: used, city });
     if (!plans.length) {
       days.push({ date, plan: null });
       continue;
