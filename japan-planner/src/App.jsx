@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { loadActivities, cityForKey, datesInRange } from "./services/activities";
 import { loadVotes, allVoters } from "./services/votes";
 import { loadPlannerMetadata } from "./services/plannerData";
@@ -12,6 +12,12 @@ function formatDateFr(iso) {
   });
 }
 
+function scrollToRef(ref) {
+  if (ref.current) {
+    ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 export default function App() {
   const [activities, setActivities] = useState([]);
   const [votes, setVotes] = useState(new Map());
@@ -19,10 +25,13 @@ export default function App() {
   const [city, setCity] = useState("osaka");
   const [constraints, setConstraints] = useState([]);
   const [dateResults, setDateResults] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
   const admin = new URLSearchParams(location.search).get("admin") === "1";
+
+  const resultsRef = useRef(null);
 
   async function reload() {
     setLoading(true);
@@ -62,11 +71,13 @@ export default function App() {
     setCity(key);
     setConstraints([]);
     setDateResults([]);
+    setSelectedDate(null);
   }
 
   async function generate() {
     setGenerating(true);
     setError("");
+    setSelectedDate(null);
     try {
       if (people.length < 2) {
         throw new Error("Il faut au moins deux votants enregistrés dans Firestore.");
@@ -78,6 +89,7 @@ export default function App() {
         constraints
       });
       setDateResults(result);
+      requestAnimationFrame(() => scrollToRef(resultsRef));
     } catch (e) {
       console.error(e);
       setError(e.message || "Impossible de générer les parcours.");
@@ -86,11 +98,13 @@ export default function App() {
     }
   }
 
-  function pinDate(date) {
-    setConstraints([
-      ...constraints.filter(c => c.type !== "date"),
-      { type: "date", date, id: crypto.randomUUID() }
-    ]);
+  function viewDay(date) {
+    setSelectedDate(date);
+    requestAnimationFrame(() => scrollToRef(resultsRef));
+  }
+
+  function backToOverview() {
+    setSelectedDate(null);
   }
 
   function addConstraint() {
@@ -113,6 +127,18 @@ export default function App() {
     ["tokyo", "Tokyo", "26 fév.–10 mars"],
     ["fuji", "Fuji Five Lakes", "28 fév.–2 mars"]
   ];
+
+  // Résout quelle entrée de dateResults afficher en détail, sans jamais recalculer :
+  // priorité à une contrainte "Jour précis" explicite, sinon au jour sélectionné
+  // dans le classement, sinon — s'il n'y a qu'un seul jour dans les résultats —
+  // celui-là directement.
+  const activeDate = dateConstraint?.date
+    || selectedDate
+    || (dateResults.length === 1 ? dateResults[0].date : null);
+
+  const activeEntry = activeDate ? dateResults.find(d => d.date === activeDate) : null;
+  const showOverview = dateResults.length > 1 && !activeEntry;
+  const canGoBack = dateResults.length > 1 && !!activeEntry && !dateConstraint;
 
   return (
     <div className="app">
@@ -231,47 +257,54 @@ export default function App() {
               </div>
             </section>
 
-            {dateResults.length > 1 && (
-              <section className="results">
-                <div className="results-head">
-                  <p className="eyebrow">3. Meilleurs jours pour {cities.find(c => c[0] === city)?.[1]}</p>
-                  <h2>Classement sur l'ensemble du séjour</h2>
-                </div>
-                <ul className="day-overview">
-                  {dateResults.map((entry, i) => (
-                    <li className={i === 0 ? "best" : ""} key={entry.date}>
-                      <div>
-                        <div className="day-label">{i === 0 ? "🥇 " : ""}{formatDateFr(entry.date)}</div>
-                        <div className="day-summary">
-                          {entry.plans[0].peopleSatisfied}/{people.length} satisfaits ·{" "}
-                          {entry.plans[0].totalTravelMin} min de déplacements
+            <section className="results" ref={resultsRef}>
+              {showOverview && (
+                <>
+                  <div className="results-head">
+                    <p className="eyebrow">3. Meilleurs jours pour {cities.find(c => c[0] === city)?.[1]}</p>
+                    <h2>Classement sur l'ensemble du séjour</h2>
+                  </div>
+                  <ul className="day-overview">
+                    {dateResults.map((entry, i) => (
+                      <li className={i === 0 ? "best" : ""} key={entry.date}>
+                        <div>
+                          <div className="day-label">{i === 0 ? "🥇 " : ""}{formatDateFr(entry.date)}</div>
+                          <div className="day-summary">
+                            {entry.plans[0].peopleSatisfied}/{people.length} satisfaits ·{" "}
+                            {entry.plans[0].totalTravelMin} min de déplacements
+                          </div>
                         </div>
-                      </div>
-                      <button onClick={() => pinDate(entry.date)}>Voir le détail</button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+                        <button onClick={() => viewDay(entry.date)}>Voir le détail</button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
 
-            {dateResults.length === 1 && (
-              <section className="results">
-                <div className="results-head">
-                  <p className="eyebrow">3. Propositions pour {formatDateFr(dateResults[0].date)}</p>
-                  <h2>Les parcours que les votes rendent possibles</h2>
-                </div>
-                {dateResults[0].plans.map((p, i) => (
-                  <PlanCard
-                    plan={p}
-                    rank={i + 1}
-                    totalPeople={people.length}
-                    cityName={cities.find(c => c[0] === city)?.[1]}
-                    dateLabel={formatDateFr(dateResults[0].date)}
-                    key={i}
-                  />
-                ))}
-              </section>
-            )}
+              {activeEntry && (
+                <>
+                  <div className="results-head">
+                    {canGoBack && (
+                      <button className="back-to-overview" onClick={backToOverview}>
+                        ← Retour au classement des jours
+                      </button>
+                    )}
+                    <p className="eyebrow">3. Propositions pour {formatDateFr(activeEntry.date)}</p>
+                    <h2>Les parcours que les votes rendent possibles</h2>
+                  </div>
+                  {activeEntry.plans.map((p, i) => (
+                    <PlanCard
+                      plan={p}
+                      rank={i + 1}
+                      totalPeople={people.length}
+                      cityName={cities.find(c => c[0] === city)?.[1]}
+                      dateLabel={formatDateFr(activeEntry.date)}
+                      key={i}
+                    />
+                  ))}
+                </>
+              )}
+            </section>
 
             {admin && (
               <AdminPanel

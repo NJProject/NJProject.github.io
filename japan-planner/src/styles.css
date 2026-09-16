@@ -129,7 +129,14 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 .travel-quality.tq-ok{background:#fdf3d9;color:#9a7015;}
 .travel-quality.tq-bad{background:#fbeae7;color:#b23a2e;}
 
-
+.back-to-overview{
+  display:inline-block;
+  border:0;background:none;
+  color:#253c63;font-weight:700;font-size:.82rem;
+  padding:0 0 10px;cursor:pointer;
+  text-decoration:underline;
+}
+.back-to-overview:hover{color:#18243a;}
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}
