@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { loadActivities, cityForKey, datesInRange } from "./services/activities";
 import { loadVotes, allVoters } from "./services/votes";
 import { loadPlannerMetadata } from "./services/plannerData";
-import { generatePlansForDateRange } from "./algorithm/planner";
+import { generatePlansForDateRange, generateMultiDayPlan } from "./algorithm/planner";
+import { downloadMultiDayPlanAsPdf } from "./utils/exportPlan";
 import PlanCard from "./components/PlanCard";
 import AdminPanel from "./components/AdminPanel";
 
@@ -26,6 +27,7 @@ export default function App() {
   const [constraints, setConstraints] = useState([]);
   const [dateResults, setDateResults] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [multiDayResult, setMultiDayResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
@@ -66,29 +68,44 @@ export default function App() {
   const cityDates = useMemo(() => datesInRange(city), [city]);
   const people = useMemo(() => allVoters(votes), [votes]);
   const dateConstraint = constraints.find(c => c.type === "date");
+  const multiDayConstraint = constraints.find(c => c.type === "multiDay");
 
   function changeCity(key) {
     setCity(key);
     setConstraints([]);
     setDateResults([]);
     setSelectedDate(null);
+    setMultiDayResult(null);
   }
 
   async function generate() {
     setGenerating(true);
     setError("");
     setSelectedDate(null);
+    setMultiDayResult(null);
+    setDateResults([]);
     try {
       if (people.length < 2) {
         throw new Error("Il faut au moins deux votants enregistrés dans Firestore.");
       }
-      const result = await generatePlansForDateRange({
-        activities: cityActivities,
-        people,
-        dates: cityDates,
-        constraints
-      });
-      setDateResults(result);
+
+      if (multiDayConstraint?.dates?.length) {
+        const result = await generateMultiDayPlan({
+          activities: cityActivities,
+          people,
+          dates: multiDayConstraint.dates,
+          constraints
+        });
+        setMultiDayResult(result);
+      } else {
+        const result = await generatePlansForDateRange({
+          activities: cityActivities,
+          people,
+          dates: cityDates,
+          constraints
+        });
+        setDateResults(result);
+      }
       requestAnimationFrame(() => scrollToRef(resultsRef));
     } catch (e) {
       console.error(e);
@@ -119,6 +136,16 @@ export default function App() {
     setConstraints(constraints.filter(c => c.id !== id));
   }
 
+  function toggleMultiDayDate(id, date, currentDates) {
+    const set = new Set(currentDates || []);
+    if (set.has(date)) set.delete(date); else set.add(date);
+    updateConstraint(id, { dates: [...set].sort() });
+  }
+
+  function selectAllMultiDayDates(id) {
+    updateConstraint(id, { dates: [...cityDates] });
+  }
+
   const cities = [
     ["osaka", "Osaka", "18–22 fév."],
     ["nara", "Nara", "22–23 fév."],
@@ -127,11 +154,8 @@ export default function App() {
     ["tokyo", "Tokyo", "26 fév.–10 mars"],
     ["fuji", "Fuji Five Lakes", "28 fév.–2 mars"]
   ];
+  const cityName = cities.find(c => c[0] === city)?.[1];
 
-  // Résout quelle entrée de dateResults afficher en détail, sans jamais recalculer :
-  // priorité à une contrainte "Jour précis" explicite, sinon au jour sélectionné
-  // dans le classement, sinon — s'il n'y a qu'un seul jour dans les résultats —
-  // celui-là directement.
   const activeDate = dateConstraint?.date
     || selectedDate
     || (dateResults.length === 1 ? dateResults[0].date : null);
@@ -147,9 +171,11 @@ export default function App() {
         <p className="eyebrow">Japon 2027 · outil du groupe</p>
         <h1>Organiser une journée</h1>
         <p>
-          {dateConstraint
-            ? "Un jour précis est fixé ci-dessous — les propositions détaillées portent uniquement sur celui-ci."
-            : "Par défaut, tous les jours du séjour dans la ville sont évalués et classés du meilleur au moins bon."}
+          {multiDayConstraint?.dates?.length
+            ? `Programme sur ${multiDayConstraint.dates.length} jour(s) — les activités ne se répètent pas d'un jour à l'autre.`
+            : dateConstraint
+              ? "Un jour précis est fixé ci-dessous — les propositions détaillées portent uniquement sur celui-ci."
+              : "Par défaut, tous les jours du séjour dans la ville sont évalués et classés du meilleur au moins bon."}
         </p>
       </header>
 
@@ -161,7 +187,7 @@ export default function App() {
               <div className="panel-head">
                 <div>
                   <h2>1. Choisir la ville</h2>
-                  <p>{people.length} votant(s) détecté(s) · {cityActivities.length} activités à {cities.find(c => c[0] === city)?.[1]}</p>
+                  <p>{people.length} votant(s) détecté(s) · {cityActivities.length} activités à {cityName}</p>
                 </div>
               </div>
 
@@ -176,7 +202,7 @@ export default function App() {
               <div className="constraint-box">
                 <div>
                   <strong>Contraintes</strong>
-                  <p>Ajoute un jour précis, une activité obligatoire/exclue, un créneau horaire, ou impose de rester groupé.</p>
+                  <p>Ajoute un jour précis, plusieurs jours à enchaîner, une activité obligatoire/exclue, un créneau horaire, ou impose de rester groupé.</p>
                 </div>
                 <button onClick={addConstraint}>+ Ajouter</button>
               </div>
@@ -189,6 +215,7 @@ export default function App() {
                   >
                     <option value="none">Type de contrainte…</option>
                     <option value="date">Jour précis</option>
+                    <option value="multiDay">Plusieurs jours</option>
                     <option value="required">Activité obligatoire</option>
                     <option value="excluded">Activité exclue</option>
                     <option value="timeWindow">Créneau horaire</option>
@@ -203,6 +230,27 @@ export default function App() {
                       <option value="">Choisir un jour</option>
                       {cityDates.map(d => <option key={d} value={d}>{formatDateFr(d)}</option>)}
                     </select>
+                  )}
+
+                  {c.type === "multiDay" && (
+                    <div className="multiday-picker">
+                      <div className="multiday-picker-head">
+                        <span>{c.dates?.length || 0}/{cityDates.length} jour(s) sélectionné(s)</span>
+                        <button type="button" onClick={() => selectAllMultiDayDates(c.id)}>Tout sélectionner</button>
+                      </div>
+                      <div className="multiday-checkboxes">
+                        {cityDates.map(d => (
+                          <label key={d} className="multiday-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={(c.dates || []).includes(d)}
+                              onChange={() => toggleMultiDayDate(c.id, d, c.dates)}
+                            />
+                            {formatDateFr(d)}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   {(c.type === "required" || c.type === "excluded") && (
@@ -258,10 +306,41 @@ export default function App() {
             </section>
 
             <section className="results" ref={resultsRef}>
-              {showOverview && (
+              {multiDayResult && (
                 <>
                   <div className="results-head">
-                    <p className="eyebrow">3. Meilleurs jours pour {cities.find(c => c[0] === city)?.[1]}</p>
+                    <p className="eyebrow">3. Programme sur {multiDayResult.days.length} jour(s)</p>
+                    <h2>{cityName}</h2>
+                  </div>
+                  <button
+                    className="download-plan multiday-download"
+                    onClick={() => downloadMultiDayPlanAsPdf(multiDayResult.days, cityName)}
+                  >
+                    📄 Télécharger le programme complet (PDF)
+                  </button>
+                  {multiDayResult.days.map((day, i) => (
+                    <details className="multiday-day" open={i === 0} key={day.date}>
+                      <summary>Jour {i + 1} — {formatDateFr(day.date)}</summary>
+                      {day.plan ? (
+                        <PlanCard
+                          plan={day.plan}
+                          rank={1}
+                          totalPeople={people.length}
+                          cityName={cityName}
+                          dateLabel={formatDateFr(day.date)}
+                        />
+                      ) : (
+                        <p className="muted">Aucune proposition possible ce jour avec les contraintes actuelles.</p>
+                      )}
+                    </details>
+                  ))}
+                </>
+              )}
+
+              {!multiDayResult && showOverview && (
+                <>
+                  <div className="results-head">
+                    <p className="eyebrow">3. Meilleurs jours pour {cityName}</p>
                     <h2>Classement sur l'ensemble du séjour</h2>
                   </div>
                   <ul className="day-overview">
@@ -281,7 +360,7 @@ export default function App() {
                 </>
               )}
 
-              {activeEntry && (
+              {!multiDayResult && activeEntry && (
                 <>
                   <div className="results-head">
                     {canGoBack && (
@@ -297,7 +376,7 @@ export default function App() {
                       plan={p}
                       rank={i + 1}
                       totalPeople={people.length}
-                      cityName={cities.find(c => c[0] === city)?.[1]}
+                      cityName={cityName}
                       dateLabel={formatDateFr(activeEntry.date)}
                       key={i}
                     />

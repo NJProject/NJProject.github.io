@@ -137,6 +137,26 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
   text-decoration:underline;
 }
 .back-to-overview:hover{color:#18243a;}
+
+.multiday-picker{flex:1;border:1px solid #ddd7ca;border-radius:8px;padding:10px 12px;background:#fff;}
+.multiday-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.78rem;color:#6f6a61;}
+.multiday-picker-head button{border:0;background:none;color:#253c63;font-weight:700;font-size:.78rem;cursor:pointer;text-decoration:underline;}
+.multiday-checkboxes{display:flex;flex-wrap:wrap;gap:6px 14px;max-height:120px;overflow-y:auto;}
+.multiday-checkbox{display:flex;align-items:center;gap:5px;font-size:.8rem;white-space:nowrap;cursor:pointer;}
+.multiday-checkbox input{accent-color:#253c63;cursor:pointer;}
+
+.multiday-download{margin-bottom:18px;}
+.multiday-day{
+  border:1px solid #ddd7ca;border-radius:12px;margin-bottom:12px;
+  padding:4px 16px 16px;background:#fff;
+}
+.multiday-day summary{
+  cursor:pointer;font-weight:800;font-size:.95rem;padding:12px 0;
+  list-style:none;color:#253c63;
+}
+.multiday-day summary::-webkit-details-marker{display:none;}
+.multiday-day summary::before{content:"▸ ";}
+.multiday-day[open] summary::before{content:"▾ ";}
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}

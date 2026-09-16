@@ -134,3 +134,124 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
   const safeDate = dateLabel.replace(/\s+/g, "-");
   doc.save(`parcours-${safeCity}-${safeDate}.pdf`);
 }
+
+
+export function downloadMultiDayPlanAsPdf(days, cityName) {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 18;
+
+  days.forEach((day, dayIndex) => {
+    let y = 24;
+    if (dayIndex === 0) {
+      paintBackground(doc);
+    } else {
+      doc.addPage();
+      paintBackground(doc);
+    }
+
+    const dateLabel = new Date(`${day.date}T00:00:00`).toLocaleDateString("fr-FR", {
+      weekday: "long", day: "numeric", month: "long"
+    });
+
+    const sealCx = marginX + 6;
+    const sealCy = y - 2;
+    doc.setDrawColor(...COLORS.seal);
+    doc.setLineWidth(0.9);
+    doc.circle(sealCx, sealCy, 6.5, "S");
+    doc.setLineWidth(0.4);
+    doc.circle(sealCx, sealCy, 4.4, "S");
+    doc.setFillColor(...COLORS.seal);
+    doc.circle(sealCx, sealCy, 1, "F");
+
+    doc.setTextColor(...COLORS.ink);
+    doc.setFont("times", "bold");
+    doc.setFontSize(19);
+    doc.text(`${cityName} — Jour ${dayIndex + 1}`, marginX + 17, y - 3);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    doc.setTextColor(...COLORS.gold);
+    doc.text(dateLabel.toUpperCase(), marginX + 17, y + 3);
+
+    y += 12;
+    doc.setDrawColor(...COLORS.line);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, y, pageWidth - marginX, y);
+    y += 9;
+
+    if (!day.plan) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.setTextColor(...COLORS.muted);
+      doc.text("Aucune proposition possible pour ce jour avec les contraintes actuelles.", marginX, y);
+      return;
+    }
+
+    const plan = day.plan;
+    const summary = plan.groups.length > 1
+      ? `${plan.groups.map(g => g.people.length).join(" + ")} personnes · séparation proposée`
+      : "Tout le monde reste ensemble";
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...COLORS.muted);
+    doc.text(`${summary}  ·  ${plan.totalTravelMin} min de déplacements estimés`, marginX, y);
+    y += 11;
+
+    plan.groups.forEach((group, gi) => {
+      if (y > pageHeight - 35) { y = newPage(doc); }
+
+      doc.setFont("times", "bold");
+      doc.setFontSize(12.5);
+      doc.setTextColor(...COLORS.indigo);
+      doc.text(
+        plan.groups.length > 1 ? `Groupe ${gi + 1} — ${group.people.join(", ")}` : group.people.join(", "),
+        marginX, y
+      );
+      y += 8;
+
+      if (group.ordered.length === 0) {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(10);
+        doc.setTextColor(...COLORS.muted);
+        doc.text("Aucune activité compatible trouvée.", marginX + 4, y);
+        y += 10;
+        return;
+      }
+
+      group.ordered.forEach((item) => {
+        if (y > pageHeight - 26) { y = newPage(doc); }
+
+        doc.setFillColor(...COLORS.indigo);
+        doc.roundedRect(marginX, y - 4.4, 24, 6.8, 1.4, 1.4, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.3);
+        doc.text(`${fmt(item.start)}–${fmt(item.end)}`, marginX + 12, y, { align: "center" });
+
+        doc.setTextColor(...COLORS.ink);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10.5);
+        doc.text(item.activity.title, marginX + 29, y);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8.3);
+        doc.setTextColor(...COLORS.muted);
+        const travelNote = `${item.travelBeforeMin} min de trajet avant${item.travelEstimated ? " (estimé)" : ""}`;
+        doc.text(travelNote, marginX + 29, y + 4.5);
+
+        y += 11.5;
+      });
+
+      y += 5;
+    });
+  });
+
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.setTextColor(...COLORS.muted);
+  doc.text("Généré par le planner Japon 2027", marginX, pageHeight - 12);
+
+  const safeCity = cityName.toLowerCase().replace(/\s+/g, "-");
+  doc.save(`programme-${safeCity}-${days.length}-jours.pdf`);
+}

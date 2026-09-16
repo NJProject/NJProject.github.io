@@ -155,8 +155,11 @@ function getTimeBounds(constraints) {
   };
 }
 
-export async function generatePlans({ activities, people, date, constraints = [] }) {
-  const excluded = new Set(constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId));
+export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set() }) {
+  const excluded = new Set([
+    ...constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId),
+    ...extraExcludedIds
+  ]);
   const requiredIds = constraints.filter(c => c.type === "required" && c.activityId).map(c => c.activityId);
   const timeBounds = getTimeBounds(constraints);
 
@@ -235,4 +238,34 @@ export async function generatePlansForDateRange({ activities, people, dates, con
   }
 
   return perDate.sort((a, b) => b.topScore - a.topScore);
+}
+
+
+// Enchaîne plusieurs jours choisis, dans l'ordre chronologique, en excluant
+// au fil de l'eau les activités déjà casées un jour précédent — évite les
+// doublons sur un séjour de plusieurs jours dans la même ville.
+export async function generateMultiDayPlan({ activities, people, dates, constraints = [] }) {
+  const sortedDates = [...dates].sort();
+  const used = new Set();
+  const days = [];
+
+  for (const date of sortedDates) {
+    const plans = await generatePlans({ activities, people, date, constraints, extraExcludedIds: used });
+    if (!plans.length) {
+      days.push({ date, plan: null });
+      continue;
+    }
+    const best = plans[0];
+    days.push({ date, plan: best });
+    best.groups.forEach(g => g.ordered.forEach(item => used.add(item.activity.id)));
+  }
+
+  const validDays = days.filter(d => d.plan);
+  return {
+    days,
+    totalTravelMin: validDays.reduce((sum, d) => sum + d.plan.totalTravelMin, 0),
+    avgSatisfaction: validDays.length
+      ? validDays.reduce((sum, d) => sum + d.plan.peopleSatisfied, 0) / validDays.length
+      : 0
+  };
 }
