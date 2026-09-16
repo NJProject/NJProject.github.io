@@ -323,9 +323,12 @@ export default function App() {
                   </button>
                   {multiDayResult.days.map((day, i) => (
                     <details className="multiday-day" open={i === 0} key={day.date}>
-                      <summary>Jour {i + 1} — {formatDateFr(day.date)}</summary>
-                      {day.plan ? (
-                        <PlanCard
+                    <summary>Jour {i + 1} — {formatDateFr(day.date)}</summary>
+                    {getLodgingLabel(city, day.date) && (
+                      <p className="lodging-note">🏠 Départ estimé depuis : {getLodgingLabel(city, day.date)}</p>
+                    )}
+                    {day.plan ? (
+                      <PlanCard
                           plan={day.plan}
                           rank={1}
                           totalPeople={people.length}
