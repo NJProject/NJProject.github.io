@@ -5,6 +5,7 @@ import { getLodgingForDate } from "../services/lodgings";
 const DEFAULT_DAY_START = 10 * 60;
 const DEFAULT_DAY_END = 20 * 60;
 const POOL_CAP = 12; // borne le nb de candidats évalués géographiquement par groupe/jour
+const GROUPING_CONSISTENCY_BONUS = 40; // bonus si la répartition du jour reprend celle d'un jour précédent
 
 function voters(activity) {
   return new Set(activity.voters || []);
@@ -64,7 +65,25 @@ function separationPenalty(groupCount) {
  * l'estimation à vol d'oiseau — à recalibrer une fois l'API Google Maps
  * branchée, quand les temps de trajet reflèteront la réalité des transports.
  */
-async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null } = {}) {
+
+// Décale le début d'une activité après un créneau "temps libre" imposé s'il
+// chevaucherait ce créneau — ne raccourcit jamais la durée de l'activité,
+// la repousse entièrement après la pause.
+function applyFreeWindow(start, duration, freeWindow) {
+  if (!freeWindow) return start;
+  const end = start + duration;
+  if (end <= freeWindow.from || start >= freeWindow.to) return start;
+  return freeWindow.to;
+}
+
+// Représentation canonique d'une répartition en sous-groupes, pour comparer
+// deux répartitions entre elles indépendamment de l'ordre des groupes ou
+// des personnes à l'intérieur de chaque groupe.
+function normalizeGrouping(groups) {
+  return groups.map(g => [...g].sort().join(",")).sort().join("|");
+}
+
+async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null, freeWindow = null } = {}) {
   const remaining = [...pool];
   const ordered = [];
   let current = startLocation ? { location: startLocation } : null;
@@ -87,8 +106,8 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
       const [open, close] = openingWindow(candidate, timeBounds);
       const dayEnd = timeBounds?.before ?? DEFAULT_DAY_END;
       const arrival = cursor + route.durationMin;
-      const start = Math.max(arrival, open);
       const duration = candidate.durationMin || getDefaultDuration(candidate.category);
+      const start = applyFreeWindow(Math.max(arrival, open), duration, freeWindow);
 
       if (start + duration > Math.min(close, dayEnd)) continue; // ne rentre pas dans la journée
 
@@ -156,13 +175,20 @@ function getTimeBounds(constraints) {
   };
 }
 
-export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set(), city = null }) {
+function getFreeWindow(constraints) {
+  const c = constraints.find(x => x.type === "freeTime" && x.from && x.to);
+  if (!c) return null;
+  return { from: minutesFromHHMM(c.from), to: minutesFromHHMM(c.to) };
+}
+
+export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set(), city = null, preferredGrouping = null }) {
   const excluded = new Set([
     ...constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId),
     ...extraExcludedIds
   ]);
   const requiredIds = constraints.filter(c => c.type === "required" && c.activityId).map(c => c.activityId);
   const timeBounds = getTimeBounds(constraints);
+  const freeWindow = getFreeWindow(constraints);
 
   const relevant = activities
     .filter(a => compatibleWithDate(a, date))
@@ -192,7 +218,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       });
 
       const startLocation = city ? getLodgingForDate(city, date) : null;
-      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation });
+      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation, freeWindow });
       const satisfactionScore = result.ordered.length
         ? result.ordered.reduce((sum, item) => sum + satisfaction(item.activity, group), 0) / result.ordered.length
         : 0;
@@ -205,6 +231,11 @@ export async function generatePlans({ activities, people, date, constraints = []
 
     score -= travel * 0.35;
     score -= separationPenalty(candidate.groups.length);
+
+    if (preferredGrouping && candidate.groups.length > 1
+        && normalizeGrouping(candidate.groups) === normalizeGrouping(preferredGrouping)) {
+      score += GROUPING_CONSISTENCY_BONUS;
+    }
 
     const travelRatio = (travel + activeMin) > 0 ? travel / (travel + activeMin) : 0;
 
@@ -250,9 +281,10 @@ export async function generateMultiDayPlan({ activities, people, dates, constrai
   const sortedDates = [...dates].sort();
   const used = new Set();
   const days = [];
+  let lastGrouping = null; // répartition en sous-groupes du dernier jour séparé, pour la cohérence inter-jours
 
   for (const date of sortedDates) {
-    const plans = await generatePlans({ activities, people, date, constraints, extraExcludedIds: used, city });
+    const plans = await generatePlans({ activities, people, date, constraints, extraExcludedIds: used, city, preferredGrouping: lastGrouping });
     if (!plans.length) {
       days.push({ date, plan: null });
       continue;
@@ -260,6 +292,9 @@ export async function generateMultiDayPlan({ activities, people, dates, constrai
     const best = plans[0];
     days.push({ date, plan: best });
     best.groups.forEach(g => g.ordered.forEach(item => used.add(item.activity.id)));
+    if (best.groups.length > 1) {
+      lastGrouping = best.groups.map(g => g.people);
+    }
   }
 
   const validDays = days.filter(d => d.plan);

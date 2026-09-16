@@ -222,6 +222,7 @@ export default function App() {
                     <option value="required">Activité obligatoire</option>
                     <option value="excluded">Activité exclue</option>
                     <option value="timeWindow">Créneau horaire</option>
+                    <option value="freeTime">Bloquer un créneau (temps libre)</option>
                     <option value="keepTogether">Rester groupé</option>
                   </select>
 
@@ -279,6 +280,24 @@ export default function App() {
                         placeholder="Avant"
                         value={c.before || ""}
                         onChange={e => updateConstraint(c.id, { before: e.target.value })}
+                      />
+                    </div>
+                  )}
+
+                  
+{c.type === "freeTime" && (
+                    <div className="time-inputs">
+                      <input
+                        type="time"
+                        placeholder="De"
+                        value={c.from || ""}
+                        onChange={e => updateConstraint(c.id, { from: e.target.value })}
+                      />
+                      <input
+                        type="time"
+                        placeholder="À"
+                        value={c.to || ""}
+                        onChange={e => updateConstraint(c.id, { to: e.target.value })}
                       />
                     </div>
                   )}
