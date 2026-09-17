@@ -29,7 +29,7 @@ function paintBackground(doc) {
   doc.rect(0, 0, w, h, "F");
 }
 
-export function downloadPlanAsPdf(plan, cityName, dateLabel) {
+export function downloadPlanAsPdf(plan, cityName, dateLabel, lodgingLabel) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -67,6 +67,15 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
   doc.line(marginX, y, pageWidth - marginX, y);
   y += 9;
 
+  // Point de départ (logement), si connu — cohérent avec le texte affiché sur la page
+  if (lodgingLabel) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...COLORS.indigo);
+    doc.text(`Départ de : ${lodgingLabel}`, marginX, y);
+    y += 7;
+  }
+
   // Résumé
   const summary = plan.groups.length > 1
     ? `${plan.groups.map(g => g.people.length).join(" + ")} personnes · séparation proposée`
@@ -99,7 +108,12 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
     }
 
     group.ordered.forEach((item) => {
-      if (y > pageHeight - 26) y = newPage(doc);
+      const descLines = item.activity.description
+        ? doc.splitTextToSize(item.activity.description, pageWidth - marginX - 29 - 18)
+        : [];
+      const blockHeight = 11.5 + (descLines.length ? descLines.length * 4.2 + 1.5 : 0);
+
+      if (y + blockHeight - 11.5 > pageHeight - 20) y = newPage(doc);
 
       doc.setFillColor(...COLORS.indigo);
       doc.roundedRect(marginX, y - 4.4, 24, 6.8, 1.4, 1.4, "F");
@@ -119,7 +133,17 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
       const travelNote = `${item.travelBeforeMin} min de trajet avant${item.travelEstimated ? " (estimé)" : ""}`;
       doc.text(travelNote, marginX + 29, y + 4.5);
 
-      y += 11.5;
+      y += 9.5;
+
+      if (descLines.length) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...COLORS.muted);
+        doc.text(descLines, marginX + 29, y);
+        y += descLines.length * 4.2 + 2;
+      }
+
+      y += 2;
     });
 
     y += 5;
@@ -136,7 +160,7 @@ export function downloadPlanAsPdf(plan, cityName, dateLabel) {
 }
 
 
-export function downloadMultiDayPlanAsPdf(days, cityName) {
+export function downloadMultiDayPlanAsPdf(days, cityName, getLodgingLabelForDate) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -180,6 +204,15 @@ export function downloadMultiDayPlanAsPdf(days, cityName) {
     doc.line(marginX, y, pageWidth - marginX, y);
     y += 9;
 
+    const lodgingLabel = getLodgingLabelForDate ? getLodgingLabelForDate(day.date) : null;
+    if (lodgingLabel) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(...COLORS.indigo);
+      doc.text(`Départ de : ${lodgingLabel}`, marginX, y);
+      y += 7;
+    }
+
     if (!day.plan) {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(10);
@@ -220,7 +253,12 @@ export function downloadMultiDayPlanAsPdf(days, cityName) {
       }
 
       group.ordered.forEach((item) => {
-        if (y > pageHeight - 26) { y = newPage(doc); }
+        const descLines = item.activity.description
+          ? doc.splitTextToSize(item.activity.description, pageWidth - marginX - 29 - 18)
+          : [];
+        const blockHeight = 11.5 + (descLines.length ? descLines.length * 4.2 + 1.5 : 0);
+
+        if (y + blockHeight - 11.5 > pageHeight - 20) { y = newPage(doc); }
 
         doc.setFillColor(...COLORS.indigo);
         doc.roundedRect(marginX, y - 4.4, 24, 6.8, 1.4, 1.4, "F");
@@ -240,7 +278,17 @@ export function downloadMultiDayPlanAsPdf(days, cityName) {
         const travelNote = `${item.travelBeforeMin} min de trajet avant${item.travelEstimated ? " (estimé)" : ""}`;
         doc.text(travelNote, marginX + 29, y + 4.5);
 
-        y += 11.5;
+        y += 9.5;
+
+        if (descLines.length) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(...COLORS.muted);
+          doc.text(descLines, marginX + 29, y);
+          y += descLines.length * 4.2 + 2;
+        }
+
+        y += 2;
       });
 
       y += 5;

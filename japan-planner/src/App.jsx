@@ -350,7 +350,7 @@ export default function App() {
                   </div>
                   <button
                     className="download-plan multiday-download"
-                    onClick={() => downloadMultiDayPlanAsPdf(multiDayResult.days, cityName)}
+                    onClick={() => downloadMultiDayPlanAsPdf(multiDayResult.days, cityName, (date) => getLodgingLabel(city, date))}
                   >
                     📄 Télécharger le programme complet (PDF)
                   </button>
@@ -362,12 +362,13 @@ export default function App() {
                     )}
                     {day.plan ? (
                       <PlanCard
-                          plan={day.plan}
-                          rank={1}
-                          totalPeople={people.length}
-                          cityName={cityName}
-                          dateLabel={formatDateFr(day.date)}
-                        />
+                        plan={day.plan}
+                        rank={1}
+                        totalPeople={people.length}
+                        cityName={cityName}
+                        dateLabel={formatDateFr(day.date)}
+                        lodgingLabel={getLodgingLabel(city, day.date)}
+                      />
                       ) : (
                         <p className="muted">Aucune proposition possible ce jour avec les contraintes actuelles.</p>
                       )}
@@ -415,13 +416,14 @@ export default function App() {
                   </div>
                   {activeEntry.plans.map((p, i) => (
                     <PlanCard
-                      plan={p}
-                      rank={i + 1}
-                      totalPeople={people.length}
-                      cityName={cityName}
-                      dateLabel={formatDateFr(activeEntry.date)}
-                      key={i}
-                    />
+                    plan={p}
+                    rank={i + 1}
+                    totalPeople={people.length}
+                    cityName={cityName}
+                    dateLabel={formatDateFr(activeEntry.date)}
+                    lodgingLabel={getLodgingLabel(city, activeEntry.date)}
+                    key={i}
+                  />
                   ))}
                 </>
               )}

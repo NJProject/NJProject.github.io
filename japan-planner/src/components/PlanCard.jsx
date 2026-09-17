@@ -13,7 +13,7 @@ function fmt(min) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel }) {
+export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel, lodgingLabel }) {
   return (
     <article className={`plan-card rank-${rank}`}>
       <header>
@@ -31,7 +31,7 @@ export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel 
       <button
         type="button"
         className="download-plan"
-        onClick={() => downloadPlanAsPdf(plan, cityName, dateLabel)}
+        onClick={() => downloadPlanAsPdf(plan, cityName, dateLabel, lodgingLabel)}
       >
         📄 Télécharger en PDF
       </button>
