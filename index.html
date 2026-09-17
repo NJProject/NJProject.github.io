@@ -434,6 +434,25 @@
           </tbody>
         </table>
       </div>
+    <!-- Bouton -->
+    <button id="openPdfBtn" type="button">
+      Voir le PDF
+    </button>
+
+    <!-- Popup PDF -->
+    <div id="pdfModal" class="pdf-modal" aria-hidden="true">
+      <div class="pdf-modal-content">
+        <button id="closePdfBtn" class="pdf-close" type="button" aria-label="Fermer">
+          ×
+        </button>
+
+        <iframe
+          id="pdfViewer"
+          src=""
+          title="Prévisualisation du PDF"
+        ></iframe>
+      </div>
+    </div>      
     </section>
 
     <!-- 4. CALENDRIER -->

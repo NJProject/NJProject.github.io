@@ -301,3 +301,38 @@ if (calRecurringNotes && typeof RECURRING_RESERVATIONS !== 'undefined') {
     </div>
   `).join('');
 }
+
+const openPdfBtn = document.getElementById("openPdfBtn");
+const closePdfBtn = document.getElementById("closePdfBtn");
+const pdfModal = document.getElementById("pdfModal");
+const pdfViewer = document.getElementById("pdfViewer");
+
+const pdfPath = "./Transports_Bagages_Japon2027.pdf";
+
+openPdfBtn.addEventListener("click", () => {
+  pdfViewer.src = pdfPath;
+  pdfModal.classList.add("active");
+  pdfModal.setAttribute("aria-hidden", "false");
+});
+
+function closePdf() {
+  pdfModal.classList.remove("active");
+  pdfModal.setAttribute("aria-hidden", "true");
+
+  // Arrête le chargement du PDF lorsqu'on ferme
+  pdfViewer.src = "";
+}
+
+closePdfBtn.addEventListener("click", closePdf);
+
+pdfModal.addEventListener("click", (event) => {
+  if (event.target === pdfModal) {
+    closePdf();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && pdfModal.classList.contains("active")) {
+    closePdf();
+  }
+});
