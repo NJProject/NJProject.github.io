@@ -20,10 +20,9 @@ const CATS_BY_TYPE = {
 };
 
 const CATS_BY_DESTINATION = {
-  kamakura: ["📿", "Kamakura"],
+  kamakura: ["🗿", "Kamakura"],
   nikko: ["⛩️", "Nikko"],
-  fuji: ["🗻", "Fuji Five Lakes"],
-  yokohama: ["⚓", "Yokohama"],
+  yokohama: ["🌉", "Yokohama"],
   takao: ["🥾", "Takao & Mitake"]
 };
 

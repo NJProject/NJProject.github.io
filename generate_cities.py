@@ -9,6 +9,11 @@ CATS = {
     "nightlife": ("🌃", "Vie nocturne"),
     "randonnee": ("🥾", "Randonnée"),
     "otaku": ("🎮", "Otaku / Geek"),
+    # Catégories propres à excursions.html — filtre par destination, pas par type de lieu
+    "kamakura": ("🗿", "Kamakura"),
+    "nikko": ("⛩️", "Nikko"),
+    "yokohama": ("🌉", "Yokohama"),
+    "takao": ("🥾", "Takao & Mitake"),
 }
 
 CITY_NAV = [
@@ -173,6 +178,36 @@ CITIES = {
             poi("🌊","Lac Kawaguchiko & Oishi Park","touristique","Le plus accessible des 5 lacs, reflets classiques du Fuji sur l'eau, promenade à vélo, croisière en bateau, vue depuis Oishi Park particulièrement photogénique.", "Juste à côté de la gare de Kawaguchiko"),
             poi("🍜","Hōtō (spécialité locale)","gastronomie","Plat de nouilles épaisses plates mijotées avec légumes dans un bouillon miso — LE plat réconfortant de la région, parfait après une journée dehors en hiver.", "Disponible dans la plupart des restaurants autour de Kawaguchiko"),
             poi("🚡","Mt Tenjo Ropeway","touristique","Téléphérique panoramique au-dessus du lac Kawaguchiko, vue combinée lac + Mont Fuji depuis le sommet — point connu sous le nom de \"Kachikachi Yama\".", "Départ à 5 min à pied de la gare de Kawaguchiko"),
+        ],
+    },
+    "excursions": {
+        "icon": "🗺️",
+        "name": "Excursions",
+        "dates": "Sorties à la journée depuis Tokyo",
+        "intro": "Kamakura, Nikko, Yokohama, Takao & Mitake — quoi voir une fois sur place, pas juste comment y aller.",
+        "cats_used": ["kamakura", "nikko", "yokohama", "takao"],
+        "pois": [
+            poi("🗿","Kotoku-in — Grand Bouddha","kamakura","Statue de bronze en plein air de 13m, datant du XIIIe siècle — le symbole de Kamakura, ancienne capitale du shogunat.", "Accès : Enoden jusqu'à Hase Station, puis 7 min à pied"),
+            poi("🌸","Hase-dera","kamakura","Temple avec jardins en terrasses et vue sur l'océan, abrite l'une des plus grandes statues en bois du Japon (Kannon à 11 visages, 9,18m).", "5 min à pied de Hase Station, juste à côté du Grand Bouddha"),
+            poi("⛩️","Tsurugaoka Hachimangu","kamakura","Le sanctuaire shinto le plus important de la ville, dédié au dieu tutélaire des samouraïs — grande allée d'approche (Dankazura) et étangs Genpei.", "Sortie est de la gare de Kamakura, à pied"),
+            poi("🎋","Hokoku-ji (temple du bambou)","kamakura","Petite bambouseraie paisible avec salon de thé, beaucoup moins fréquentée que les grands sites — bonne pause calme dans la journée.", "Un peu excentré, ~20 min à pied ou bus depuis la gare"),
+            poi("🛍️","Komachi-dori","kamakura","Rue commerçante animée entre la gare et le sanctuaire Hachimangu — snacks locaux (shirasu-don, sucreries), artisanat, bonne option déjeuner.", "Juste à côté de la gare de Kamakura"),
+            poi("🏖️","Plage de Yuigahama & train Enoden","kamakura","Le petit train côtier Enoden longe la mer entre les sites — descendre à Yuigahama pour une marche sur la plage, jolie lumière en fin d'après-midi.", "Bon moyen de relier les sites entre eux plutôt qu'à pied"),
+
+            poi("⛩️","Tōshō-gū","nikko","Patrimoine mondial UNESCO, mausolée du shogun Tokugawa Ieyasu — plus de 500 sculptures ornant le portail Yōmeimon, célèbres \"trois singes de la sagesse\" et \"chat endormi\".", "~25 min à pied ou bus depuis la gare de Tobu-Nikkō"),
+            poi("🌉","Pont Shinkyo","nikko","Pont laqué rouge vif enjambant la rivière Daiya, symbole de Nikko — vue gratuite depuis le trottoir, ou traversée payante.", "Sur le chemin entre la gare et Tōshō-gū"),
+            poi("💦","Chutes de Kegon","nikko","L'une des trois plus belles cascades du Japon (97m de haut), ascenseur payant jusqu'à la plateforme d'observation en contrebas.", "Bus depuis la gare via la route Irohazaka (48 virages), ~50 min"),
+            poi("🚡","Lac Chūzenji & téléphérique Akechidaira","nikko","Le plus haut lac naturel du Japon, à 10 min à pied des chutes de Kegon. Le téléphérique Akechidaira (3 min) monte à 1373m pour une vue d'ensemble sur le lac et la cascade.", "Juste à côté des chutes de Kegon"),
+            poi("🥾","Route Irohazaka","nikko","Route de montagne à 48 virages en épingle reliant Nikko-ville au lac Chūzenji, spectaculaire même simplement traversée en bus.", "Empruntée par le bus vers le lac Chūzenji/chutes de Kegon"),
+
+            poi("🌉","Minato Mirai","yokohama","Quartier futuriste en bord de mer, grande roue Cosmo Clock 21, gratte-ciel Landmark Tower, joli en soirée avec les lumières.", "Terminus de la Tokyu Toyoko Line depuis Shibuya"),
+            poi("🏮","Chinatown (Motomachi-Chukagai)","yokohama","Le plus grand quartier chinois du Japon, dizaines de restaurants et échoppes de street food, porte d'entrée colorée.", "Continuité de la Minato Mirai Line depuis Shibuya, sans changement"),
+            poi("🐴","Equine Museum of Japan","yokohama","Petit musée avec chevaux de course retraités et poneys, balades gratuites le dimanche après-midi — un clin d'œil sympa pour les fans d'Uma Musume.", "Quartier de Negishi"),
+
+            poi("🥾","Mont Takao","takao","La randonnée la plus populaire et accessible depuis Tokyo — plusieurs sentiers de difficulté variable, singes, temple Yakuō-in, vue sur le Fuji par temps clair. Un funiculaire permet de raccourcir la montée.", "Keio Line express jusqu'à Takaosanguchi, ~50 min depuis Shinjuku"),
+            poi("⛰️","Mont Mitake","takao","Moins fréquenté que Takao, sanctuaire Musashi-Mitake en haut, \"jardin de rochers\" (gorge étroite), forêts anciennes — téléphérique jusqu'à 30 min du sommet.", "JR Chuo Line + bus depuis la gare de Mitake, ~2h depuis Shinjuku"),
+
+            poi("🥾","Daibutsu Hiking Course","kamakura","Sentier de 3km reliant la gare de Kita-Kamakura au Grand Bouddha via le temple Jōchi-ji, environ 1h30 — bon moyen de voir Kamakura autrement que par les rues commerçantes.", "Départ juste après la gare de Kita-Kamakura"),
         ],
     },
 }
