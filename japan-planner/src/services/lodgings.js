@@ -64,16 +64,21 @@ const LODGINGS = {
     ]
   };
   
-  export function getLodgingForDate(cityKey, date) {
-    const entries = LODGINGS[cityKey];
-    if (!entries) return null;
-    const match = entries.find(e => date >= e.start && date <= e.end);
-    return match ? match.location : (entries[0]?.location || null);
-  }
-  
-  export function getLodgingLabel(cityKey, date) {
-    const entries = LODGINGS[cityKey];
-    if (!entries) return null;
-    const match = entries.find(e => date >= e.start && date <= e.end);
-    return match ? match.label : (entries[0]?.label || null);
-  }
+// Les excursions (Kamakura, Nikko, Yokohama, Takao) sont des sorties à la
+// journée depuis Tokyo — elles n'ont pas de logement propre, donc on réutilise
+// le logement de Tokyo actif à la date donnée comme point de départ.
+const CITY_ALIASES = { excursions: "tokyo" };
+
+export function getLodgingForDate(cityKey, date) {
+  const entries = LODGINGS[CITY_ALIASES[cityKey] || cityKey];
+  if (!entries) return null;
+  const match = entries.find(e => date >= e.start && date <= e.end);
+  return match ? match.location : (entries[0]?.location || null);
+}
+
+export function getLodgingLabel(cityKey, date) {
+  const entries = LODGINGS[CITY_ALIASES[cityKey] || cityKey];
+  if (!entries) return null;
+  const match = entries.find(e => date >= e.start && date <= e.end);
+  return match ? match.label : (entries[0]?.label || null);
+}

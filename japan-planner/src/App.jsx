@@ -168,7 +168,8 @@ export default function App() {
     ["kyoto", "Kyoto", "23–26 fév."],
     ["kanazawa", "Kanazawa", "26–28 fév."],
     ["tokyo", "Tokyo", "26 fév.–10 mars"],
-    ["fuji", "Fuji Five Lakes", "28 fév.–2 mars"]
+    ["fuji", "Fuji Five Lakes", "28 fév.–2 mars"],
+    ["excursions", "Excursions", "26 fév.–10 mars"]
   ];
   const cityName = cities.find(c => c[0] === city)?.[1];
 

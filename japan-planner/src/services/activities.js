@@ -8,7 +8,8 @@ const CITIES = [
   { key: "kyoto", name: "Kyoto", start: "2027-02-23", end: "2027-02-26" },
   { key: "kanazawa", name: "Kanazawa", start: "2027-02-26", end: "2027-02-28" },
   { key: "tokyo", name: "Tokyo", start: "2027-02-26", end: "2027-03-10" },
-  { key: "fuji", name: "Fuji Five Lakes", start: "2027-02-28", end: "2027-03-02" }
+  { key: "fuji", name: "Fuji Five Lakes", start: "2027-02-28", end: "2027-03-02" },
+  { key: "excursions", name: "Excursions (Kamakura/Nikko/Yokohama/Takao)", start: "2027-02-26", end: "2027-03-10" }
 ];
 
 export function cityForKey(key) {
