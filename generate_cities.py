@@ -52,7 +52,7 @@ CITIES = {
             poi("🧱","Legoland Discovery Center Osaka","loisirs","Attraction indoor pour tous âges, zones de jeu, mini-Osaka en Lego, montagne russe douce, plutôt pour une pause de 2h que pour la journée.", "Centre commercial LaLaport Osaka Expocity, Suita", "https://www.legolanddiscoverycenter.com/osaka/en/"),
             poi("🍜","Cup Noodles Museum Osaka Ikeda","loisirs","Musée dédié à l'invention des nouilles instantanées par Momofuku Ando, atelier pour créer son propre pot de nouilles personnalisé.", "Ikeda, ~30 min du centre — réservation atelier conseillée", "https://www.cupnoodles-museum.jp/en/osaka_ikeda/"),
             poi("🍶","Soemoncho (bar-hopping)","nightlife","Juste sous Dotonbori — izakaya, bars à karaoké et clubs serrés sur quelques rues, réputé accueillant pour les visiteurs étrangers.", "5 min à pied du logement"),
-            poi("🎤","Karaoke Dotonbori","nightlife","Chaînes de karaoké ouvertes tard (Big Echo, Karaoke Kan) avec vue sur le canal pour certaines salles — format classique par petite pièce privative, pas de scène.", "Plusieurs enseignes autour de Dotonbori/Namba", "https://www.bigecho.jp/shop/search/?pref=27", "Trouver une salle (Big Echo) ↗"),
+            poi("🎤","Karaoke Dotonbori","nightlife","Chaînes de karaoké ouvertes tard (Big Echo, Karaoke Kan) avec vue sur le canal pour certaines salles — format classique par petite pièce privative, pas de scène.", "Plusieurs enseignes autour de Dotonbori/Namba", "https://big-echo.jp/en/shop_search/shop_search_list/?pref=27&mapflg=true", "Trouver une salle (Big Echo) ↗"),
             poi("🕺","Amerikamura by night","nightlife","Le quartier bascule en clubs indie/hip-hop/électro après la tombée de la nuit, ambiance plus underground que Namba.", "Proche Shinsaibashi"),
             poi("🤖","Joshin Super Kids Land","commerces","5 étages entièrement dédiés au hobby : Gundam/Gunpla à perte de vue au rez-de-chaussée, modèles réduits de trains/voitures/motos, maisons de poupées. Détaxe disponible sur présentation du passeport.", "Nipponbashi, Den Den Town", "https://osaka-info.jp/fr/spot/popculture-joshin/"),
             poi("👩‍🍳","Maid café Den Den Town","otaku","Osaka a sa propre scène de maid cafés, plus expérimentale et moins formatée qu'à Akihabara — certains avec du personnel parlant le dialecte du Kansai. Maidreamin est la valeur sûre pour une première fois.", "Nipponbashi, Den Den Town", "https://global.maidreamin.com/", "Site officiel Maidreamin ↗"),
@@ -75,7 +75,7 @@ CITIES = {
             poi("🌸","Isui-en Garden","touristique","Jardin japonais traditionnel avec vue sur le Tōdai-ji en arrière-plan (technique du \"paysage emprunté\"), plus calme que le parc principal.", "Juste à côté du Tōdai-ji"),
             poi("🍡","Kudzu mochi & kakinoha zushi","gastronomie","Spécialités locales : gâteau de riz à base de racine de kudzu, et sushi enveloppé de feuille de plaqueminier (kaki) — typiques de la cuisine d'ancienne capitale.", "À goûter à Naramachi"),
             poi("🍵","Atelier wagashi & thé matcha","gastronomie","Ateliers proposés dans des boutiques historiques de Naramachi pour apprendre à confectionner des wagashi (douceurs traditionnelles) et les déguster avec du matcha.", "Réservation conseillée sur place ou en ligne"),
-            poi("🎤","Karaoke à Nara","nightlife","Moins de choix qu'à Tokyo/Osaka mais quelques box karaoké autour de la gare JR Nara/Kintetsu-Nara pour finir la soirée avant de reprendre la route.", "Quartier de la gare", "https://www.bigecho.jp/shop/search/?pref=29", "Trouver une salle (Big Echo) ↗"),
+            poi("🎤","Karaoke à Nara","nightlife","Moins de choix qu'à Tokyo/Osaka mais quelques box karaoké autour de la gare JR Nara/Kintetsu-Nara pour finir la soirée avant de reprendre la route.", "Quartier de la gare", "https://big-echo.jp/en/shop_search/shop_search_list/?pref=29&mapflg=true", "Trouver une salle (Big Echo) ↗"),
         ],
     },
     "kyoto": {
@@ -99,7 +99,7 @@ CITIES = {
             poi("🥾","Fushimi Inari jusqu'au sommet","randonnee","Au-delà du point de vue habituel de Yotsutsuji, la foule se dissipe et le sentier continue à travers la forêt jusqu'au sommet du mont Inari — environ 2h30-3h aller-retour complet.", "Départ depuis le sanctuaire, même accès que la visite classique"),
             poi("🍁","Higashiyama & Mont Daimonji","randonnee","Depuis le Pavillon d'argent (Ginkaku-ji) et le Chemin du philosophe, montée courte mais soutenue (~1h) jusqu'au point de vue de Daimonji pour une vue d'ensemble sur Kyoto.", "Bus Raku 100 depuis la gare de Kyoto jusqu'à Ginkaku-ji"),
             poi("🍶","Pontocho & Kiyamachi","nightlife","Ruelle étroite en maisons machiya le long de la rivière Kamo (Pontocho, plus haut de gamme) et rue parallèle plus jeune et animée (Kiyamachi) — bars, izakaya, quelques terrasses sur l'eau.", "Entre Gion et le centre-ville, Kyoto ferme plus tôt que Tokyo/Osaka (23h-minuit)"),
-            poi("🎤","Karaoke Kyoto","nightlife","Chaînes Big Echo/Karaoke Kan présentes autour de la gare et de Kawaramachi — bon point de chute après une soirée à Pontocho/Kiyamachi.", "Quartier de Kawaramachi ou de la gare", "https://www.bigecho.jp/shop/search/?pref=26", "Trouver une salle (Big Echo) ↗"),
+            poi("🎤","Karaoke Kyoto","nightlife","Chaînes Big Echo/Karaoke Kan présentes autour de la gare et de Kawaramachi — bon point de chute après une soirée à Pontocho/Kiyamachi.", "Quartier de Kawaramachi ou de la gare", "https://big-echo.jp/en/shop_search/shop_search_list/?pref=26&mapflg=true", "Trouver une salle (Big Echo) ↗"),
         ],
     },
     "kanazawa": {
@@ -120,7 +120,7 @@ CITIES = {
             poi("🛍️","Kōrinbō & Tatemachi","commerces","Quartier commerçant central, grands magasins et rues piétonnes plus locales, bon complément après la journée culturelle.", "Centre-ville de Kanazawa"),
             poi("🏔️","Shirakawa-go (excursion à la journée)","touristique","Village classé UNESCO aux fermes traditionnelles au toit de chaume pentu (style gassho-zukuri), superbe même sous la neige. Faisable en bus direct depuis Kanazawa.", "~1h15 en bus depuis Kanazawa, réservation du bus conseillée en hiver"),
             poi("🍶","Katamachi (bar-hopping)","nightlife","Le quartier des bars de Kanazawa — ruelles denses en izakaya et petits bars à saké, prix environ 30% sous Tokyo, ambiance beaucoup plus locale que touristique.", "Centre-ville, proche Korinbo"),
-            poi("🎤","Karaoke Kanazawa","nightlife","Quelques box karaoké dans le quartier de Katamachi/Korinbo, pratique pour prolonger la soirée après les bars.", "Centre-ville de Kanazawa", "https://www.bigecho.jp/shop/search/?pref=17", "Trouver une salle (Big Echo) ↗"),
+            poi("🎤","Karaoke Kanazawa","nightlife","Quelques box karaoké dans le quartier de Katamachi/Korinbo, pratique pour prolonger la soirée après les bars.", "Centre-ville de Kanazawa", "https://big-echo.jp/en/shop_search/shop_search_list/?pref=17&mapflg=true", "Trouver une salle (Big Echo) ↗"),
         ],
     },
     "tokyo": {

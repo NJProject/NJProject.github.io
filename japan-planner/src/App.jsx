@@ -32,7 +32,20 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
-  const admin = new URLSearchParams(location.search).get("admin") === "1";
+  const admin = useMemo(() => {
+    const ADMIN_PASSWORD = "japon2027"; // garde la même valeur que custom-pois.js
+    const ADMIN_SESSION_KEY = "adminUnlocked";
+
+    if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "1") return true;
+    if (new URLSearchParams(location.search).get("admin") !== "1") return false;
+
+    const entered = prompt("Mot de passe admin :");
+    if (entered === ADMIN_PASSWORD) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+      return true;
+    }
+    return false;
+  }, []);
 
   const resultsRef = useRef(null);
 

@@ -1,7 +1,7 @@
 // votes.js
 import { db } from "./firebase-config.js";
 import {
-  doc, onSnapshot, updateDoc, setDoc, deleteField
+  doc, onSnapshot, updateDoc, setDoc, deleteField, collection, getDocs
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const NAME_KEY = "voterName";
@@ -28,6 +28,21 @@ function setVoterName(name) {
 }
 
 // ---------- Modale de saisie du prénom ----------
+async function fetchKnownVoterNames() {
+  try {
+    const snap = await getDocs(collection(db, "votes"));
+    const names = new Set();
+    snap.forEach(docSnap => {
+      const voters = docSnap.data().voters || {};
+      Object.keys(voters).forEach(n => names.add(n));
+    });
+    return [...names].sort((a, b) => a.localeCompare(b));
+  } catch (e) {
+    console.error("Impossible de récupérer les prénoms existants :", e);
+    return [];
+  }
+}
+
 function buildNameModal() {
   const overlay = document.createElement("div");
   overlay.className = "name-modal-overlay";
@@ -37,6 +52,10 @@ function buildNameModal() {
       <div class="name-modal-seal">印</div>
       <h3 id="nameModalTitle">Ton prénom</h3>
       <p class="name-modal-sub">Affiché à côté de tes votes, pour que le groupe sache qui a voté quoi.</p>
+      <select id="nameModalSelect">
+        <option value="">— Choisir un prénom déjà utilisé —</option>
+      </select>
+      <p class="name-modal-or">ou saisis un nouveau prénom :</p>
       <input type="text" id="nameModalInput" maxlength="24" placeholder="Ex. Nicolas" autocomplete="off">
       <div class="name-modal-actions">
         <button type="button" class="name-modal-cancel">Annuler</button>
@@ -46,10 +65,15 @@ function buildNameModal() {
   `;
   document.body.appendChild(overlay);
 
+  const select = overlay.querySelector("#nameModalSelect");
   const input = overlay.querySelector("#nameModalInput");
   const saveBtn = overlay.querySelector(".name-modal-save");
   const cancelBtn = overlay.querySelector(".name-modal-cancel");
   let resolveFn = null;
+
+  select.addEventListener("change", () => {
+    if (select.value) input.value = select.value;
+  });
 
   function onKeydown(e) {
     if (e.key === "Escape") close(null);
@@ -66,8 +90,14 @@ function buildNameModal() {
   saveBtn.addEventListener("click", () => close(input.value.trim()));
   cancelBtn.addEventListener("click", () => close(null));
 
-  return function open(currentValue) {
+  return async function open(currentValue) {
     input.value = currentValue || "";
+    select.value = "";
+
+    const names = await fetchKnownVoterNames();
+    select.innerHTML = '<option value="">— Choisir un prénom déjà utilisé —</option>'
+      + names.map(n => `<option value="${n}">${n}</option>`).join("");
+
     overlay.hidden = false;
     document.addEventListener("keydown", onKeydown);
     setTimeout(() => input.focus(), 50);

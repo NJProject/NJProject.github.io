@@ -48,8 +48,19 @@ function getCats(cityKey) {
   return isExcursions(cityKey) ? CATS_BY_DESTINATION : CATS_BY_TYPE;
 }
 
+const ADMIN_PASSWORD = "japon2027"; // change cette valeur si tu veux un autre mot de passe
+const ADMIN_SESSION_KEY = "adminUnlocked";
+
 function isAdmin() {
-  return new URLSearchParams(location.search).get("admin") === "1";
+  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "1") return true;
+  if (new URLSearchParams(location.search).get("admin") !== "1") return false;
+
+  const entered = prompt("Mot de passe admin :");
+  if (entered === ADMIN_PASSWORD) {
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+    return true;
+  }
+  return false;
 }
 
 function getVoterName() {
