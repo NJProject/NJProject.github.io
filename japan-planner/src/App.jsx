@@ -3,7 +3,7 @@ import { loadActivities, cityForKey, datesInRange } from "./services/activities"
 import { loadVotes, allVoters } from "./services/votes";
 import { loadPlannerMetadata } from "./services/plannerData";
 import { generatePlansForDateRange, generateMultiDayPlan } from "./algorithm/planner";
-import { validateConstraints } from "./algorithm/validateConstraints";
+import { validateConstraints, summarizeConstraints } from "./algorithm/validateConstraints";
 import { getLodgingLabel } from "./services/lodgings";
 import { downloadMultiDayPlanAsPdf } from "./utils/exportPlan";
 import PlanCard from "./components/PlanCard";
@@ -85,6 +85,7 @@ export default function App() {
   const dateConstraint = constraints.find(c => c.type === "date");
   const multiDayConstraint = constraints.find(c => c.type === "multiDay");
   const constraintIssues = useMemo(() => validateConstraints(constraints), [constraints]);
+  const constraintSummary = useMemo(() => summarizeConstraints(constraints, cityActivities), [constraints, cityActivities]);
 
   function changeCity(key) {
     setCity(key);
@@ -321,6 +322,15 @@ export default function App() {
                   <button onClick={() => removeConstraint(c.id)}>×</button>
                 </div>
               ))}
+
+{constraintSummary.length > 0 && (
+                <div className="constraint-summary">
+                  <strong>Contraintes actives :</strong>
+                  <ul>
+                    {constraintSummary.map((line, i) => <li key={i}>{line}</li>)}
+                  </ul>
+                </div>
+              )}
 
 {constraintIssues.errors.length > 0 && (
                 <div className="constraint-issues constraint-errors">

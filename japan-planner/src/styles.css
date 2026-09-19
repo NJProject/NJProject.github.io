@@ -177,6 +177,18 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
   color:#9a7015;
   border:1px solid #f0d99a;
 }
+
+.constraint-summary{
+  margin-top:14px;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:.82rem;
+  background:#f3f0e8;
+  border:1px dashed #cfc8ba;
+}
+.constraint-summary strong{display:block;margin-bottom:4px;color:#253c63;}
+.constraint-summary ul{margin:0;padding-left:18px;}
+.constraint-summary li{margin:2px 0;}
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}

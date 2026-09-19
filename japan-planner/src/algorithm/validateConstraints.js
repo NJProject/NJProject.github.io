@@ -44,3 +44,46 @@ export function validateConstraints(constraints) {
   
     return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
   }
+
+  function formatDateFr(iso) {
+    return new Date(`${iso}T00:00:00`).toLocaleDateString("fr-FR", {
+      weekday: "short", day: "numeric", month: "long"
+    });
+  }
+  
+  export function summarizeConstraints(constraints, activities) {
+    const lines = [];
+  
+    const dateC = constraints.find(c => c.type === "date" && c.date);
+    if (dateC) lines.push(`📅 Jour fixé : ${formatDateFr(dateC.date)}`);
+  
+    const multiDayC = constraints.find(c => c.type === "multiDay" && c.dates?.length);
+    if (multiDayC) lines.push(`📆 Programme sur ${multiDayC.dates.length} jour(s) enchaînés`);
+  
+    constraints.filter(c => c.type === "required" && c.activityId).forEach(c => {
+      const activity = activities.find(a => a.id === c.activityId);
+      if (activity) lines.push(`✅ Obligatoire : ${activity.title}`);
+    });
+  
+    constraints.filter(c => c.type === "excluded" && c.activityId).forEach(c => {
+      const activity = activities.find(a => a.id === c.activityId);
+      if (activity) lines.push(`🚫 Exclue : ${activity.title}`);
+    });
+  
+    const timeWindow = constraints.find(c => c.type === "timeWindow" && (c.after || c.before));
+    if (timeWindow) {
+      const parts = [];
+      if (timeWindow.after) parts.push(`après ${timeWindow.after}`);
+      if (timeWindow.before) parts.push(`avant ${timeWindow.before}`);
+      lines.push(`🕐 Créneau horaire : ${parts.join(", ")}`);
+    }
+  
+    const freeTime = constraints.find(c => c.type === "freeTime" && c.from && c.to);
+    if (freeTime) lines.push(`☕ Temps libre bloqué : ${freeTime.from}–${freeTime.to}`);
+  
+    if (constraints.some(c => c.type === "keepTogether")) {
+      lines.push(`👥 Le groupe reste ensemble (pas de séparation proposée)`);
+    }
+  
+    return lines;
+  }
