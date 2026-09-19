@@ -96,6 +96,7 @@ export default function AdminPanel({ activities, metadata, onSaved }) {
             <option value="kanazawa">Kanazawa</option>
             <option value="tokyo">Tokyo</option>
             <option value="fuji">Fuji Five Lakes</option>
+            <option value="excursions">Excursions</option>
           </select>
           <button onClick={generateSkeleton}>Générer le squelette</button>
         </div>

@@ -160,6 +160,23 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 
 .lodging-note{font-size:.8rem;color:#6f6a61;margin:2px 0 10px;}
 
+.constraint-issues{
+  margin-top:14px;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:.82rem;
+}
+.constraint-issues p{margin:3px 0;}
+.constraint-errors{
+  background:#fbeae7;
+  color:#b23a2e;
+  border:1px solid #e2b0a7;
+}
+.constraint-warnings{
+  background:#fdf3d9;
+  color:#9a7015;
+  border:1px solid #f0d99a;
+}
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}

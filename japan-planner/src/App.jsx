@@ -3,6 +3,7 @@ import { loadActivities, cityForKey, datesInRange } from "./services/activities"
 import { loadVotes, allVoters } from "./services/votes";
 import { loadPlannerMetadata } from "./services/plannerData";
 import { generatePlansForDateRange, generateMultiDayPlan } from "./algorithm/planner";
+import { validateConstraints } from "./algorithm/validateConstraints";
 import { getLodgingLabel } from "./services/lodgings";
 import { downloadMultiDayPlanAsPdf } from "./utils/exportPlan";
 import PlanCard from "./components/PlanCard";
@@ -83,6 +84,7 @@ export default function App() {
   const people = useMemo(() => allVoters(votes), [votes]);
   const dateConstraint = constraints.find(c => c.type === "date");
   const multiDayConstraint = constraints.find(c => c.type === "multiDay");
+  const constraintIssues = useMemo(() => validateConstraints(constraints), [constraints]);
 
   function changeCity(key) {
     setCity(key);
@@ -320,7 +322,18 @@ export default function App() {
                 </div>
               ))}
 
-              <button className="generate" onClick={generate} disabled={generating}>
+{constraintIssues.errors.length > 0 && (
+                <div className="constraint-issues constraint-errors">
+                  {constraintIssues.errors.map((msg, i) => <p key={i}>⚠️ {msg}</p>)}
+                </div>
+              )}
+              {constraintIssues.warnings.length > 0 && (
+                <div className="constraint-issues constraint-warnings">
+                  {constraintIssues.warnings.map((msg, i) => <p key={i}>ℹ️ {msg}</p>)}
+                </div>
+              )}
+
+              <button className="generate" onClick={generate} disabled={generating || constraintIssues.errors.length > 0}>
                 {generating ? "Calcul des parcours…" : "✨ Générer les parcours"}
               </button>
             </section>
