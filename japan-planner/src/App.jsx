@@ -240,6 +240,7 @@ export default function App() {
                     <option value="excluded">Activité exclue</option>
                     <option value="timeWindow">Créneau horaire</option>
                     <option value="freeTime">Bloquer un créneau (temps libre)</option>
+                    <option value="flexible">Durée libre (parc, balade…)</option>
                     <option value="keepTogether">Rester groupé</option>
                   </select>
 
@@ -282,6 +283,34 @@ export default function App() {
                       <option value="">Choisir une activité</option>
                       {cityActivities.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
                     </select>
+                  )}
+
+                  {c.type === "flexible" && (
+                    <div className="flexible-picker">
+                      <select
+                        value={c.activityId || ""}
+                        onChange={e => updateConstraint(c.id, { activityId: e.target.value })}
+                      >
+                        <option value="">Choisir une activité</option>
+                        {cityActivities.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
+                      </select>
+                      <div className="time-inputs">
+                        <input
+                          type="number"
+                          min="10"
+                          placeholder="Min (30)"
+                          value={c.min || ""}
+                          onChange={e => updateConstraint(c.id, { min: e.target.value })}
+                        />
+                        <input
+                          type="number"
+                          min="10"
+                          placeholder="Max (180)"
+                          value={c.max || ""}
+                          onChange={e => updateConstraint(c.id, { max: e.target.value })}
+                        />
+                      </div>
+                    </div>
                   )}
 
                   {c.type === "timeWindow" && (

@@ -56,7 +56,7 @@ export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel,
                   <div className="time">{fmt(item.start)} – {fmt(item.end)}</div>
                   <div className="activity">
                     <strong>{item.activity.title}</strong>
-                    <span>{item.activity.cityName} · {item.travelBeforeMin} min de trajet avant</span>
+                    <span>{item.activity.cityName} · {item.travelBeforeMin} min de trajet avant{item.flexible ? " · durée ajustée automatiquement" : ""}</span>
                     {item.travelEstimated && <small>Trajet estimé — coordonnées/API à compléter</small>}
                   </div>
                 </li>

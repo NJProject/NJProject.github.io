@@ -40,6 +40,12 @@ export function validateConstraints(constraints) {
       if ((c.type === "required" || c.type === "excluded") && !c.activityId) {
         warnings.push(`Une contrainte "${c.type === "required" ? "Activité obligatoire" : "Activité exclue"}" est ajoutée mais aucune activité n'est choisie — elle sera ignorée.`);
       }
+      if (c.type === "flexible" && !c.activityId) {
+        warnings.push("Une contrainte \"Durée libre\" est ajoutée mais aucune activité n'est choisie — elle sera ignorée.");
+      }
+      if (c.type === "flexible" && c.min && c.max && Number(c.min) >= Number(c.max)) {
+        errors.push("Une contrainte \"Durée libre\" a un minimum supérieur ou égal au maximum — corrige les valeurs.");
+      }
     });
   
     return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
@@ -80,6 +86,11 @@ export function validateConstraints(constraints) {
   
     const freeTime = constraints.find(c => c.type === "freeTime" && c.from && c.to);
     if (freeTime) lines.push(`☕ Temps libre bloqué : ${freeTime.from}–${freeTime.to}`);
+  
+    constraints.filter(c => c.type === "flexible" && c.activityId).forEach(c => {
+      const activity = activities.find(a => a.id === c.activityId);
+      if (activity) lines.push(`🌿 Durée libre : ${activity.title} (${c.min || 30}–${c.max || 180} min)`);
+    });
   
     if (constraints.some(c => c.type === "keepTogether")) {
       lines.push(`👥 Le groupe reste ensemble (pas de séparation proposée)`);

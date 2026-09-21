@@ -83,7 +83,7 @@ function normalizeGrouping(groups) {
   return groups.map(g => [...g].sort().join(",")).sort().join("|");
 }
 
-async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null, freeWindow = null } = {}) {
+async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null, freeWindow = null, flexibleMap = new Map() } = {}) {
   const remaining = [...pool];
   const ordered = [];
   let current = startLocation ? { location: startLocation } : null;
@@ -95,6 +95,7 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
     let bestScore = -Infinity;
     let bestRoute = null;
     let bestStart = null;
+    let bestDuration = null;
 
     for (const candidate of remaining) {
       const route = current?.location && candidate.location
@@ -105,11 +106,23 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
 
       const [open, close] = openingWindow(candidate, timeBounds);
       const dayEnd = timeBounds?.before ?? DEFAULT_DAY_END;
+      const effectiveClose = Math.min(close, dayEnd);
       const arrival = cursor + route.durationMin;
-      const duration = candidate.durationMin || getDefaultDuration(candidate.category);
-      const start = applyFreeWindow(Math.max(arrival, open), duration, freeWindow);
 
-      if (start + duration > Math.min(close, dayEnd)) continue; // ne rentre pas dans la journée
+      const flex = flexibleMap.get(candidate.id);
+      const fixedDuration = candidate.durationMin || getDefaultDuration(candidate.category);
+      const provisionalDuration = flex ? (flex.min ?? 30) : fixedDuration;
+      const start = applyFreeWindow(Math.max(arrival, open), provisionalDuration, freeWindow);
+
+      let duration = provisionalDuration;
+      if (flex) {
+        const available = effectiveClose - start;
+        const min = flex.min ?? 30;
+        const max = flex.max ?? Math.max(min, fixedDuration);
+        duration = Math.max(min, Math.min(max, available));
+      }
+
+      if (start + duration > effectiveClose) continue; // ne rentre pas dans la journée, même en durée minimale
 
       const isRequired = requiredIds.includes(candidate.id);
       const voteValue = groupVoteScore(candidate, group) * 25;
@@ -124,22 +137,23 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
         best = candidate;
         bestRoute = route;
         bestStart = start;
+        bestDuration = duration;
       }
     }
 
     if (!best) break; // plus rien ne rentre dans le temps restant
 
-    const duration = best.durationMin || getDefaultDuration(best.category);
     ordered.push({
       activity: best,
       start: bestStart,
-      end: bestStart + duration,
+      end: bestStart + bestDuration,
       travelBeforeMin: bestRoute.durationMin,
-      travelEstimated: bestRoute.estimated
+      travelEstimated: bestRoute.estimated,
+      flexible: flexibleMap.has(best.id)
     });
 
     totalTravel += bestRoute.durationMin;
-    cursor = bestStart + duration;
+    cursor = bestStart + bestDuration;
     current = best;
     remaining.splice(remaining.indexOf(best), 1);
   }
@@ -181,6 +195,17 @@ function getFreeWindow(constraints) {
   return { from: minutesFromHHMM(c.from), to: minutesFromHHMM(c.to) };
 }
 
+function getFlexibleMap(constraints) {
+  const map = new Map();
+  constraints.filter(c => c.type === "flexible" && c.activityId).forEach(c => {
+    map.set(c.activityId, {
+      min: c.min ? Number(c.min) : 30,
+      max: c.max ? Number(c.max) : 180
+    });
+  });
+  return map;
+}
+
 export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set(), city = null, preferredGrouping = null }) {
   const excluded = new Set([
     ...constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId),
@@ -189,6 +214,7 @@ export async function generatePlans({ activities, people, date, constraints = []
   const requiredIds = constraints.filter(c => c.type === "required" && c.activityId).map(c => c.activityId);
   const timeBounds = getTimeBounds(constraints);
   const freeWindow = getFreeWindow(constraints);
+  const flexibleMap = getFlexibleMap(constraints);
 
   const relevant = activities
     .filter(a => compatibleWithDate(a, date))
@@ -218,7 +244,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       });
 
       const startLocation = city ? getLodgingForDate(city, date) : null;
-      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation, freeWindow });
+      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation, freeWindow, flexibleMap });
       const satisfactionScore = result.ordered.length
         ? result.ordered.reduce((sum, item) => sum + satisfaction(item.activity, group), 0) / result.ordered.length
         : 0;

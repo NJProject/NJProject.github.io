@@ -189,6 +189,9 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 .constraint-summary strong{display:block;margin-bottom:4px;color:#253c63;}
 .constraint-summary ul{margin:0;padding-left:18px;}
 .constraint-summary li{margin:2px 0;}
+
+.flexible-picker{flex:1;display:flex;flex-direction:column;gap:6px;}
+.flexible-picker select{width:100%;}
 @media(max-width:700px){
   main{width:min(100% - 20px,1100px);margin-top:14px}
   .hero{padding:24px 16px}
