@@ -9,6 +9,45 @@ import { downloadMultiDayPlanAsPdf } from "./utils/exportPlan";
 import PlanCard from "./components/PlanCard";
 import AdminPanel from "./components/AdminPanel";
 
+function MultiActivityPicker({ activities, selectedIds, onChange }) {
+  const [open, setOpen] = useState(false);
+
+  function toggle(id) {
+    const set = new Set(selectedIds);
+    if (set.has(id)) set.delete(id); else set.add(id);
+    onChange([...set]);
+  }
+
+  const selectedTitles = activities
+    .filter(a => selectedIds.includes(a.id))
+    .map(a => a.title);
+
+  return (
+    <div className="multi-activity-picker">
+      <button type="button" className="multi-activity-toggle" onClick={() => setOpen(!open)}>
+        {selectedIds.length === 0
+          ? "Choisir une ou plusieurs activités"
+          : `${selectedIds.length} activité(s) : ${selectedTitles.join(", ")}`}
+        <span>{open ? "▴" : "▾"}</span>
+      </button>
+      {open && (
+        <div className="multi-activity-list">
+          {activities.map(a => (
+            <label key={a.id} className="multi-activity-item">
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(a.id)}
+                onChange={() => toggle(a.id)}
+              />
+              {a.title}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function formatDateFr(iso) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("fr-FR", {
     weekday: "short", day: "numeric", month: "long"
@@ -277,13 +316,11 @@ export default function App() {
                   )}
 
                   {(c.type === "required" || c.type === "excluded") && (
-                    <select
-                      value={c.activityId || ""}
-                      onChange={e => updateConstraint(c.id, { activityId: e.target.value })}
-                    >
-                      <option value="">Choisir une activité</option>
-                      {cityActivities.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
-                    </select>
+                    <MultiActivityPicker
+                      activities={cityActivities}
+                      selectedIds={c.activityIds || (c.activityId ? [c.activityId] : [])}
+                      onChange={ids => updateConstraint(c.id, { activityIds: ids, activityId: undefined })}
+                    />
                   )}
 
                   {c.type === "flexible" && (

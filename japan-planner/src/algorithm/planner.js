@@ -223,10 +223,10 @@ function getFlexibleMap(constraints) {
 
 export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set(), city = null, preferredGrouping = null }) {
   const excluded = new Set([
-    ...constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId),
+    ...constraints.filter(c => c.type === "excluded").flatMap(c => c.activityIds || (c.activityId ? [c.activityId] : [])),
     ...extraExcludedIds
   ]);
-  const requiredIds = constraints.filter(c => c.type === "required" && c.activityId).map(c => c.activityId);
+  const requiredIds = constraints.filter(c => c.type === "required").flatMap(c => c.activityIds || (c.activityId ? [c.activityId] : []));
   const timeBounds = getTimeBounds(constraints);
   const freeWindow = getFreeWindow(constraints);
   const flexibleMap = getFlexibleMap(constraints);

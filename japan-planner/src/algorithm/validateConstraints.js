@@ -8,8 +8,8 @@ export function validateConstraints(constraints) {
       errors.push("Un jour précis et une planification multi-jours sont actifs en même temps — la première sera ignorée. Retire l'une des deux contraintes.");
     }
   
-    const requiredIds = new Set(constraints.filter(c => c.type === "required" && c.activityId).map(c => c.activityId));
-    const excludedIds = new Set(constraints.filter(c => c.type === "excluded" && c.activityId).map(c => c.activityId));
+    const requiredIds = new Set(constraints.filter(c => c.type === "required").flatMap(c => c.activityIds || (c.activityId ? [c.activityId] : [])));
+    const excludedIds = new Set(constraints.filter(c => c.type === "excluded").flatMap(c => c.activityIds || (c.activityId ? [c.activityId] : [])));
     for (const id of requiredIds) {
       if (excludedIds.has(id)) {
         errors.push("Une activité est à la fois marquée \"obligatoire\" et \"exclue\" — retire l'une des deux contraintes.");
@@ -37,7 +37,7 @@ export function validateConstraints(constraints) {
       if (c.type === "none") warnings.push("Une contrainte est ajoutée mais aucun type n'est choisi — elle sera ignorée.");
       if (c.type === "date" && !c.date) warnings.push("Une contrainte \"Jour précis\" est ajoutée mais aucun jour n'est choisi — elle sera ignorée.");
       if (c.type === "multiDay" && !(c.dates?.length)) warnings.push("Une contrainte \"Plusieurs jours\" est ajoutée mais aucun jour n'est coché — elle sera ignorée.");
-      if ((c.type === "required" || c.type === "excluded") && !c.activityId) {
+      if ((c.type === "required" || c.type === "excluded") && !(c.activityIds?.length)) {
         warnings.push(`Une contrainte "${c.type === "required" ? "Activité obligatoire" : "Activité exclue"}" est ajoutée mais aucune activité n'est choisie — elle sera ignorée.`);
       }
       if (c.type === "flexible" && !c.activityId) {
@@ -66,14 +66,16 @@ export function validateConstraints(constraints) {
     const multiDayC = constraints.find(c => c.type === "multiDay" && c.dates?.length);
     if (multiDayC) lines.push(`📆 Programme sur ${multiDayC.dates.length} jour(s) enchaînés`);
   
-    constraints.filter(c => c.type === "required" && c.activityId).forEach(c => {
-      const activity = activities.find(a => a.id === c.activityId);
-      if (activity) lines.push(`✅ Obligatoire : ${activity.title}`);
+    constraints.filter(c => c.type === "required").forEach(c => {
+      const ids = c.activityIds || (c.activityId ? [c.activityId] : []);
+      const titles = ids.map(id => activities.find(a => a.id === id)?.title).filter(Boolean);
+      if (titles.length) lines.push(`✅ Obligatoire : ${titles.join(", ")}`);
     });
   
-    constraints.filter(c => c.type === "excluded" && c.activityId).forEach(c => {
-      const activity = activities.find(a => a.id === c.activityId);
-      if (activity) lines.push(`🚫 Exclue : ${activity.title}`);
+    constraints.filter(c => c.type === "excluded").forEach(c => {
+      const ids = c.activityIds || (c.activityId ? [c.activityId] : []);
+      const titles = ids.map(id => activities.find(a => a.id === id)?.title).filter(Boolean);
+      if (titles.length) lines.push(`🚫 Exclue : ${titles.join(", ")}`);
     });
   
     const timeWindow = constraints.find(c => c.type === "timeWindow" && (c.after || c.before));
