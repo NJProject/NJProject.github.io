@@ -19,8 +19,18 @@ const WEIGHTS = {
   REQUIRED_BONUS: 500,    // bonus pour une activité marquée "obligatoire"
   DAY_TRAVEL_PENALTY: 0.25, // pénalité par minute de trajet total sur la journée (était 0.35)
   SEPARATION_PENALTY: 12,   // pénalité par sous-groupe au-delà du premier
-  GROUPING_CONSISTENCY_BONUS: 40 // bonus si la répartition du jour reprend celle d'un jour précédent
+  GROUPING_CONSISTENCY_BONUS: 40, // bonus si la répartition du jour reprend celle d'un jour précédent
+  MEAL_TIME_BONUS: 60      // bonus pour une activité "gastronomie" si son horaire tombe sur un repas
 };
+
+const MEAL_WINDOWS = [
+  [11 * 60 + 30, 14 * 60],      // déjeuner : 11h30–14h00
+  [18 * 60 + 30, 21 * 60]       // dîner : 18h30–21h00
+];
+
+function isMealTime(startMin) {
+  return MEAL_WINDOWS.some(([from, to]) => startMin >= from && startMin < to);
+}
 
 function voters(activity) {
   return new Set(activity.voters || []);
@@ -144,8 +154,9 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
       const travelCost = route.durationMin * WEIGHTS.TRAVEL_COST;
       const idleCost = Math.max(0, start - arrival) * WEIGHTS.IDLE_COST;
       const requiredBonus = isRequired ? WEIGHTS.REQUIRED_BONUS : 0;
+      const mealBonus = (candidate.category === "gastronomie" && isMealTime(start)) ? WEIGHTS.MEAL_TIME_BONUS : 0;
 
-      const score = voteValue + requiredBonus - travelCost - idleCost;
+      const score = voteValue + requiredBonus + mealBonus - travelCost - idleCost;
 
       if (score > bestScore) {
         bestScore = score;
