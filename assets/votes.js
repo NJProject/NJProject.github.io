@@ -149,29 +149,47 @@ export function attachVoting(card, cityKey) {
   const wrap = document.createElement("div");
   wrap.className = "poi-vote";
   wrap.innerHTML = `
-    <button type="button" class="poi-vote-btn" aria-label="Voter pour ce lieu">
-      🗳️ <span class="poi-vote-count">0</span>
-    </button>
+    <div class="poi-vote-buttons">
+      <button type="button" class="poi-vote-btn" aria-label="Voter pour ce lieu">
+        🗳️ <span class="poi-vote-count">0</span>
+      </button>
+      <button type="button" class="poi-exclude-btn" aria-label="Je ne veux pas faire ça">
+        🚫 <span class="poi-exclude-count">0</span>
+      </button>
+    </div>
     <div class="poi-vote-names" hidden></div>
   `;
   card.appendChild(wrap);
 
   const btn = wrap.querySelector(".poi-vote-btn");
   const countEl = wrap.querySelector(".poi-vote-count");
+  const excludeBtn = wrap.querySelector(".poi-exclude-btn");
+  const excludeCountEl = wrap.querySelector(".poi-exclude-count");
   const namesEl = wrap.querySelector(".poi-vote-names");
 
   let currentVoters = {};
+  let currentExcluders = {};
 
   function render() {
     const names = Object.keys(currentVoters);
+    const excludedNames = Object.keys(currentExcluders);
     countEl.textContent = names.length;
-    namesEl.textContent = names.length ? names.join(", ") : "Aucun vote pour l'instant";
+    excludeCountEl.textContent = excludedNames.length;
+
+    const parts = [];
+    parts.push(names.length ? `Pour : ${names.join(", ")}` : "Aucun vote pour l'instant");
+    if (excludedNames.length) parts.push(`Ne veulent pas : ${excludedNames.join(", ")}`);
+    namesEl.textContent = parts.join(" · ");
+
     const me = getVoterName();
     btn.classList.toggle("voted", !!me && !!currentVoters[me]);
+    excludeBtn.classList.toggle("excluded", !!me && !!currentExcluders[me]);
   }
 
   onSnapshot(ref, (snap) => {
-    currentVoters = snap.exists() ? (snap.data().voters || {}) : {};
+    const data = snap.exists() ? snap.data() : {};
+    currentVoters = data.voters || {};
+    currentExcluders = data.excluders || {};
     render();
   });
 
@@ -180,7 +198,7 @@ export function attachVoting(card, cityKey) {
     namesEl.hidden = !namesEl.hidden;
   });
 
-  btn.addEventListener("click", async () => {
+  async function toggleField(fieldName, oppositeFieldName, currentMap, oppositeMap) {
     let me = getVoterName();
     if (!me) {
       if (promptNameFn) await promptNameFn();
@@ -188,23 +206,36 @@ export function attachVoting(card, cityKey) {
       if (!me) return;
     }
 
-    btn.disabled = true;
-    const alreadyVoted = !!currentVoters[me];
+    const already = !!currentMap[me];
     try {
-      if (alreadyVoted) {
-        await updateDoc(ref, { [`voters.${me}`]: deleteField() });
+      const updates = {};
+      if (already) {
+        updates[`${fieldName}.${me}`] = deleteField();
       } else {
-        try {
-          await updateDoc(ref, { [`voters.${me}`]: true });
-        } catch {
-          await setDoc(ref, { voters: { [me]: true } });
-        }
+        updates[`${fieldName}.${me}`] = true;
+        // Voter pour et exclure sont mutuellement exclusifs — activer l'un retire l'autre.
+        if (oppositeMap[me]) updates[`${oppositeFieldName}.${me}`] = deleteField();
+      }
+      try {
+        await updateDoc(ref, updates);
+      } catch {
+        await setDoc(ref, { [fieldName]: { [me]: true } }, { merge: true });
       }
     } catch (e) {
       console.error("Erreur de vote :", e);
-    } finally {
-      btn.disabled = false;
     }
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    await toggleField("voters", "excluders", currentVoters, currentExcluders);
+    btn.disabled = false;
+  });
+
+  excludeBtn.addEventListener("click", async () => {
+    excludeBtn.disabled = true;
+    await toggleField("excluders", "voters", currentExcluders, currentVoters);
+    excludeBtn.disabled = false;
   });
 
   document.addEventListener("voterNameChanged", render);

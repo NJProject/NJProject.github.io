@@ -18,6 +18,22 @@ function haversineKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
+// En dessous de 1,2 km : marche à pied pure (~4,3 km/h, buffer pour feux/trottoirs).
+// Au-delà : hypothèse transport en commun urbain japonais — vitesse moyenne plus
+// élevée, mais avec un forfait fixe de ~8 min (marche vers la station, attente,
+// accès quai) qui ne disparaît jamais, même sur un trajet court en transit.
+function estimateDurationMin(km) {
+  const WALK_THRESHOLD_KM = 1.2;
+  const WALK_SPEED_KMH = 4.3;
+  const TRANSIT_SPEED_KMH = 16;
+  const TRANSIT_OVERHEAD_MIN = 8;
+
+  if (km <= WALK_THRESHOLD_KM) {
+    return Math.max(5, Math.round((km / WALK_SPEED_KMH) * 60));
+  }
+  return Math.round((km / TRANSIT_SPEED_KMH) * 60 + TRANSIT_OVERHEAD_MIN);
+}
+
 export async function routeBetween(a, b) {
   if (!a || !b) return { durationMin: 60, distanceKm: null, estimated: true };
 
@@ -33,10 +49,9 @@ export async function routeBetween(a, b) {
   }
 
   const km = haversineKm(a, b);
-  // Estimation volontairement prudente en ville, à remplacer par une API.
   return {
     distanceKm: km,
-    durationMin: Math.max(5, Math.round((km / 4.5) * 60)),
+    durationMin: estimateDurationMin(km),
     estimated: true
   };
 }

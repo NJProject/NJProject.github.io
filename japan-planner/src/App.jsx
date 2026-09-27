@@ -63,7 +63,8 @@ export default function App() {
       setActivities(rawActivities.map(a => ({
         ...a,
         ...(loadedMetadata.get(a.id) || {}),
-        voters: loadedVotes.get(a.id) || []
+        voters: loadedVotes.get(a.id)?.voters || [],
+        excluders: loadedVotes.get(a.id)?.excluders || []
       })));
     } catch (e) {
       console.error(e);

@@ -5,7 +5,22 @@ import { getLodgingForDate } from "../services/lodgings";
 const DEFAULT_DAY_START = 10 * 60;
 const DEFAULT_DAY_END = 20 * 60;
 const POOL_CAP = 12; // borne le nb de candidats évalués géographiquement par groupe/jour
-const GROUPING_CONSISTENCY_BONUS = 40; // bonus si la répartition du jour reprend celle d'un jour précédent
+
+// Poids de scoring, regroupés ici pour être ajustés facilement en un seul endroit.
+// Recalibrés une fois que routing.js a cessé de supposer une vitesse de marche
+// uniforme (voir estimateDurationMin) : les temps de trajet reflètent désormais
+// mieux la réalité (transit + forfait d'accès), donc le coût du trajet pèse
+// un peu moins fort par minute qu'avant, pour ne pas écraser la satisfaction
+// des votes sur des écarts de quelques minutes qui, eux, sont maintenant réels.
+const WEIGHTS = {
+  VOTE: 25,               // valeur d'un vote du groupe pour une activité
+  TRAVEL_COST: 0.85,      // coût par minute de trajet, au choix d'une activité (était 1.1)
+  IDLE_COST: 0.3,         // coût par minute d'attente avant ouverture
+  REQUIRED_BONUS: 500,    // bonus pour une activité marquée "obligatoire"
+  DAY_TRAVEL_PENALTY: 0.25, // pénalité par minute de trajet total sur la journée (était 0.35)
+  SEPARATION_PENALTY: 12,   // pénalité par sous-groupe au-delà du premier
+  GROUPING_CONSISTENCY_BONUS: 40 // bonus si la répartition du jour reprend celle d'un jour précédent
+};
 
 function voters(activity) {
   return new Set(activity.voters || []);
@@ -53,7 +68,7 @@ function toDepartureDate(dateStr, minutes) {
 }
 
 function separationPenalty(groupCount) {
-  return Math.max(0, groupCount - 1) * 12;
+  return Math.max(0, groupCount - 1) * WEIGHTS.SEPARATION_PENALTY;
 }
 
 /*
@@ -125,10 +140,10 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
       if (start + duration > effectiveClose) continue; // ne rentre pas dans la journée, même en durée minimale
 
       const isRequired = requiredIds.includes(candidate.id);
-      const voteValue = groupVoteScore(candidate, group) * 25;
-      const travelCost = route.durationMin * 1.1;
-      const idleCost = Math.max(0, start - arrival) * 0.3;
-      const requiredBonus = isRequired ? 500 : 0;
+      const voteValue = groupVoteScore(candidate, group) * WEIGHTS.VOTE;
+      const travelCost = route.durationMin * WEIGHTS.TRAVEL_COST;
+      const idleCost = Math.max(0, start - arrival) * WEIGHTS.IDLE_COST;
+      const requiredBonus = isRequired ? WEIGHTS.REQUIRED_BONUS : 0;
 
       const score = voteValue + requiredBonus - travelCost - idleCost;
 
@@ -230,7 +245,9 @@ export async function generatePlans({ activities, people, date, constraints = []
     let activeMin = 0;
 
     for (const group of candidate.groups) {
-      let pool = relevant.filter(a => a.voters?.some(v => group.includes(v)));
+      let pool = relevant
+        .filter(a => a.voters?.some(v => group.includes(v)))
+        .filter(a => !a.excluders?.some(v => group.includes(v)));
       pool.sort((a, b) => groupVoteScore(b, group) - groupVoteScore(a, group));
       pool = pool.slice(0, POOL_CAP);
 
@@ -255,13 +272,13 @@ export async function generatePlans({ activities, people, date, constraints = []
       activeMin += result.ordered.reduce((sum, item) => sum + (item.end - item.start), 0);
     }
 
-    score -= travel * 0.35;
+    score -= travel * WEIGHTS.DAY_TRAVEL_PENALTY;
     score -= separationPenalty(candidate.groups.length);
 
     if (preferredGrouping && candidate.groups.length > 1
-        && normalizeGrouping(candidate.groups) === normalizeGrouping(preferredGrouping)) {
-      score += GROUPING_CONSISTENCY_BONUS;
-    }
+      && normalizeGrouping(candidate.groups) === normalizeGrouping(preferredGrouping)) {
+    score += WEIGHTS.GROUPING_CONSISTENCY_BONUS;
+  }
 
     const travelRatio = (travel + activeMin) > 0 ? travel / (travel + activeMin) : 0;
 
