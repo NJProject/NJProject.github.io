@@ -1,122 +1,122 @@
 # Planner Japon 2027
 
-Application React/Vite à placer dans `planner/` du dépôt `NJProject.github.io`.
+Application React/Vite qui construit automatiquement des parcours de visite à partir des votes du groupe. Elle fait partie du guide de voyage du dépôt `njproject.github.io` et est servie sous `/planner/`.
 
-## Objectif
+## Fonctionnement
 
-À partir des activités déjà présentes dans les pages `osaka.html`, `nara.html`, `kyoto.html`, `kanazawa.html` et `tokyo.html`, l'application :
+À partir des activités des pages du guide et des votes enregistrés dans Firestore, le planner :
 
-- lit les votes booléens déjà présents dans Firestore ;
-- détecte les votants ;
-- filtre les activités par ville/date ;
-- propose jusqu'à 3 parcours ;
-- autorise des séparations du groupe ;
-- prend en compte durée, horaires et coordonnées lorsqu'elles sont renseignées ;
-- expose une interface d'administration pour compléter les métadonnées des activités.
+- détecte les votants et filtre les activités par ville et par date ;
+- génère jusqu'à 3 parcours par jour, avec ou sans séparation du groupe ;
+- classe les jours d'un séjour du meilleur au moins bon, ou enchaîne plusieurs jours choisis sans répéter d'activité ;
+- calcule les horaires en tenant compte des durées, des horaires d'ouverture et des trajets depuis le logement du jour ;
+- exporte le parcours en PDF.
 
-Le guide existant reste intact.
+L'algorithme est déterministe et explicable, sans recours à un modèle d'IA.
 
-## Installation locale
+## Sources de données
 
-Depuis le dossier `planner/` :
+| Source | Contenu |
+|---|---|
+| Pages HTML du guide | Lieux de `osaka`, `nara`, `kyoto`, `kanazawa`, `tokyo`, `fuji` et `excursions`, lus à l'exécution pour éviter de maintenir une seconde liste |
+| Firestore `customPois` | Lieux ajoutés par le groupe depuis les pages villes |
+| Firestore `votes/{ville--slug}` | Votes `voters` (pour) et `excluders` (ne veut pas faire), par prénom |
+| Firestore `plannerActivities/{ville--slug}` | Métadonnées propres au planner (voir ci-dessous) |
+| `src/services/lodgings.js` | Logement de chaque étape, utilisé comme point de départ de la journée |
 
-```bash
-npm install
-npm run dev
-```
+Les excursions à la journée n'ont pas de logement propre : elles partent du logement de Tokyo actif à la date choisie.
 
-Puis ouvrir l'URL affichée par Vite.
-
-Pour l'intégration GitHub Pages, construire avec :
-
-```bash
-npm run build
-```
-
-Le build est écrit dans `../planner-build/`. Pour le déploiement statique,
-copier le contenu de `planner-build/` dans un dossier `/planner/` à la racine
-du dépôt. Le `base` Vite est déjà réglé sur `/planner/`.
-
-Une fois déployé :
-
-`https://njproject.github.io/planner/`
-
-Tu peux ensuite ajouter un lien dans `index.html` vers `/planner/`.
-
-## Firebase
-
-L'application utilise le même projet Firestore que le guide actuel :
-
-`japon-2027-votes`
-
-La structure de vote existante est conservée :
+### Métadonnées d'une activité
 
 ```text
-votes/{city--slug}
-  voters:
-    Nicolas: true
-    ...
+location:       { lat, lng }
+durationMin:    nombre de minutes
+openingHours:   { open: "HH:MM", close: "HH:MM" }
+availableDates: ["YYYY-MM-DD", ...]
 ```
 
-Le planner ajoute seulement :
+Sans durée renseignée, une durée par défaut est appliquée selon la catégorie (de 60 minutes pour le culturel ou la gastronomie à 240 pour un parc de loisirs). Sans coordonnées, les trajets retombent sur une valeur par défaut.
 
-```text
-plannerActivities/{city--slug}
-```
+## Algorithme
 
-pour les métadonnées supplémentaires.
+Pour chaque jour et chaque répartition du groupe envisagée, le parcours est construit de façon gloutonne : à chaque étape, on retient l'activité qui maximise un score combinant votes, coût du trajet depuis l'étape précédente, temps d'attente avant ouverture, bonus pour les activités obligatoires et bonus pour la gastronomie sur les créneaux de repas.
 
-### Important : règles Firestore
+- Les poids sont regroupés dans la constante `WEIGHTS` de `src/algorithm/planner.js`.
+- Le pool de candidats est limité aux 12 activités les plus votées par sous-groupe.
+- Une activité qu'un membre du sous-groupe a exclue n'est jamais proposée à ce sous-groupe.
+- En mode multi-jours, une répartition du groupe déjà utilisée un jour reçoit un bonus les jours suivants pour éviter les recompositions inutiles.
 
-Les règles Firestore existantes doivent autoriser la lecture des documents `votes/{id}` et la lecture/écriture de `plannerActivities/{id}` pour l'administration.
+## Contraintes
 
-Ne remplace pas les règles actuelles sans les vérifier.
+| Type | Effet |
+|---|---|
+| Jour précis | Limite la génération à une date |
+| Plusieurs jours | Enchaîne les jours choisis, sans répétition d'activité |
+| Activité obligatoire | Force l'activité dans le parcours, plusieurs par contrainte |
+| Activité exclue | Retire les activités du pool, plusieurs par contrainte |
+| Créneau horaire | Borne le début et la fin de journée |
+| Temps libre | Bloque une plage au milieu de la journée |
+| Durée libre | Étire ou raccourcit une activité (parc, balade) entre un minimum et un maximum |
+| Rester groupé | Désactive les propositions de séparation |
 
-## Données d'activités
-
-Les activités sont chargées directement depuis les pages HTML du guide au runtime. Cela évite de maintenir une seconde liste de lieux.
-
-Le planner ajoute ensuite les métadonnées Firestore :
-
-- `location: { lat, lng }`
-- `durationMin`
-- `openingHours: { open, close }`
-- `availableDates: ["YYYY-MM-DD", ...]`
-
-Tant que les coordonnées ne sont pas renseignées, le parcours utilise une estimation grossière des déplacements.
+Les contraintes contradictoires (obligatoire et exclue à la fois, jour précis et multi-jours, plages incohérentes) bloquent la génération, et un résumé en clair des contraintes actives est affiché avant de lancer le calcul.
 
 ## Routage
 
-La V1 possède une abstraction de routage dans `src/services/routing.js`.
+`src/services/routing.js` fournit les temps de trajet, avec trois niveaux :
 
-Sans API, elle utilise une estimation basée sur la distance à vol d'oiseau.
+1. **Google Directions** (transport en commun) si `VITE_GOOGLE_MAPS_API_KEY` est définie. Non activé à ce jour.
+2. **Proxy d'itinéraires** si `VITE_ROUTING_URL` est définie.
+3. **Estimation à vol d'oiseau** par défaut : marche en dessous de 1,2 km, sinon vitesse de transport en commun avec un forfait d'accès de 8 minutes.
 
-Pour une vraie optimisation des transports japonais, il faudra brancher un fournisseur d'itinéraires multimodal derrière cette abstraction. Ne mets pas une clé API secrète directement dans le frontend.
+Une clé Google exposée dans un frontend statique n'est jamais secrète : elle doit être restreinte par domaine et protégée par un quota journalier et une alerte de budget côté Google Cloud.
 
 ## Administration
 
-Ajouter `?admin=1` à l'URL du planner pour afficher l'interface de métadonnées.
+`/planner/?admin=1` affiche, après saisie du mot de passe, le panneau d'administration :
 
-Exemple :
+- édition des métadonnées d'une activité (coordonnées, durée, horaires, dates possibles) ;
+- import groupé au format JSON, avec génération d'un squelette contenant les identifiants de chaque ville.
 
-`/planner/?admin=1`
+Le mot de passe est vérifié côté navigateur : il limite l'accès à l'interface mais ne constitue pas un contrôle d'accès. Les règles Firestore valident la forme des données écrites, sans authentifier l'auteur.
 
-Cette V1 ne fournit pas encore d'authentification administrateur. Si le planner devient accessible publiquement, il faut sécuriser les écritures Firestore avant de considérer cette interface comme une vraie administration.
+## Structure
 
-## Limites volontaires de la V1
+```
+src/
+├── App.jsx                     Interface et orchestration
+├── firebase.js
+├── algorithm/
+│   ├── planner.js              Génération des parcours
+│   └── validateConstraints.js  Validation et résumé des contraintes
+├── components/
+│   ├── PlanCard.jsx            Affichage d'un parcours
+│   └── AdminPanel.jsx          Métadonnées et import groupé
+├── services/
+│   ├── activities.js           Chargement des activités, villes et dates
+│   ├── votes.js                Lecture des votes et exclusions
+│   ├── plannerData.js          Métadonnées Firestore
+│   ├── lodgings.js             Points de départ par étape
+│   ├── routing.js              Temps de trajet
+│   └── googleMaps.js           Chargement de l'API Google Maps
+└── utils/
+    ├── exportPlan.js           Export PDF (jsPDF)
+    └── slugify.js
+```
 
-- Les repas ne sont pas planifiés.
-- Les contraintes sont volontairement simples.
-- Tokyo Ouest/Est est prévu dans l'architecture mais doit être modélisé avec les logements/zones réelles.
-- Le routage réel (marche/transports en commun) n'est pas encore branché.
-- L'algorithme est déterministe et explicable : pas d'IA nécessaire.
+## Limites connues
 
-## Première mise en place recommandée
+- Les repas ne sont pas planifiés comme des étapes : les activités de gastronomie reçoivent seulement un bonus sur les créneaux de déjeuner et de dîner.
+- Les trajets sont estimés, faute de fournisseur d'itinéraires branché.
+- Le logement de la première étape à Tokyo (26–28 février) n'est pas défini, donc aucun point de départ n'y est utilisé.
+- Le planner n'a pas d'authentification réelle.
 
-1. Installer et lancer le planner localement.
-2. Ouvrir `?admin=1`.
-3. Compléter les coordonnées et durées des activités réellement utilisées.
-4. Vérifier les dates possibles et horaires.
-5. Brancher un fournisseur de routage réel.
-6. Tester les propositions avec les votes réels du groupe.
-7. Seulement ensuite déployer sous `/planner/`.
+## Développement
+
+```bash
+npm install
+npm run dev      # serveur local
+npm run build    # écrit dans ../planner-build/ (ignoré par Git)
+```
+
+Le `base` de Vite est réglé sur `/planner/`. Les variables d'environnement sont décrites dans `.env.example`.
