@@ -21,7 +21,9 @@ const WEIGHTS = {
   SEPARATION_PENALTY: 12,   // pénalité par sous-groupe au-delà du premier
   GROUPING_CONSISTENCY_BONUS: 40, // bonus si la répartition du jour reprend celle d'un jour précédent
   MEAL_TIME_BONUS: 60,     // bonus pour une activité "gastronomie" si son horaire tombe sur un repas
-  REQUIRED_PLAN_BONUS: 80  // bonus au plan entier pour chaque activité obligatoire effectivement placée
+  REQUIRED_PLAN_BONUS: 80, // bonus au plan entier pour chaque activité obligatoire effectivement placée
+  CATEGORY_GROUP_STEP_BONUS: 15, // léger coup de pouce, au choix d'une activité, si sa catégorie appartient à un groupe demandé
+  CATEGORY_GROUP_PLAN_BONUS: 50  // bonus au plan entier pour chaque groupe de catégories effectivement satisfait
 };
 
 const MEAL_WINDOWS = [
@@ -109,7 +111,7 @@ function normalizeGrouping(groups) {
   return groups.map(g => [...g].sort().join(",")).sort().join("|");
 }
 
-async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null, freeWindow = null, flexibleMap = new Map() } = {}) {
+async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = [], startLocation = null, freeWindow = null, flexibleMap = new Map(), categoryGroups = [] } = {}) {
   const remaining = [...pool];
   const ordered = [];
   let current = startLocation ? { location: startLocation } : null;
@@ -156,8 +158,9 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
       const idleCost = Math.max(0, start - arrival) * WEIGHTS.IDLE_COST;
       const requiredBonus = isRequired ? WEIGHTS.REQUIRED_BONUS : 0;
       const mealBonus = (candidate.category === "gastronomie" && isMealTime(start)) ? WEIGHTS.MEAL_TIME_BONUS : 0;
+      const categoryGroupBonus = categoryGroups.some(cats => cats.includes(candidate.category)) ? WEIGHTS.CATEGORY_GROUP_STEP_BONUS : 0;
 
-      const score = voteValue + requiredBonus + mealBonus - travelCost - idleCost;
+      const score = voteValue + requiredBonus + mealBonus + categoryGroupBonus - travelCost - idleCost;
 
       if (score > bestScore) {
         bestScore = score;
@@ -233,6 +236,14 @@ function getFlexibleMap(constraints) {
   return map;
 }
 
+// Un groupe de catégories est satisfait dès qu'une activité de l'une de ses
+// catégories est placée dans la journée — "Culture OU Gastronomie", jamais "ET".
+function getCategoryGroups(constraints) {
+  return constraints
+    .filter(c => c.type === "categoryGroup" && c.categories?.length)
+    .map(c => c.categories);
+}
+
 export async function generatePlans({ activities, people, date, constraints = [], extraExcludedIds = new Set(), city = null, preferredGrouping = null }) {
   const excluded = new Set([
     ...constraints.filter(c => c.type === "excluded").flatMap(c => c.activityIds || (c.activityId ? [c.activityId] : [])),
@@ -242,6 +253,7 @@ export async function generatePlans({ activities, people, date, constraints = []
   const timeBounds = getTimeBounds(constraints);
   const freeWindow = getFreeWindow(constraints);
   const flexibleMap = getFlexibleMap(constraints);
+  const categoryGroups = getCategoryGroups(constraints);
 
   const relevant = activities
     .filter(a => compatibleWithDate(a, date))
@@ -273,7 +285,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       });
 
       const startLocation = city ? getLodgingForDate(city, date) : null;
-      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation, freeWindow, flexibleMap });
+      const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation, freeWindow, flexibleMap, categoryGroups });
       const satisfactionScore = result.ordered.length
         ? result.ordered.reduce((sum, item) => sum + satisfaction(item.activity, group), 0) / result.ordered.length
         : 0;
@@ -287,6 +299,13 @@ export async function generatePlans({ activities, people, date, constraints = []
     const scheduledIds = new Set(groupResults.flatMap(g => g.ordered.map(item => item.activity.id)));
     const requiredPlaced = requiredIds.filter(id => scheduledIds.has(id)).length;
     score += requiredPlaced * WEIGHTS.REQUIRED_PLAN_BONUS;
+
+    const scheduledCategories = new Set(groupResults.flatMap(g => g.ordered.map(item => item.activity.category)));
+    const categoryGroupResults = categoryGroups.map(cats => ({
+      categories: cats,
+      satisfied: cats.some(cat => scheduledCategories.has(cat))
+    }));
+    score += categoryGroupResults.filter(r => r.satisfied).length * WEIGHTS.CATEGORY_GROUP_PLAN_BONUS;
 
     score -= travel * WEIGHTS.DAY_TRAVEL_PENALTY;
     score -= separationPenalty(candidate.groups.length);
@@ -305,6 +324,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       score,
       totalTravelMin: travel,
       travelRatio,
+      categoryGroupResults,
       peopleSatisfied: new Set(groupResults.flatMap(g =>
         g.people.filter(person => g.ordered.some(item => voters(item.activity).has(person)))
       )).size

@@ -48,6 +48,48 @@ function MultiActivityPicker({ activities, selectedIds, onChange }) {
   );
 }
 
+function formatCategoryLabel(slug) {
+  if (!slug) return slug;
+  return slug.charAt(0).toUpperCase() + slug.slice(1).replace(/_/g, " ");
+}
+
+function MultiCategoryPicker({ categories, selectedCategories, onChange }) {
+  const [open, setOpen] = useState(false);
+
+  function toggle(cat) {
+    const set = new Set(selectedCategories);
+    if (set.has(cat)) set.delete(cat); else set.add(cat);
+    onChange([...set]);
+  }
+
+  const selectedLabels = selectedCategories.map(formatCategoryLabel);
+
+  return (
+    <div className="multi-activity-picker">
+      <button type="button" className="multi-activity-toggle" onClick={() => setOpen(!open)}>
+        {selectedCategories.length === 0
+          ? "Choisir une ou plusieurs catégories"
+          : `${selectedCategories.length} catégorie(s) : ${selectedLabels.join(" ou ")}`}
+        <span>{open ? "▴" : "▾"}</span>
+      </button>
+      {open && (
+        <div className="multi-activity-list">
+          {categories.map(cat => (
+            <label key={cat} className="multi-activity-item">
+              <input
+                type="checkbox"
+                checked={selectedCategories.includes(cat)}
+                onChange={() => toggle(cat)}
+              />
+              {formatCategoryLabel(cat)}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function formatDateFr(iso) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("fr-FR", {
     weekday: "short", day: "numeric", month: "long"
@@ -121,6 +163,10 @@ export default function App() {
   );
 
   const cityDates = useMemo(() => datesInRange(city), [city]);
+  const cityCategories = useMemo(() => {
+    const set = new Set(cityActivities.map(a => a.category).filter(Boolean));
+    return [...set].sort();
+  }, [cityActivities]);
   const people = useMemo(() => allVoters(votes), [votes]);
   const dateConstraint = constraints.find(c => c.type === "date");
   const multiDayConstraint = constraints.find(c => c.type === "multiDay");
@@ -262,7 +308,7 @@ export default function App() {
               <div className="constraint-box">
                 <div>
                   <strong>Contraintes</strong>
-                  <p>Ajoute un jour précis, plusieurs jours à enchaîner, une activité obligatoire/exclue, un créneau horaire, ou impose de rester groupé.</p>
+                  <p>Ajoute un jour précis, plusieurs jours à enchaîner, une activité obligatoire/exclue, un groupe de catégories, un créneau horaire, ou impose de rester groupé.</p>
                 </div>
                 <button onClick={addConstraint}>+ Ajouter</button>
               </div>
@@ -278,6 +324,7 @@ export default function App() {
                     <option value="multiDay">Plusieurs jours</option>
                     <option value="required">Activité obligatoire</option>
                     <option value="excluded">Activité exclue</option>
+                    <option value="categoryGroup">Groupe de catégories</option>
                     <option value="timeWindow">Créneau horaire</option>
                     <option value="freeTime">Bloquer un créneau (temps libre)</option>
                     <option value="flexible">Durée libre (parc, balade…)</option>
@@ -313,6 +360,14 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+                  )}
+
+                  {(c.type === "required" || c.type === "excluded") && (
+                    <MultiActivityPicker
+                      activities={cityActivities}
+                      selectedIds={c.activityIds || (c.activityId ? [c.activityId] : [])}
+                      onChange={ids => updateConstraint(c.id, { activityIds: ids, activityId: undefined })}
+                    />
                   )}
 
                   {(c.type === "required" || c.type === "excluded") && (

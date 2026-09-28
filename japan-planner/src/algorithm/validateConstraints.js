@@ -58,6 +58,9 @@ export function validateConstraints(constraints, activities = []) {
       if (c.type === "flexible" && c.min && c.max && Number(c.min) >= Number(c.max)) {
         errors.push("Une contrainte \"Durée libre\" a un minimum supérieur ou égal au maximum — corrige les valeurs.");
       }
+      if (c.type === "categoryGroup" && !(c.categories?.length)) {
+        warnings.push("Une contrainte \"Groupe de catégories\" est ajoutée mais aucune catégorie n'est cochée — elle sera ignorée.");
+      }
     });
   
     return { errors: [...new Set(errors)], warnings: [...new Set(warnings)] };
@@ -104,6 +107,11 @@ export function validateConstraints(constraints, activities = []) {
     constraints.filter(c => c.type === "flexible" && c.activityId).forEach(c => {
       const activity = activities.find(a => a.id === c.activityId);
       if (activity) lines.push(`🌿 Durée libre : ${activity.title} (${c.min || 30}–${c.max || 180} min)`);
+    });
+  
+    constraints.filter(c => c.type === "categoryGroup" && c.categories?.length).forEach(c => {
+      const labels = c.categories.map(cat => cat.charAt(0).toUpperCase() + cat.slice(1));
+      lines.push(`🏷️ Groupe de catégories : ${labels.join(" ou ")}`);
     });
   
     if (constraints.some(c => c.type === "keepTogether")) {
