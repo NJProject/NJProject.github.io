@@ -230,10 +230,10 @@ def render_poi(p):
 
 
 def render_filter_bar(cats_used):
-    chips = ['<button class="filter-chip active" data-cat="all">Tout</button>']
+    chips = ['<button class="filter-chip active" data-cat="all">Tout <span class="chip-count"></span></button>']
     for c in cats_used:
         icon, label = CATS[c]
-        chips.append(f'<button class="filter-chip" data-cat="{c}">{icon} {label}</button>')
+        chips.append(f'<button class="filter-chip" data-cat="{c}">{icon} {label} <span class="chip-count"></span></button>')
     return "\n        ".join(chips)
 
 
@@ -279,8 +279,14 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <main class="city-main">
   <p>{intro}</p>
 
-  <div class="filter-bar">
+  <div class="city-toolbar">
+    <div class="city-search">
+      <span class="city-search-icon">🔎</span>
+      <input type="search" id="poiSearch" class="city-search-input" placeholder="Rechercher une activité…" autocomplete="off">
+    </div>
+    <div class="filter-bar">
         {filter_bar}
+    </div>
   </div>
 
   <div class="poi-grid">

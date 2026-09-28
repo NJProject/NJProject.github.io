@@ -74,7 +74,7 @@ function ensureFilterChip(cat, cats) {
   btn.type = "button";
   btn.className = "filter-chip";
   btn.dataset.cat = cat;
-  btn.textContent = `${icon} ${label}`;
+  btn.innerHTML = `${icon} ${label} <span class="chip-count"></span>`;
   bar.appendChild(btn);
 }
 
@@ -298,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (change.type === "removed") {
         rendered.get(change.doc.id)?.remove();
         rendered.delete(change.doc.id);
+        document.dispatchEvent(new CustomEvent("poi-cards-changed"));
         return;
       }
       rendered.get(change.doc.id)?.remove();
@@ -310,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.appendChild(card);
       attachVoting(card, cityKey);
       rendered.set(change.doc.id, card);
+      document.dispatchEvent(new CustomEvent("poi-cards-changed"));
     });
   });
 });

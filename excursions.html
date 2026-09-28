@@ -36,12 +36,18 @@
 <main class="city-main">
   <p>Kamakura, Nikko, Yokohama, Takao & Mitake — quoi voir une fois sur place, pas juste comment y aller.</p>
 
-  <div class="filter-bar">
-        <button class="filter-chip active" data-cat="all">Tout</button>
-        <button class="filter-chip" data-cat="kamakura">🗿 Kamakura</button>
-        <button class="filter-chip" data-cat="nikko">⛩️ Nikko</button>
-        <button class="filter-chip" data-cat="yokohama">🌉 Yokohama</button>
-        <button class="filter-chip" data-cat="takao">🥾 Takao & Mitake</button>
+  <div class="city-toolbar">
+    <div class="city-search">
+      <span class="city-search-icon">🔎</span>
+      <input type="search" id="poiSearch" class="city-search-input" placeholder="Rechercher une activité…" autocomplete="off">
+    </div>
+    <div class="filter-bar">
+        <button class="filter-chip active" data-cat="all">Tout <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="kamakura">🗿 Kamakura <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="nikko">⛩️ Nikko <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="yokohama">🌉 Yokohama <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="takao">🥾 Takao & Mitake <span class="chip-count"></span></button>
+    </div>
   </div>
 
   <div class="poi-grid">

@@ -36,15 +36,21 @@
 <main class="city-main">
   <p>Capitale impériale pendant plus de 1000 ans. Logement dans le quartier de la gare, avec 6 vélos gratuits fournis — pratique pour enchaîner les quartiers sans dépendre des bus bondés.</p>
 
-  <div class="filter-bar">
-        <button class="filter-chip active" data-cat="all">Tout</button>
-        <button class="filter-chip" data-cat="touristique">🗺️ Touristique</button>
-        <button class="filter-chip" data-cat="culturel">⛩️ Culturel</button>
-        <button class="filter-chip" data-cat="commerces">🛍️ Commerces</button>
-        <button class="filter-chip" data-cat="gastronomie">🍜 Gastronomie</button>
-        <button class="filter-chip" data-cat="loisirs">🎢 Parcs & loisirs</button>
-        <button class="filter-chip" data-cat="randonnee">🥾 Randonnée</button>
-        <button class="filter-chip" data-cat="nightlife">🌃 Vie nocturne</button>
+  <div class="city-toolbar">
+    <div class="city-search">
+      <span class="city-search-icon">🔎</span>
+      <input type="search" id="poiSearch" class="city-search-input" placeholder="Rechercher une activité…" autocomplete="off">
+    </div>
+    <div class="filter-bar">
+        <button class="filter-chip active" data-cat="all">Tout <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="touristique">🗺️ Touristique <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="culturel">⛩️ Culturel <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="commerces">🛍️ Commerces <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="gastronomie">🍜 Gastronomie <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="loisirs">🎢 Parcs & loisirs <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="randonnee">🥾 Randonnée <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="nightlife">🌃 Vie nocturne <span class="chip-count"></span></button>
+    </div>
   </div>
 
   <div class="poi-grid">

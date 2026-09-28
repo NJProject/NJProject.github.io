@@ -44,24 +44,69 @@ if (navToggle && sidenav) {
   }));
 }
 
-// Category filter (city pages) — délégation d'événement pour inclure les cartes ajoutées après coup
+// Recherche + filtre par catégorie (pages villes) — délégation d'événement pour
+// inclure les cartes ajoutées après coup par custom-pois.js. La recherche
+// interroge le titre, la description et l'info pratique de chaque carte.
 const filterBar = document.querySelector('.filter-bar');
+const poiSearchInput = document.getElementById('poiSearch');
 
 if (filterBar) {
+  let activeCat = 'all';
+
+  function cardText(card) {
+    const title = card.querySelector('h4')?.textContent || '';
+    const desc = card.querySelector('p')?.textContent || '';
+    const meta = card.querySelector('.poi-meta')?.textContent || '';
+    return `${title} ${desc} ${meta}`.toLowerCase();
+  }
+
+  function applyFilters() {
+    const term = (poiSearchInput?.value || '').trim().toLowerCase();
+    document.querySelectorAll('.poi-card').forEach(card => {
+      const matchesCat = activeCat === 'all' || card.dataset.cat === activeCat;
+      const matchesSearch = !term || cardText(card).includes(term);
+      card.classList.toggle('hidden', !(matchesCat && matchesSearch));
+    });
+  }
+
+  function updateCategoryCounts() {
+    const cards = document.querySelectorAll('.poi-card');
+    const counts = {};
+    cards.forEach(card => {
+      const cat = card.dataset.cat;
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    filterBar.querySelectorAll('.filter-chip').forEach(chip => {
+      const countEl = chip.querySelector('.chip-count');
+      if (!countEl) return;
+      const cat = chip.dataset.cat;
+      const n = cat === 'all' ? cards.length : (counts[cat] || 0);
+      countEl.textContent = `(${n})`;
+    });
+  }
+
   filterBar.addEventListener('click', (e) => {
     const chip = e.target.closest('.filter-chip');
     if (!chip) return;
     filterBar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
-    const cat = chip.dataset.cat;
-    document.querySelectorAll('.poi-card').forEach(card => {
-      if (cat === 'all' || card.dataset.cat === cat) {
-        card.classList.remove('hidden');
-      } else {
-        card.classList.add('hidden');
-      }
-    });
+    activeCat = chip.dataset.cat;
+    applyFilters();
   });
+
+  if (poiSearchInput) {
+    poiSearchInput.addEventListener('input', applyFilters);
+  }
+
+  // Les lieux ajoutés par le groupe arrivent après coup depuis Firestore : on
+  // réapplique les filtres actifs et on recompte dès qu'un lieu est ajouté
+  // ou retiré, via l'évènement émis par custom-pois.js.
+  document.addEventListener('poi-cards-changed', () => {
+    applyFilters();
+    updateCategoryCounts();
+  });
+
+  updateCategoryCounts();
 }
 
 const CAL_MIN = { y: 2026, m: 7 };  // août 2026 (mois 0-indexé)

@@ -36,14 +36,20 @@
 <main class="city-main">
   <p>Étape courte mais dense : ancienne capitale du Japon (710-784), premier grand foyer bouddhiste du pays. L'essentiel se fait à pied depuis le logement, à côté du Tōdai-ji.</p>
 
-  <div class="filter-bar">
-        <button class="filter-chip active" data-cat="all">Tout</button>
-        <button class="filter-chip" data-cat="touristique">🗺️ Touristique</button>
-        <button class="filter-chip" data-cat="culturel">⛩️ Culturel</button>
-        <button class="filter-chip" data-cat="commerces">🛍️ Commerces</button>
-        <button class="filter-chip" data-cat="gastronomie">🍜 Gastronomie</button>
-        <button class="filter-chip" data-cat="randonnee">🥾 Randonnée</button>
-        <button class="filter-chip" data-cat="nightlife">🌃 Vie nocturne</button>
+  <div class="city-toolbar">
+    <div class="city-search">
+      <span class="city-search-icon">🔎</span>
+      <input type="search" id="poiSearch" class="city-search-input" placeholder="Rechercher une activité…" autocomplete="off">
+    </div>
+    <div class="filter-bar">
+        <button class="filter-chip active" data-cat="all">Tout <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="touristique">🗺️ Touristique <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="culturel">⛩️ Culturel <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="commerces">🛍️ Commerces <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="gastronomie">🍜 Gastronomie <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="randonnee">🥾 Randonnée <span class="chip-count"></span></button>
+        <button class="filter-chip" data-cat="nightlife">🌃 Vie nocturne <span class="chip-count"></span></button>
+    </div>
   </div>
 
   <div class="poi-grid">
