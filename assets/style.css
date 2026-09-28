@@ -666,6 +666,22 @@ footer a{color:var(--muted);}
   opacity:.7;
   font-weight:600;
 }
+
+.vote-summary{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  margin:-6px 0 20px;
+}
+.vote-summary span{
+  background:var(--indigo-tint);
+  color:var(--indigo);
+  font-size:12px;
+  font-weight:600;
+  padding:5px 12px;
+  border-radius:12px;
+}
+
 .filter-chip{
   border:1.5px solid var(--line);
   background:var(--card);

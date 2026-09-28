@@ -136,6 +136,48 @@ function buildNameBadge(openNameModal) {
   return { promptName };
 }
 
+// ---------- Résumé des votes en haut de page ----------
+function buildVoteSummary(cityKey) {
+  const el = document.getElementById("voteSummary");
+  if (!el) return;
+
+  onSnapshot(collection(db, "votes"), (snap) => {
+    const prefix = `${cityKey}--`;
+    const voterSet = new Set();
+    let withVotes = 0;
+    const voteCounts = [];
+
+    snap.forEach((docSnap) => {
+      const voters = docSnap.data().voters || {};
+      const names = Object.keys(voters);
+      names.forEach((n) => voterSet.add(n));
+      if (docSnap.id.startsWith(prefix) && names.length > 0) {
+        withVotes++;
+        voteCounts.push(names.length);
+      }
+    });
+
+    const totalVoters = voterSet.size;
+    const majority = totalVoters >= 2 ? Math.ceil(totalVoters / 2) : null;
+    const highVotes = majority ? voteCounts.filter((n) => n >= majority).length : 0;
+
+    if (withVotes === 0) {
+      el.hidden = true;
+      return;
+    }
+
+    const parts = [
+      `${withVotes} activité${withVotes > 1 ? "s ont" : " a"} reçu au moins un vote`
+    ];
+    if (majority && highVotes > 0) {
+      parts.push(`${highVotes} activité${highVotes > 1 ? "s ont" : " a"} la majorité des votes (≥ ${majority}/${totalVoters})`);
+    }
+
+    el.hidden = false;
+    el.innerHTML = parts.map((p) => `<span>${p}</span>`).join("");
+  });
+}
+
 let promptNameFn = null;
 
 // Attache le bouton de vote à une carte .poi-card donnée.
@@ -248,4 +290,5 @@ document.addEventListener("DOMContentLoaded", () => {
   promptNameFn = promptName;
 
   document.querySelectorAll(".poi-card").forEach((card) => attachVoting(card, cityKey));
+  buildVoteSummary(cityKey);
 });

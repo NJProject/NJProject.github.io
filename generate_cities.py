@@ -279,6 +279,8 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <main class="city-main">
   <p>{intro}</p>
 
+  <div id="voteSummary" class="vote-summary" hidden></div>
+
   <div class="city-toolbar">
     <div class="city-search">
       <span class="city-search-icon">🔎</span>
