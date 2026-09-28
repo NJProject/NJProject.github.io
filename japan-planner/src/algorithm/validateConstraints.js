@@ -1,4 +1,4 @@
-export function validateConstraints(constraints) {
+export function validateConstraints(constraints, activities = []) {
     const errors = [];
     const warnings = [];
   
@@ -16,6 +16,18 @@ export function validateConstraints(constraints) {
         break;
       }
     }
+    
+  const keepTogether = constraints.some(c => c.type === "keepTogether");
+  for (const id of requiredIds) {
+    const activity = activities.find(a => a.id === id);
+    if (!activity?.excluders?.length) continue;
+    const names = activity.excluders.join(", ");
+    if (keepTogether) {
+      errors.push(`« ${activity.title} » est obligatoire mais ${names} ne veut pas la faire : impossible de garder le groupe ensemble. Retire « Rester groupé » ou l'obligation.`);
+    } else {
+      warnings.push(`« ${activity.title} » est obligatoire mais ${names} ne veut pas la faire : elle ne sera proposée qu'à un sous-groupe sans ${activity.excluders.length > 1 ? "ces personnes" : "cette personne"} (le groupe sera séparé).`);
+    }
+  }
   
     const timeWindow = constraints.find(c => c.type === "timeWindow");
     if (timeWindow?.after && timeWindow?.before && timeWindow.after >= timeWindow.before) {

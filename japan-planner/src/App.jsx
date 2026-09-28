@@ -124,7 +124,7 @@ export default function App() {
   const people = useMemo(() => allVoters(votes), [votes]);
   const dateConstraint = constraints.find(c => c.type === "date");
   const multiDayConstraint = constraints.find(c => c.type === "multiDay");
-  const constraintIssues = useMemo(() => validateConstraints(constraints), [constraints]);
+  const constraintIssues = useMemo(() => validateConstraints(constraints, cityActivities), [constraints, cityActivities]);
   const constraintSummary = useMemo(() => summarizeConstraints(constraints, cityActivities), [constraints, cityActivities]);
 
   function changeCity(key) {

@@ -20,7 +20,8 @@ const WEIGHTS = {
   DAY_TRAVEL_PENALTY: 0.25, // pénalité par minute de trajet total sur la journée (était 0.35)
   SEPARATION_PENALTY: 12,   // pénalité par sous-groupe au-delà du premier
   GROUPING_CONSISTENCY_BONUS: 40, // bonus si la répartition du jour reprend celle d'un jour précédent
-  MEAL_TIME_BONUS: 60      // bonus pour une activité "gastronomie" si son horaire tombe sur un repas
+  MEAL_TIME_BONUS: 60,     // bonus pour une activité "gastronomie" si son horaire tombe sur un repas
+  REQUIRED_PLAN_BONUS: 80  // bonus au plan entier pour chaque activité obligatoire effectivement placée
 };
 
 const MEAL_WINDOWS = [
@@ -267,7 +268,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       requiredIds.forEach(id => {
         if (!pool.some(a => a.id === id)) {
           const forced = relevant.find(a => a.id === id);
-          if (forced) pool.push(forced);
+          if (forced && !forced.excluders?.some(v => group.includes(v))) pool.push(forced);
         }
       });
 
@@ -282,6 +283,10 @@ export async function generatePlans({ activities, people, date, constraints = []
       travel += result.totalTravelMin;
       activeMin += result.ordered.reduce((sum, item) => sum + (item.end - item.start), 0);
     }
+
+    const scheduledIds = new Set(groupResults.flatMap(g => g.ordered.map(item => item.activity.id)));
+    const requiredPlaced = requiredIds.filter(id => scheduledIds.has(id)).length;
+    score += requiredPlaced * WEIGHTS.REQUIRED_PLAN_BONUS;
 
     score -= travel * WEIGHTS.DAY_TRAVEL_PENALTY;
     score -= separationPenalty(candidate.groups.length);
