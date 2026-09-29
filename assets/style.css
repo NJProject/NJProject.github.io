@@ -615,6 +615,23 @@ footer a{color:var(--muted);}
 }
 .section-collapse summary h2{font-size:21px;margin:0;font-weight:700;}
 
+.info-group-label{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  padding:2px 0 2px 10px;
+  margin:30px 0 6px;
+}
+.info-group-label.info-group-neutral{
+  color:var(--indigo);
+  border-left:3px solid var(--indigo);
+}
+.info-group-label.info-group-urgent{
+  color:var(--seal);
+  border-left:3px solid var(--seal);
+}
+
 .next-deadline{
   background:var(--gold-tint);
   color:var(--gold);

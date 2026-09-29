@@ -2,6 +2,13 @@ const allSidenavLinks = document.querySelectorAll('#sidenav a');
 const links = Array.from(allSidenavLinks).filter(a => a.getAttribute('href')?.startsWith('#'));
 const sections = links.map(a => document.querySelector(a.getAttribute('href')));
 
+// Hiérarchie visuelle des échéances : 🔴 action urgente (≤7j), 🟡 à surveiller (≤30j), 🔵 information au-delà.
+function urgencyEmoji(days) {
+  if (days <= 7) return '🔴';
+  if (days <= 30) return '🟡';
+  return '🔵';
+}
+
 // Bandeau "prochaine échéance"
 const nextDeadlineBanner = document.getElementById('nextDeadlineBanner');
 if (nextDeadlineBanner && typeof DEADLINES !== 'undefined') {
@@ -10,14 +17,14 @@ if (nextDeadlineBanner && typeof DEADLINES !== 'undefined') {
     .filter(e => e.date >= todayIso)
     .sort((a, b) => a.date.localeCompare(b.date))[0];
 
-  if (next) {
-    const days = Math.ceil((new Date(next.date) - new Date(todayIso)) / 86400000);
-    nextDeadlineBanner.hidden = false;
-    nextDeadlineBanner.innerHTML = `
-      ⏳ Prochaine échéance dans <strong>${days} jour${days > 1 ? 's' : ''}</strong> :
-      <a href="#calendrier">${next.title}</a>
-    `;
-  }
+    if (next) {
+      const days = Math.ceil((new Date(next.date) - new Date(todayIso)) / 86400000);
+      nextDeadlineBanner.hidden = false;
+      nextDeadlineBanner.innerHTML = `
+        ${urgencyEmoji(days)} Prochaine échéance dans <strong>${days} jour${days > 1 ? 's' : ''}</strong> :
+        <a href="#calendrier">${next.title}</a>
+      `;
+    }
 }
 
 function onScroll() {
@@ -255,16 +262,19 @@ if (calGrid && calMonthLabel && calPrev && calNext && calDetail) {
       const pageItems = upcoming.slice(start, start + UPCOMING_PAGE_SIZE);
 
       calUpcoming.innerHTML = pageItems.length
-        ? pageItems.map(e => `
+        ? pageItems.map(e => {
+            const daysUntil = Math.ceil((new Date(e.date) - new Date(todayIso)) / 86400000);
+            return `
           <li>
             <span class="cal-type-dot type-${e.type}"></span>
             <button type="button" data-date="${e.date}">
-              <span class="cal-up-date">${formatShort(e.date)}</span>
+              <span class="cal-up-date">${urgencyEmoji(daysUntil)} ${formatShort(e.date)}</span>
               <span class="cal-up-title">${e.title}</span>
               <span class="cal-up-time">${TYPE_LABELS[e.type]} · ${e.time}</span>
             </button>
           </li>
-        `).join('')
+        `;
+          }).join('')
         : '<li class="cal-upcoming-empty">Aucune échéance à venir.</li>';
 
       calUpcoming.querySelectorAll('button[data-date]').forEach(btn => {
