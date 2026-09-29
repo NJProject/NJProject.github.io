@@ -370,11 +370,11 @@ export default function App() {
                     />
                   )}
 
-                  {(c.type === "required" || c.type === "excluded") && (
-                    <MultiActivityPicker
-                      activities={cityActivities}
-                      selectedIds={c.activityIds || (c.activityId ? [c.activityId] : [])}
-                      onChange={ids => updateConstraint(c.id, { activityIds: ids, activityId: undefined })}
+                  {c.type === "categoryGroup" && (
+                    <MultiCategoryPicker
+                      categories={cityCategories}
+                      selectedCategories={c.categories || []}
+                      onChange={cats => updateConstraint(c.id, { categories: cats })}
                     />
                   )}
 
