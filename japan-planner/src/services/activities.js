@@ -26,6 +26,7 @@ function parsePoiCard(card, city) {
   const category = card.dataset.cat || "";
   const description = card.querySelector("p")?.textContent?.trim() || "";
   const meta = card.querySelector(".poi-meta")?.textContent?.trim() || "";
+  const icon = card.querySelector(".poi-icon")?.textContent?.trim() || "";
   return {
     id: `${city.key}--${slugify(title)}`,
     city: city.key,
@@ -34,6 +35,7 @@ function parsePoiCard(card, city) {
     category,
     description,
     meta,
+    icon,
     // À compléter dans l'admin pour rendre l'optimisation géographique fiable.
     location: null,
     durationMin: null,
@@ -53,6 +55,7 @@ function parseCustomPoi(docSnap, city) {
     category: data.category || "",
     description: data.description || "",
     meta: data.meta || "",
+    icon: data.icon || "",
     location: null,
     durationMin: null,
     openingHours: null,

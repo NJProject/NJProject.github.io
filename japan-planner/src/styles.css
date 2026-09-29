@@ -129,6 +129,29 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
 .travel-quality.tq-ok{background:#fdf3d9;color:#9a7015;}
 .travel-quality.tq-bad{background:#fbeae7;color:#b23a2e;}
 
+.plan-checklist{
+  list-style:none;
+  margin:14px 0 0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.plan-checklist li{
+  font-size:.85rem;
+  color:#3a4a3f;
+}
+.plan-checklist li.warn{color:#9a7015;}
+
+.timeline-connector{
+  display:block !important;
+  grid-template-columns:none !important;
+  border-bottom:none !important;
+  padding:4px 0 4px 105px !important;
+  color:#6f6a61;
+  font-size:.78rem;
+}
+
 .back-to-overview{
   display:inline-block;
   border:0;background:none;
@@ -244,4 +267,5 @@ input,select{border:1px solid #cfc8ba;border-radius:9px;padding:9px;background:#
   .constraint-row select{min-width:0}
   .admin-grid{grid-template-columns:1fr}
   .timeline li{grid-template-columns:82px 1fr}
+  .timeline-connector{padding-left:82px !important;}
 }
