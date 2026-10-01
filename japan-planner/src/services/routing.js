@@ -3,6 +3,8 @@
  * - Si VITE_ROUTING_URL est configurée, elle est appelée avec un tableau
  *   de points et doit renvoyer { durationMin, distanceKm }.
  * - Sinon, on utilise une estimation haversine + facteur urbain.
+ * - [F] Un échec de l'API externe ne doit plus annuler toute une génération :
+ *   on retombe sur l'estimation pour ce seul trajet, pas sur une exception.
  *
  * Pour le Japon, on pourra brancher ensuite une API réellement multimodale
  * (Google Routes/Maps ou autre fournisseur avec transports en commun).
@@ -34,18 +36,24 @@ function estimateDurationMin(km) {
   return Math.round((km / TRANSIT_SPEED_KMH) * 60 + TRANSIT_OVERHEAD_MIN);
 }
 
-export async function routeBetween(a, b) {
+// [L] options est accepté mais pas encore utilisé (departureTime réservé pour
+// une future intégration tenant compte des horaires réels de transport).
+export async function routeBetween(a, b, options = {}) {
   if (!a || !b) return { durationMin: 60, distanceKm: null, estimated: true };
 
   const base = import.meta.env.VITE_ROUTING_URL;
   if (base) {
-    const response = await fetch(base, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ from: a, to: b })
-    });
-    if (!response.ok) throw new Error(`Erreur API itinéraire (${response.status})`);
-    return { ...(await response.json()), estimated: false };
+    try {
+      const response = await fetch(base, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from: a, to: b })
+      });
+      if (!response.ok) throw new Error(`Erreur API itinéraire (${response.status})`);
+      return { ...(await response.json()), estimated: false };
+    } catch (e) {
+      console.warn("Routage externe indisponible, estimation utilisée :", e.message);
+    }
   }
 
   const km = haversineKm(a, b);

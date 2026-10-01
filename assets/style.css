@@ -1194,8 +1194,17 @@ footer a{color:var(--muted);}
 }
 .poi-exclude-btn:disabled{cursor:default;opacity:.7;}
 
+.timeline-return{
+  margin:6px 0 0 105px;
+  font-size:.78rem;
+  color:#6f6a61;
+}
 
 /* ================= RESPONSIVE ================= */
+@media (max-width:620px){
+  .timeline-return{margin-left:82px;}
+}
+
 @media (max-width:620px){
   .voter-badge{bottom:8px;right:8px;font-size:11.5px;padding:6px 10px;}
 }

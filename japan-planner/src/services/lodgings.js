@@ -73,12 +73,12 @@ export function getLodgingForDate(cityKey, date) {
   const entries = LODGINGS[CITY_ALIASES[cityKey] || cityKey];
   if (!entries) return null;
   const match = entries.find(e => date >= e.start && date <= e.end);
-  return match ? match.location : (entries[0]?.location || null);
+  return match ? match.location : null;
 }
 
 export function getLodgingLabel(cityKey, date) {
   const entries = LODGINGS[CITY_ALIASES[cityKey] || cityKey];
   if (!entries) return null;
   const match = entries.find(e => date >= e.start && date <= e.end);
-  return match ? match.label : (entries[0]?.label || null);
+  return match ? match.label : null;
 }

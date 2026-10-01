@@ -61,6 +61,11 @@ export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel,
             ? `Groupe séparé en ${plan.groups.map(g => g.people.length).join(" + ")}`
             : "Tout le monde reste ensemble"}
         </li>
+        {(plan.requiredResults || []).map((r, i) => (
+          <li className={r.placed ? "ok" : "warn"} key={`req-${i}`}>
+            {r.placed ? "✓" : "⚠️"} Obligatoire : {r.title}{r.placed ? "" : " — n'a pas pu être placée"}
+          </li>
+        ))}
         {categoryGroupResults.map((r, i) => (
           <li className={r.satisfied ? "ok" : "warn"} key={i}>
             {r.satisfied ? "✓" : "⚠️"} Groupe « {r.categories.map(formatCategoryLabel).join(" ou ")} » {r.satisfied ? "satisfait" : "non satisfait"}
@@ -92,6 +97,11 @@ export default function PlanCard({ plan, rank, totalPeople, cityName, dateLabel,
                 </React.Fragment>
               ))}
             </ol>
+          )}
+          {group.returnTravelMin > 0 && (
+            <p className="timeline-return">
+              ↩ {group.returnTravelMin} min de retour au logement{group.returnEstimated ? " (estimé)" : ""}
+            </p>
           )}
         </section>
       ))}

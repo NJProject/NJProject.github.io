@@ -167,7 +167,14 @@ export default function App() {
     const set = new Set(cityActivities.map(a => a.category).filter(Boolean));
     return [...set].sort();
   }, [cityActivities]);
-  const people = useMemo(() => allVoters(votes), [votes]);
+  // Scopé à la ville active : avant, "X/6 satisfaits" comptait des personnes
+  // n'ayant jamais voté sur aucune activité de cette ville, rendant le ratio
+  // structurellement incomplétable pour certaines villes.
+  const people = useMemo(() => {
+    const cityIds = new Set(cityActivities.map(a => a.id));
+    const scopedVotes = new Map([...votes].filter(([id]) => cityIds.has(id)));
+    return allVoters(scopedVotes);
+  }, [votes, cityActivities]);
   const dateConstraint = constraints.find(c => c.type === "date");
   const multiDayConstraint = constraints.find(c => c.type === "multiDay");
   const constraintIssues = useMemo(() => validateConstraints(constraints, cityActivities), [constraints, cityActivities]);

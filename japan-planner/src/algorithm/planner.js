@@ -7,17 +7,12 @@ const DEFAULT_DAY_END = 20 * 60;
 const POOL_CAP = 12; // borne le nb de candidats évalués géographiquement par groupe/jour
 
 // Poids de scoring, regroupés ici pour être ajustés facilement en un seul endroit.
-// Recalibrés une fois que routing.js a cessé de supposer une vitesse de marche
-// uniforme (voir estimateDurationMin) : les temps de trajet reflètent désormais
-// mieux la réalité (transit + forfait d'accès), donc le coût du trajet pèse
-// un peu moins fort par minute qu'avant, pour ne pas écraser la satisfaction
-// des votes sur des écarts de quelques minutes qui, eux, sont maintenant réels.
 const WEIGHTS = {
   VOTE: 25,               // valeur d'un vote du groupe pour une activité
-  TRAVEL_COST: 0.85,      // coût par minute de trajet, au choix d'une activité (était 1.1)
+  TRAVEL_COST: 0.85,      // coût par minute de trajet, au choix d'une activité
   IDLE_COST: 0.3,         // coût par minute d'attente avant ouverture
   REQUIRED_BONUS: 500,    // bonus pour une activité marquée "obligatoire"
-  DAY_TRAVEL_PENALTY: 0.25, // pénalité par minute de trajet total sur la journée (était 0.35)
+  DAY_TRAVEL_PENALTY: 0.25, // pénalité par minute de trajet total sur la journée
   SEPARATION_PENALTY: 12,   // pénalité par sous-groupe au-delà du premier
   GROUPING_CONSISTENCY_BONUS: 40, // bonus si la répartition du jour reprend celle d'un jour précédent
   MEAL_TIME_BONUS: 60,     // bonus pour une activité "gastronomie" si son horaire tombe sur un repas
@@ -83,16 +78,6 @@ function toDepartureDate(dateStr, minutes) {
 function separationPenalty(groupCount) {
   return Math.max(0, groupCount - 1) * WEIGHTS.SEPARATION_PENALTY;
 }
-
-/*
- * Construction gloutonne géo-consciente : à chaque étape, on évalue tous les
- * candidats restants (pas seulement un top-5 déjà figé), on calcule le trajet
- * réel depuis l'arrêt précédent, et on choisit celui qui maximise
- * "popularité − coût du trajet − temps d'attente avant ouverture".
- * Les poids (25 / 1.1 / 0.3) sont un point de départ raisonnable avec
- * l'estimation à vol d'oiseau — à recalibrer une fois l'API Google Maps
- * branchée, quand les temps de trajet reflèteront la réalité des transports.
- */
 
 // Décale le début d'une activité après un créneau "temps libre" imposé s'il
 // chevaucherait ce créneau — ne raccourcit jamais la durée de l'activité,
@@ -188,7 +173,25 @@ async function buildDayPlan(pool, group, { dateStr, timeBounds, requiredIds = []
     remaining.splice(remaining.indexOf(best), 1);
   }
 
-  return { ordered, totalTravelMin: Math.round(totalTravel) };
+  // [G] Trajet retour vers le logement en fin de journée — absent jusqu'ici,
+  // ce qui sous-estimait totalTravelMin/travelRatio (et donc le badge 🟢/🟡/🔴).
+  let returnTravelMin = 0;
+  let returnEstimated = false;
+  if (startLocation && current?.location && ordered.length) {
+    const back = await routeBetween(current.location, startLocation, {
+      departureTime: dateStr ? toDepartureDate(dateStr, cursor) : undefined
+    });
+    returnTravelMin = back.durationMin;
+    returnEstimated = back.estimated;
+    totalTravel += back.durationMin;
+  }
+
+  return {
+    ordered,
+    totalTravelMin: Math.round(totalTravel),
+    returnTravelMin: Math.round(returnTravelMin),
+    returnEstimated
+  };
 }
 
 function buildGroupCandidates(activities, people, constraints) {
@@ -267,25 +270,54 @@ export async function generatePlans({ activities, people, date, constraints = []
     let score = 0;
     let travel = 0;
     let activeMin = 0;
+    // [B] Évite qu'une activité obligatoire soit placée deux fois le même jour
+    // dans deux sous-groupes différents (ex. "3+3" visitant le même lieu unique
+    // au même moment). Une fois qu'un sous-groupe l'a réellement placée, elle
+    // sort du pool des sous-groupes suivants pour ce même candidat de répartition.
+    const claimedRequired = new Set();
 
     for (const group of candidate.groups) {
       let pool = relevant
         .filter(a => a.voters?.some(v => group.includes(v)))
-        .filter(a => !a.excluders?.some(v => group.includes(v)));
+        .filter(a => !a.excluders?.some(v => group.includes(v)))
+        .filter(a => !claimedRequired.has(a.id));
       pool.sort((a, b) => groupVoteScore(b, group) - groupVoteScore(a, group));
       pool = pool.slice(0, POOL_CAP);
 
       // Une activité marquée "obligatoire" doit rester disponible même si elle
-      // n'a pas été votée par ce groupe ou est sortie du top 12.
+      // n'a pas été votée par ce groupe ou est sortie du top 12 — sauf si un
+      // sous-groupe précédent l'a déjà réellement placée aujourd'hui.
       requiredIds.forEach(id => {
+        if (claimedRequired.has(id)) return;
         if (!pool.some(a => a.id === id)) {
           const forced = relevant.find(a => a.id === id);
           if (forced && !forced.excluders?.some(v => group.includes(v))) pool.push(forced);
         }
       });
 
+      // [D] Repêchage : une activité correspondant à un groupe de catégories
+      // demandé doit rester une candidate potentielle même sans aucun vote de
+      // ce sous-groupe et même hors du top 12 — sinon le bonus "groupe de
+      // catégories" ne peut jamais s'appliquer à elle (le pool, trié par votes
+      // et tronqué juste au-dessus, l'exclurait systématiquement).
+      categoryGroups.forEach(cats => {
+        const alreadyCovered = pool.some(a => cats.includes(a.category));
+        if (alreadyCovered) return;
+        const bestMatch = relevant
+          .filter(a => cats.includes(a.category))
+          .filter(a => !a.excluders?.some(v => group.includes(v)))
+          .filter(a => !claimedRequired.has(a.id))
+          .sort((a, b) => groupVoteScore(b, group) - groupVoteScore(a, group))[0];
+        if (bestMatch && !pool.some(a => a.id === bestMatch.id)) pool.push(bestMatch);
+      });
+
       const startLocation = city ? getLodgingForDate(city, date) : null;
       const result = await buildDayPlan(pool, group, { dateStr: date, timeBounds, requiredIds, startLocation, freeWindow, flexibleMap, categoryGroups });
+
+      result.ordered.forEach(item => {
+        if (requiredIds.includes(item.activity.id)) claimedRequired.add(item.activity.id);
+      });
+
       const satisfactionScore = result.ordered.length
         ? result.ordered.reduce((sum, item) => sum + satisfaction(item.activity, group), 0) / result.ordered.length
         : 0;
@@ -300,6 +332,13 @@ export async function generatePlans({ activities, people, date, constraints = []
     const requiredPlaced = requiredIds.filter(id => scheduledIds.has(id)).length;
     score += requiredPlaced * WEIGHTS.REQUIRED_PLAN_BONUS;
 
+    // [C] Expose le statut réel de chaque activité obligatoire — jusqu'ici
+    // "requiredPlaced" n'existait que pour le score, invisible à l'utilisateur.
+    const requiredResults = requiredIds.map(id => {
+      const activity = activities.find(a => a.id === id) || relevant.find(a => a.id === id);
+      return { id, title: activity?.title || id, placed: scheduledIds.has(id) };
+    });
+
     const scheduledCategories = new Set(groupResults.flatMap(g => g.ordered.map(item => item.activity.category)));
     const categoryGroupResults = categoryGroups.map(cats => ({
       categories: cats,
@@ -312,8 +351,8 @@ export async function generatePlans({ activities, people, date, constraints = []
 
     if (preferredGrouping && candidate.groups.length > 1
       && normalizeGrouping(candidate.groups) === normalizeGrouping(preferredGrouping)) {
-    score += WEIGHTS.GROUPING_CONSISTENCY_BONUS;
-  }
+      score += WEIGHTS.GROUPING_CONSISTENCY_BONUS;
+    }
 
     const travelRatio = (travel + activeMin) > 0 ? travel / (travel + activeMin) : 0;
 
@@ -325,6 +364,7 @@ export async function generatePlans({ activities, people, date, constraints = []
       totalTravelMin: travel,
       travelRatio,
       categoryGroupResults,
+      requiredResults,
       peopleSatisfied: new Set(groupResults.flatMap(g =>
         g.people.filter(person => g.ordered.some(item => voters(item.activity).has(person)))
       )).size
@@ -352,7 +392,6 @@ export async function generatePlansForDateRange({ activities, people, dates, con
   return perDate.sort((a, b) => b.topScore - a.topScore);
 }
 
-
 // Enchaîne plusieurs jours choisis, dans l'ordre chronologique, en excluant
 // au fil de l'eau les activités déjà casées un jour précédent — évite les
 // doublons sur un séjour de plusieurs jours dans la même ville.
@@ -362,8 +401,21 @@ export async function generateMultiDayPlan({ activities, people, dates, constrai
   const days = [];
   let lastGrouping = null; // répartition en sous-groupes du dernier jour séparé, pour la cohérence inter-jours
 
+  // [M] Une fois un groupe de catégories satisfait un jour du programme, il
+  // ne doit plus être redemandé/réévalué "non satisfait" les jours suivants —
+  // comportement désormais aligné sur celui de "required", qui bénéficiait
+  // déjà de cet effet via l'exclusion des activités utilisées (ci-dessous).
+  const satisfiedGroupKeys = new Set();
+  function groupKey(cats) {
+    return [...cats].sort().join("|");
+  }
+
   for (const date of sortedDates) {
-    const plans = await generatePlans({ activities, people, date, constraints, extraExcludedIds: used, city, preferredGrouping: lastGrouping });
+    const dayConstraints = constraints.filter(c =>
+      !(c.type === "categoryGroup" && c.categories?.length && satisfiedGroupKeys.has(groupKey(c.categories)))
+    );
+
+    const plans = await generatePlans({ activities, people, date, constraints: dayConstraints, extraExcludedIds: used, city, preferredGrouping: lastGrouping });
     if (!plans.length) {
       days.push({ date, plan: null });
       continue;
@@ -374,6 +426,9 @@ export async function generateMultiDayPlan({ activities, people, dates, constrai
     if (best.groups.length > 1) {
       lastGrouping = best.groups.map(g => g.people);
     }
+    (best.categoryGroupResults || []).forEach(r => {
+      if (r.satisfied) satisfiedGroupKeys.add(groupKey(r.categories));
+    });
   }
 
   const validDays = days.filter(d => d.plan);
