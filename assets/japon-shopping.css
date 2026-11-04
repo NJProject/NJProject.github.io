@@ -1,0 +1,382 @@
+
+:root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  
+    --bg: #FAF7F0;
+    --card: #ffffff;
+    --tx: #1B2A41;
+    --mu: #5B6472;
+    --bd: #DCD6C6;
+    --ac: #B23A2E;
+    --ac2: #FBEDEA;
+    --ok: #3F7A5C;
+    --in: #2F4B7C;
+    --gd: #A6873B;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15141c;
+      --card: #1e1d28;
+      --tx: #efe9db;
+      --mu: #a39d8e;
+      --bd: #34324a;
+      --ac: #e0675a;
+      --ac2: #3a2623;
+      --ok: #8fa3e0;
+      --in: #8fa3e0;
+      --gd: #d4aa5a;
+    }
+  }
+  
+  :root[data-theme="dark"] {
+    --bg: #15141c;
+    --card: #1e1d28;
+    --tx: #efe9db;
+    --mu: #a39d8e;
+    --bd: #34324a;
+    --ac: #e0675a;
+    --ac2: #3a2623;
+    --ok: #8fa3e0;
+    --in: #8fa3e0;
+    --gd: #d4aa5a;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--tx);
+    font: 15px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px;
+    position: relative;
+  }
+  
+  h1 {
+    font: 600 26px/1.2 Georgia, "Times New Roman", serif;
+    color: var(--in);
+    margin: 4px 0 2px;
+    padding-right: 130px;
+  }
+  
+  h1::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    background: var(--gd);
+    margin-top: 8px;
+  }
+  
+  .stat b,
+  .gh,
+  .nm {
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  
+  .gh {
+    color: var(--in);
+    font-size: 14px;
+    margin: 16px 0 6px;
+  }
+  
+  .tg {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+  
+  .sub {
+    color: var(--mu);
+    margin: 0 0 14px;
+    font-size: 13px;
+  }
+  
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .stat b {
+    display: block;
+    font-size: 18px;
+  }
+  
+  .stat span {
+    font-size: 12px;
+    color: var(--mu);
+  }
+  
+  .bar {
+    height: 6px;
+    background: var(--bd);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  
+  .bar i {
+    display: block;
+    height: 100%;
+    background: var(--ok);
+    width: 0;
+    transition: width .3s;
+  }
+  
+  .form {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 14px;
+    padding: 12px;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 14px;
+  }
+  
+  .form .full,
+  .grid2 .full {
+    grid-column: 1 / -1;
+  }
+  
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .more summary {
+    cursor: pointer;
+    color: var(--in);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  input,
+  select,
+  button {
+    font: inherit;
+    color: var(--tx);
+  }
+  
+  input,
+  select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--bd);
+    border-radius: 9px;
+    background: var(--bg);
+  }
+  
+  button {
+    cursor: pointer;
+    border: 1px solid var(--bd);
+    background: var(--card);
+    border-radius: 9px;
+    padding: 8px 12px;
+  }
+  
+  button.p {
+    background: var(--ac);
+    border-color: var(--ac);
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .chip {
+    white-space: nowrap;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+  
+  .chip.on {
+    background: var(--ac);
+    color: #fff;
+    border-color: var(--ac);
+  }
+  
+  .item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  
+  .item.done {
+    opacity: .55;
+  }
+  
+  .item.done .nm {
+    text-decoration: line-through;
+  }
+  
+  .item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: var(--ok);
+    flex: none;
+  }
+  
+  .bd {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .nm {
+    font-weight: 600;
+    word-break: break-word;
+  }
+  
+  .meta {
+    font-size: 12.5px;
+    color: var(--mu);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 2px;
+  }
+  
+  .tag {
+    background: var(--ac2);
+    color: var(--ac);
+    border-radius: 6px;
+    padding: 0 6px;
+  }
+  
+  .pr {
+    text-align: right;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  
+  .x {
+    border: 0;
+    background: none;
+    color: var(--mu);
+    padding: 2px 6px;
+    font-size: 18px;
+  }
+  
+  .empty {
+    text-align: center;
+    color: var(--mu);
+    padding: 28px 0;
+  }
+  
+  .tools {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  
+  .rate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--mu);
+    margin-bottom: 12px;
+  }
+  
+  .rate input {
+    width: 80px;
+  }
+  
+  .mt {
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  
+  .mr {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  
+  .ov {
+    color: var(--ac);
+    font-weight: 600;
+  }
+  
+  .sortrow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--mu);
+  }
+  
+  .sortrow select {
+    width: auto;
+  }
+  .back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 9px 14px;
+    border: 1px solid var(--bd);
+    border-radius: 9px;
+    color: var(--in);
+    background: var(--card);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background .2s ease;
+  }
+  
+  .back-home:hover {
+    background: var(--ac2);
+  }
+  
+  @media (max-width: 480px) {
+    .back-home {
+      width: 100%;
+      justify-content: center;
+    }
+  }

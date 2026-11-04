@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Souvenirs du Japon</title>
+<link rel="stylesheet" href="/assets/japon-shopping.css">
+<script src="/assets/japon-shopping.js" defer></script>
+</head>
+<body>
+<main>
+<button class="tg" id="theme" aria-label="Changer de thème"></button>
+<a href="/" class="back-home">← Retour à l'accueil</a>
+<h1>🎎 À ramener du Japon</h1>
+<p class="sub">Ta liste d’envies, tes budgets et ce qui est déjà dans la valise.</p>
+
+<div class="stats">
+<div class="stat"><b id="sN">0</b><span>articles</span></div>
+<div class="stat"><b id="sY">0 ¥</b><span>reste à acheter</span></div>
+<div class="stat"><b id="sE">0 €</b><span>≈ en euros</span></div>
+</div>
+<div class="bar"><i id="pg"></i></div>
+<div class="rate">Taux : 1 € = <input id="rate" type="number" min="1" step="1" value="165"> ¥</div>
+<div class="rate">Budget total <input id="budget" type="number" min="0" placeholder="0"> € · Franchise bagages <input id="kg" type="number" min="0" placeholder="0"> kg</div>
+<div id="budInfo"></div><div id="wgtInfo"></div>
+
+<div class="form">
+<input class="full" id="name" placeholder="Que veux-tu ramener ? (ex. : KitKat matcha)">
+<input id="price" type="number" min="0" placeholder="Prix en ¥ (facultatif)">
+<input id="qty" type="number" min="1" value="1" aria-label="Quantité" placeholder="Quantité">
+<details class="full more"><summary>＋ Plus de détails (catégorie, ville, poids…)</summary><div class="grid2">
+<select id="cat"></select>
+<select id="prio"><option value="1">⭐ Indispensable</option><option value="2" selected>👍 Si possible</option><option value="3">💭 Bonus</option></select>
+<select id="city"></select><input id="wt" type="number" min="0" placeholder="Poids unitaire (g)">
+<input class="full" id="shop" placeholder="Boutique ou quartier (facultatif)">
+<input class="full" id="for" placeholder="Pour qui ? (facultatif)"></div></details>
+<button class="p full" id="add">Ajouter à la liste</button>
+<button class="full" id="cancel" hidden>Annuler la modification</button>
+</div>
+
+<div class="sortrow">Trier par <select id="sort"><option value="prio">Priorité</option><option value="city">Ville / étape</option></select></div>
+<div class="filters" id="filters"></div>
+<div id="list"></div>
+
+<div class="tools">
+<button id="exp">Exporter</button>
+<button id="imp">Importer</button>
+<button id="clr">Retirer les achetés</button>
+<button id="shr">Copier la liste</button>
+<input type="file" id="file" accept=".json" hidden>
+</div>
+</main>
+</body>
+</html>
