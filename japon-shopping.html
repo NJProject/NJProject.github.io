@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Souvenirs du Japon</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#FAF7F0;--card:#ffffff;--tx:#1B2A41;--mu:#5B6472;--bd:#DCD6C6;--ac:#B23A2E;--ac2:#FBEDEA;--ok:#3F7A5C;--in:#2F4B7C;--gd:#A6873B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15141c;--card:#1e1d28;--tx:#efe9db;--mu:#a39d8e;--bd:#34324a;--ac:#e0675a;--ac2:#3a2623;--ok:#8fa3e0;--in:#8fa3e0;--gd:#d4aa5a}}
+:root[data-theme="dark"]{--bg:#15141c;--card:#1e1d28;--tx:#efe9db;--mu:#a39d8e;--bd:#34324a;--ac:#e0675a;--ac2:#3a2623;--ok:#8fa3e0;--in:#8fa3e0;--gd:#d4aa5a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:16px}
+h1{font:600 26px/1.2 Georgia,"Times New Roman",serif;color:var(--in);margin:4px 0 2px}h1::after{content:"";display:block;width:48px;height:3px;background:var(--gd);margin-top:8px}.stat b,.gh,.nm{font-family:Georgia,"Times New Roman",serif}.gh{color:var(--in)}.stat,.item,.form{border-radius:10px}main{position:relative}.tg{position:absolute;top:16px;right:16px;border-radius:20px;padding:5px 12px;font-size:13px}h1{padding-right:130px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.grid2 .full{grid-column:1/-1}.more summary{cursor:pointer;color:var(--in);font-size:14px;font-weight:600}
+.sub{color:var(--mu);margin:0 0 14px;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:18px}.stat span{font-size:12px;color:var(--mu)}
+.bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.form{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;display:grid;gap:8px;grid-template-columns:1fr 1fr;margin-bottom:14px}
+.form .full{grid-column:1/-1}
+input,select,button{font:inherit;color:var(--tx)}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg)}
+button{cursor:pointer;border:1px solid var(--bd);background:var(--card);border-radius:9px;padding:8px 12px}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
+.chip{white-space:nowrap;border-radius:20px;padding:5px 12px;font-size:13px}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.item{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.item.done{opacity:.55}.item.done .nm{text-decoration:line-through}
+.item input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--ok);flex:none}
+.bd{flex:1;min-width:0}.nm{font-weight:600;word-break:break-word}
+.meta{font-size:12.5px;color:var(--mu);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:2px}
+.tag{background:var(--ac2);color:var(--ac);border-radius:6px;padding:0 6px}
+.pr{text-align:right;font-size:13px;white-space:nowrap}
+.x{border:0;background:none;color:var(--mu);padding:2px 6px;font-size:18px}
+.empty{text-align:center;color:var(--mu);padding:28px 0}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:13px}
+.rate{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mu);margin-bottom:12px}
+.rate input{width:80px}
+.mt{margin-bottom:10px;font-size:13px}.mr{display:flex;justify-content:space-between;margin-bottom:4px}.ov{color:var(--ac);font-weight:600}
+.gh{font-size:14px;margin:16px 0 6px;color:var(--mu)}.sortrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;color:var(--mu)}.sortrow select{width:auto}
+</style>
+</head>
+<body>
+<main>
+<button class="tg" id="theme" aria-label="Changer de thème"></button>
+<h1>🎎 À ramener du Japon</h1>
+<p class="sub">Ta liste d’envies, tes budgets et ce qui est déjà dans la valise.</p>
+
+<div class="stats">
+<div class="stat"><b id="sN">0</b><span>articles</span></div>
+<div class="stat"><b id="sY">0 ¥</b><span>reste à acheter</span></div>
+<div class="stat"><b id="sE">0 €</b><span>≈ en euros</span></div>
+</div>
+<div class="bar"><i id="pg"></i></div>
+<div class="rate">Taux : 1 € = <input id="rate" type="number" min="1" step="1" value="165"> ¥</div>
+<div class="rate">Budget total <input id="budget" type="number" min="0" placeholder="0"> € · Franchise bagages <input id="kg" type="number" min="0" placeholder="0"> kg</div>
+<div id="budInfo"></div><div id="wgtInfo"></div>
+
+<div class="form">
+<input class="full" id="name" placeholder="Que veux-tu ramener ? (ex. : KitKat matcha)">
+<input id="price" type="number" min="0" placeholder="Prix en ¥ (facultatif)">
+<input id="qty" type="number" min="1" value="1" aria-label="Quantité" placeholder="Quantité">
+<details class="full more"><summary>＋ Plus de détails (catégorie, ville, poids…)</summary><div class="grid2">
+<select id="cat"></select>
+<select id="prio"><option value="1">⭐ Indispensable</option><option value="2" selected>👍 Si possible</option><option value="3">💭 Bonus</option></select>
+<select id="city"></select><input id="wt" type="number" min="0" placeholder="Poids unitaire (g)">
+<input class="full" id="shop" placeholder="Boutique ou quartier (facultatif)">
+<input class="full" id="for" placeholder="Pour qui ? (facultatif)"></div></details>
+<button class="p full" id="add">Ajouter à la liste</button>
+<button class="full" id="cancel" hidden>Annuler la modification</button>
+</div>
+
+<div class="sortrow">Trier par <select id="sort"><option value="prio">Priorité</option><option value="city">Ville / étape</option></select></div>
+<div class="filters" id="filters"></div>
+<div id="list"></div>
+
+<div class="tools">
+<button id="exp">Exporter</button>
+<button id="imp">Importer</button>
+<button id="clr">Retirer les achetés</button>
+<button id="shr">Copier la liste</button>
+<input type="file" id="file" accept=".json" hidden>
+</div>
+</main>
+<script>
+const CATS=["🍫 Snacks & sucreries","🍵 Thé & alimentation","🎮 Jeux & figurines","📚 Manga & livres","👕 Vêtements","💄 Beauté & santé","🔪 Cuisine & maison","✏️ Papeterie","🎁 Cadeaux","📦 Autre"];
+const PR=["","⭐","👍","💭"];
+let S={items:[],rate:165,budget:0,kg:0},filter="all",sort="prio";
+try{const r=localStorage.getItem("japon-shop");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem("japon-shop",JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>Math.round(n).toLocaleString("fr-FR");
+$("cat").innerHTML=CATS.map((c,i)=>`<option value="${i}">${c}</option>`).join("");
+$("rate").value=S.rate;
+const CITIES=["Osaka","Nara","Kyoto","Kanazawa","Tokyo","Sans préférence"];
+$("city").innerHTML=CITIES.map((c,i)=>`<option value="${i}" ${i===5?"selected":""}>${i<5?"📍 ":""}${c}</option>`).join("");
+S.items.forEach(i=>{if(i.city==null)i.city=5;if(i.wt==null)i.wt=0});
+const fmt1=n=>(Math.round(n*10)/10).toLocaleString("fr-FR");
+const meter=(l,v,m,u)=>{const p=m?Math.min(100,100*v/m):0,over=m&&v>m;return `<div class="mt"><div class="mr"><span>${l}</span><span class="${over?"ov":""}">${fmt1(v)} / ${m?fmt1(m):"—"} ${u}${over?" ⚠️ dépassé":""}</span></div><div class="bar" style="margin-bottom:0"><i style="width:${p}%;background:${over?"var(--ac)":"var(--ok)"}"></i></div></div>`};
+
+function render(){
+  const its=S.items,todo=its.filter(i=>!i.done);
+  const yen=todo.reduce((a,i)=>a+(i.price||0)*i.qty,0);
+  $("sN").textContent=todo.length+" / "+its.length;
+  $("sY").textContent=fmt(yen)+" ¥";
+  $("sE").textContent=fmt(yen/(S.rate||165))+" €";
+  $("pg").style.width=(its.length?100*(its.length-todo.length)/its.length:0)+"%";
+  if(document.activeElement!==$("budget"))$("budget").value=S.budget||"";
+  if(document.activeElement!==$("kg"))$("kg").value=S.kg||"";
+  const all=its.reduce((a,i)=>a+(i.price||0)*i.qty,0)/(S.rate||165);
+  $("budInfo").innerHTML=S.budget?meter("💶 Budget (liste complète)",all,S.budget,"€"):"";
+  const wk=its.reduce((a,i)=>a+(i.wt||0)*i.qty,0)/1000;
+  $("wgtInfo").innerHTML=(S.kg||wk)?meter("🧳 Poids des achats",wk,S.kg||0,"kg"):"";
+  const f=[["all","Tout"],["todo","À acheter"],["done","Achetés"]].map(([k,l])=>`<button class="chip ${filter===k?"on":""}" data-f="${k}">${l}</button>`);
+  CATS.forEach((c,i)=>{if(its.some(x=>x.cat===i))f.push(`<button class="chip ${filter==="c"+i?"on":""}" data-f="c${i}">${c.split(" ")[0]}</button>`)});
+  $("filters").innerHTML=f.join("");
+  let v=[...its].filter(i=>filter==="all"||(filter==="todo"&&!i.done)||(filter==="done"&&i.done)||filter==="c"+i.cat);
+  v.sort(sort==="city"?(a,b)=>a.city-b.city||a.done-b.done||a.prio-b.prio:(a,b)=>a.done-b.done||a.prio-b.prio||a.cat-b.cat);
+  const hd=(v,k)=>sort==="city"&&(k===0||v[k-1].city!==v[k].city)?`<h3 class="gh">${v[k].city<5?"📍 ":""}${CITIES[v[k].city]}</h3>`:"";
+  $("list").innerHTML=v.length?v.map((i,k)=>hd(v,k)+`<div class="item ${i.done?"done":""}">
+    <input type="checkbox" data-t="${i.id}" ${i.done?"checked":""} aria-label="Acheté">
+    <div class="bd"><div class="nm">${PR[i.prio]} ${esc(i.name)}${i.qty>1?" ×"+i.qty:""}</div>
+    <div class="meta"><span class="tag">${CATS[i.cat]}</span>${i.shop?`<span>📍 ${esc(i.shop)}</span>`:""}${i.who?`<span>🎁 ${esc(i.who)}</span>`:""}${sort!=="city"&&i.city<5?`<span>🗺️ ${CITIES[i.city]}</span>`:""}${i.wt?`<span>⚖️ ${i.wt*i.qty} g</span>`:""}</div></div>
+    <div class="pr">${i.price?fmt(i.price*i.qty)+" ¥<br><span style='color:var(--mu)'>≈ "+fmt(i.price*i.qty/(S.rate||165))+" €</span>":""}</div>
+    <button class="x" data-e="${i.id}" aria-label="Modifier">✎</button><button class="x" data-d="${i.id}" aria-label="Supprimer">×</button></div>`).join(""):`<div class="empty">Rien ici pour le moment 🗾</div>`;
+}
+$("add").onclick=()=>{
+  const n=$("name").value.trim();if(!n){$("name").focus();return}
+  const o=editId?S.items.find(x=>x.id===editId):null;const it=Object.assign(o||{id:Date.now()+Math.random(),done:false},{name:n,cat:+$("cat").value,price:+$("price").value||0,qty:Math.max(1,+$("qty").value||1),prio:+$("prio").value,city:+$("city").value,wt:+$("wt").value||0,shop:$("shop").value.trim(),who:$("for").value.trim()});if(!o)S.items.push(it);editId=null;
+  ["name","price","shop","for","wt"].forEach(k=>$(k).value="");$("qty").value=1;setMode();
+  save();render();$("name").focus();
+};
+["name","price"].forEach(k=>$(k).onkeydown=e=>{if(e.key==="Enter")$("add").click()});
+$("rate").onchange=e=>{S.rate=Math.max(1,+e.target.value||165);save();render()};
+$("filters").onclick=e=>{const f=e.target.dataset.f;if(f){filter=f;render()}};
+$("list").onclick=e=>{
+  const t=e.target.dataset;
+  if(t.t){const i=S.items.find(x=>String(x.id)===t.t);if(i){i.done=e.target.checked;save();render()}}
+  if(t.d){if(String(editId)===t.d){editId=null;setMode()}S.items=S.items.filter(x=>String(x.id)!==t.d);save();render()}
+  if(t.e)startEdit(t.e);
+};
+$("clr").onclick=()=>{if(S.items.some(i=>i.done)&&confirm("Retirer tous les articles achetés ?")){S.items=S.items.filter(i=>!i.done);save();render()}};
+$("exp").onclick=()=>{const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(S));a.download="japon-liste.json";a.click()};
+$("imp").onclick=()=>$("file").click();
+$("file").onchange=e=>{const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.items)){S=Object.assign(S,d);$("rate").value=S.rate;save();render()}}catch(x){alert("Fichier invalide")}};if(e.target.files[0])r.readAsText(e.target.files[0])};
+$("shr").onclick=async()=>{
+  const t=S.items.filter(i=>!i.done).map(i=>`☐ ${i.name}${i.qty>1?" ×"+i.qty:""}${i.price?" — "+fmt(i.price*i.qty)+" ¥":""}`).join("\n");
+  try{await navigator.clipboard.writeText(t||"Liste vide");$("shr").textContent="Copié ✓"}catch(e){prompt("Copie la liste :",t)}
+  setTimeout(()=>$("shr").textContent="Copier la liste",1500);
+};
+$("budget").onchange=e=>{S.budget=Math.max(0,+e.target.value||0);save();render()};
+$("kg").onchange=e=>{S.kg=Math.max(0,+e.target.value||0);save();render()};
+$("sort").onchange=e=>{sort=e.target.value;render()};
+const dark=()=>{const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme:dark)").matches};
+const setTheme=t=>{document.documentElement.dataset.theme=t;$("theme").textContent=t==="dark"?"☀️ Mode clair":"🌙 Mode sombre"};
+try{const t=localStorage.getItem("japon-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+setTheme(dark()?"dark":"light");
+$("theme").onclick=()=>{const t=dark()?"light":"dark";setTheme(t);try{localStorage.setItem("japon-theme",t)}catch(e){}};
+let editId=null;
+const setMode=()=>{$("add").textContent=editId?"Enregistrer les modifications":"Ajouter à la liste";$("cancel").hidden=!editId;if(!editId){document.querySelector(".more").open=false;$("cat").value=0;$("prio").value=2;$("city").value=5}};
+const startEdit=id=>{const i=S.items.find(x=>String(x.id)===id);if(!i)return;editId=i.id;
+ $("name").value=i.name;$("cat").value=i.cat;$("price").value=i.price||"";$("qty").value=i.qty;$("prio").value=i.prio;$("city").value=i.city;$("wt").value=i.wt||"";$("shop").value=i.shop||"";$("for").value=i.who||"";
+ setMode();document.querySelector(".more").open=true;$("name").scrollIntoView({behavior:"smooth",block:"center"});$("name").focus()};
+$("cancel").onclick=()=>{editId=null;["name","price","shop","for","wt"].forEach(k=>$(k).value="");$("qty").value=1;setMode()};
+render();
+</script>
+</body>
+</html>
