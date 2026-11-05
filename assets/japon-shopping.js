@@ -757,7 +757,7 @@ doc.text = (...args) => {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    doc.text(nameLines, textX, y + 1);
+    
     const nameLines = doc.splitTextToSize(
       item.name || "Sans nom",
       availableWidth
@@ -816,7 +816,7 @@ doc.text = (...args) => {
 
     // Nom de l'article
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(...(item.done ? COLORS.muted : COLORS.ink));
     doc.text(nameLines, textX, y + 1);
 
@@ -967,36 +967,6 @@ doc.text = (...args) => {
     doc.text(
       value,
       pageWidth - margin - 5,
-      lineY,
-      { align: "right" }
-    );
-  });
-
-  doc.setFillColor(...COLORS.white);
-  doc.setDrawColor(...COLORS.line);
-  doc.roundedRect(
-    margin,
-    y - 4,
-    contentWidth,
-    infoBoxHeight,
-    2,
-    2,
-    "FD"
-  );
-
-  info.forEach(([label, value], index) => {
-    const lineY = y + index * infoHeight + 1;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...COLORS.muted);
-    doc.text(label, margin + 4, lineY);
-
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...COLORS.ink);
-    doc.text(
-      value,
-      pageWidth - margin - 4,
       lineY,
       { align: "right" }
     );

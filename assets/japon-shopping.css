@@ -402,9 +402,9 @@
 .photo-btn[hidden]{display:none}
 
 .pdf-export {
-  background: var(--in);
+  background: var(--ac);
   color: #fff;
-  border-color: var(--in);
+  border-color: var(--ac);
   font-weight: 600;
 }
 
