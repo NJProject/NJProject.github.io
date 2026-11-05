@@ -36,9 +36,18 @@
             <select id="city"></select><input id="wt" type="number" min="0" placeholder="Poids unitaire (g)">
             <input class="full" id="shop" placeholder="Boutique ou quartier (facultatif)">
             <input class="full" id="for" placeholder="Pour qui ? (facultatif)">
-            <label class="full">📷 Photo (facultatif)
-                <input id="img" type="file" accept="image/jpeg,image/png,image/webp"></label>
-                <div class="full" id="imgPrev" hidden><img class="thumb" alt="Aperçu"> <button type="button" id="imgClr">Retirer la photo</button></div>
+            <div class="full photo-field">
+                <input id="img" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+                <div class="photo-box" id="photoBox">
+                  <img class="photo-img" id="photoImg" alt="" hidden>
+                  <span class="photo-empty" id="photoEmpty">📷<small>Aucune photo</small></span>
+                </div>
+                <div class="photo-actions">
+                  <button type="button" class="photo-btn" id="imgPick">📷 Choisir une photo</button>
+                  <button type="button" class="photo-btn photo-rm" id="imgClr" hidden>✕ Retirer</button>
+                  <small class="photo-hint">JPG, PNG ou WebP · facultatif</small>
+                </div>
+              </div>
         </div>
     </details>
     <button class="p full" id="add">Ajouter à la liste</button>

@@ -601,15 +601,15 @@ const CATS = [
   
   // Premier affichage
   function showPrev() {
-    const box = $("imgPrev");
-    if (IMG_RE.test(pendingImg)) {
-      box.querySelector("img").src = pendingImg;
-      box.hidden = false;
-    } else {
-      box.hidden = true;
-      $("img").value = "";
-    }
+    const has = IMG_RE.test(pendingImg);
+    $("photoImg").hidden = !has;
+    $("photoEmpty").hidden = has;
+    $("imgClr").hidden = !has;
+    $("imgPick").textContent = has ? "🔄 Changer la photo" : "📷 Choisir une photo";
+    if (has) $("photoImg").src = pendingImg;
+    else { $("photoImg").removeAttribute("src"); $("img").value = ""; }
   }
+
   $("img").onchange = async e => {
     const f = e.target.files[0];
     if (!f) return;
@@ -617,6 +617,8 @@ const CATS = [
     catch (err) { alert(err.message); e.target.value = ""; }
   };
   $("imgClr").onclick = () => { pendingImg = ""; showPrev(); };
+
+  $("imgPick").onclick = () => $("img").click();
 
   render();
   
