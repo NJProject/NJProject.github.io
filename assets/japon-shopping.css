@@ -400,6 +400,23 @@
 .photo-img[hidden],
 .photo-empty[hidden],
 .photo-btn[hidden]{display:none}
+
+.pdf-export {
+  background: var(--in);
+  color: #fff;
+  border-color: var(--in);
+  font-weight: 600;
+}
+
+.pdf-export:hover {
+  filter: brightness(1.12);
+}
+
+@media (max-width: 480px) {
+  .tools button {
+    flex: 1 1 100%;
+  }
+}
   
   @media (max-width: 480px) {
     .back-home {

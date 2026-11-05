@@ -463,306 +463,378 @@ const CATS = [
   };
   
 
-  // Export PDF
-  $("expPdf").onclick = () => {
-    const printWindow = window.open("", "_blank");
 
-    if (!printWindow) {
-      alert("Autorise les fenêtres pop-up pour exporter le PDF.");
+  // Export PDF — même identité graphique que le planificateur
+  $("expPdf").onclick = () => {
+    if (!window.jspdf?.jsPDF) {
+      alert("La bibliothèque PDF n'a pas pu être chargée. Vérifie ta connexion.");
       return;
     }
 
-    // Tri des articles selon le tri sélectionné
-    const items = [...S.items].sort(
-      sort === "city"
-        ? (a, b) =>
-            a.city - b.city ||
-            a.done - b.done ||
-            a.prio - b.prio
-        : (a, b) =>
-            a.done - b.done ||
-            a.prio - b.prio ||
-            a.cat - b.cat
-    );
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
 
-    const totalYen = items.reduce(
-      (total, item) => total + item.price * item.qty,
-      0
-    );
-
-    const remainingYen = items
-      .filter(item => !item.done)
-      .reduce(
-        (total, item) => total + item.price * item.qty,
-        0
-      );
-
-    const totalWeight = items.reduce(
-      (total, item) => total + item.wt * item.qty,
-      0
-    ) / 1000;
-
-    const rows = items.map(item => {
-      const city = CITIES[item.city] || "Sans préférence";
-      const category = CATS[item.cat] || "📦 Autre";
-      const priority = PR[item.prio] || "";
-
-      const details = [
-        category,
-        item.shop ? "Boutique : " + esc(item.shop) : "",
-        item.who ? "Pour : " + esc(item.who) : "",
-        item.wt ? item.wt * item.qty + " g" : ""
-      ].filter(Boolean).join(" · ");
-
-      const photo = IMG_RE.test(item.img || "")
-        ? `<img src="${item.img}" alt="">`
-        : "";
-
-      return `
-        <tr class="${item.done ? "done" : ""}">
-          <td>
-            <div class="product">
-              ${photo}
-              <div>
-                <strong>${priority} ${esc(item.name)}</strong>
-                <small>${details}</small>
-              </div>
-            </div>
-          </td>
-          <td>${esc(city)}</td>
-          <td class="center">${item.qty}</td>
-          <td class="price">
-            ${item.price
-              ? fmt(item.price * item.qty) + " ¥"
-              : "—"}
-          </td>
-          <td class="center">
-            ${item.done ? "✓ Acheté" : "À acheter"}
-          </td>
-        </tr>
-      `;
-    }).join("");
-
-    const budgetInfo = S.budget
-      ? `${fmt1(totalYen / (S.rate || 165))} € / ${fmt1(S.budget)} €`
-      : "Non défini";
-
-    const html = `
-      <!DOCTYPE html>
-      <html lang="fr">
-      <head>
-        <meta charset="UTF-8">
-        <title>Liste shopping Japon</title>
-        <style>
-          @page {
-            size: A4;
-            margin: 15mm;
-          }
-
-          * {
-            box-sizing: border-box;
-          }
-
-          body {
-            font-family: Arial, sans-serif;
-            color: #1B2A41;
-            font-size: 11px;
-          }
-
-          h1 {
-            font-family: Georgia, serif;
-            font-size: 25px;
-            margin: 0 0 5px;
-            color: #2F4B7C;
-          }
-
-          .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-          }
-
-          .summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-          }
-
-          .summary div {
-            border: 1px solid #DCD6C6;
-            border-radius: 8px;
-            padding: 10px;
-          }
-
-          .summary strong {
-            display: block;
-            font-size: 15px;
-            margin-bottom: 4px;
-          }
-
-          h2 {
-            font-family: Georgia, serif;
-            font-size: 15px;
-            margin: 20px 0 8px;
-          }
-
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-
-          th {
-            background: #FBEDEA;
-            color: #1B2A41;
-            text-align: left;
-          }
-
-          th, td {
-            border-bottom: 1px solid #DCD6C6;
-            padding: 8px 6px;
-            vertical-align: middle;
-          }
-
-          tr {
-            break-inside: avoid;
-          }
-
-          .product {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .product img {
-            width: 42px;
-            height: 42px;
-            object-fit: cover;
-            border-radius: 5px;
-          }
-
-          .product strong {
-            display: block;
-            font-size: 11px;
-          }
-
-          small {
-            display: block;
-            color: #666;
-            font-size: 9px;
-            margin-top: 3px;
-          }
-
-          .center {
-            text-align: center;
-          }
-
-          .price {
-            text-align: right;
-            white-space: nowrap;
-          }
-
-          .done {
-            color: #888;
-            background: #f5f5f5;
-          }
-
-          .done strong {
-            text-decoration: line-through;
-          }
-
-          .footer {
-            margin-top: 20px;
-            color: #777;
-            font-size: 9px;
-            text-align: center;
-          }
-
-          @media print {
-            body {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-          }
-        </style>
-      </head>
-
-      <body>
-        <h1>🎎 Liste shopping — Japon</h1>
-        <p class="subtitle">
-          Liste de souhaits · ${new Date().toLocaleDateString("fr-FR")}
-        </p>
-
-        <div class="summary">
-          <div>
-            <strong>${items.length}</strong>
-            Articles au total
-          </div>
-          <div>
-            <strong>${fmt(remainingYen)} ¥</strong>
-            Reste à acheter
-          </div>
-          <div>
-            <strong>${fmt1(remainingYen / (S.rate || 165))} €</strong>
-            Estimation restante
-          </div>
-        </div>
-
-        <h2>Ma liste de souhaits</h2>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Article et détails</th>
-              <th>Ville</th>
-              <th>Qté</th>
-              <th>Prix total</th>
-              <th>État</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows || `
-              <tr>
-                <td colspan="5">Aucun article dans la liste.</td>
-              </tr>
-            `}
-          </tbody>
-        </table>
-
-        <h2>Budget et bagages</h2>
-
-        <p>
-          Taux de conversion : 1 € = ${fmt(S.rate)} ¥
-        </p>
-        <p>
-          Budget : ${budgetInfo}
-        </p>
-        <p>
-          Valeur totale estimée : ${fmt1(totalYen / (S.rate || 165))} €
-        </p>
-        <p>
-          Poids total estimé : ${fmt1(totalWeight)} kg
-          ${S.kg ? " / " + fmt1(S.kg) + " kg autorisés" : ""}
-        </p>
-
-        <div class="footer">
-          Liste shopping Japon · Générée depuis le planner
-        </div>
-      </body>
-      </html>
-    `;
-
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-      }, 300);
+    const COLORS = {
+      ink: [27, 42, 65],
+      indigo: [37, 60, 99],
+      seal: [178, 58, 46],
+      gold: [166, 135, 59],
+      muted: [111, 106, 97],
+      paper: [250, 248, 243],
+      line: [221, 215, 202],
+      white: [255, 255, 255],
+      green: [63, 122, 92]
     };
 
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-  };
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 16;
+    const contentWidth = pageWidth - margin * 2;
 
+    const rate = Math.max(1, Number(S.rate) || 165);
+    const allItems = [...S.items];
+
+    // Reprendre le tri choisi dans le planner
+    allItems.sort(
+      sort === "city"
+        ? (a, b) => a.city - b.city || a.done - b.done || a.prio - b.prio
+        : (a, b) => a.done - b.done || a.prio - b.prio || a.cat - b.cat
+    );
+
+    const totalYen = allItems.reduce(
+      (sum, item) => sum + item.price * item.qty, 0
+    );
+
+    const remainingYen = allItems
+      .filter(item => !item.done)
+      .reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    const totalWeight = allItems.reduce(
+      (sum, item) => sum + item.wt * item.qty, 0
+    ) / 1000;
+
+    const remainingWeight = allItems
+      .filter(item => !item.done)
+      .reduce((sum, item) => sum + item.wt * item.qty, 0) / 1000;
+
+    const euro = yen => yen / rate;
+    const money = value => Math.round(value).toLocaleString("fr-FR");
+    const decimal = value => (Math.round(value * 10) / 10).toLocaleString("fr-FR");
+
+    const cityName = item => CITIES[item.city] || "Sans préférence";
+
+    // Les polices standards de jsPDF ne prennent pas en charge les emoji.
+    // On conserve donc le libellé textuel des catégories et des priorités.
+    const categoryName = item =>
+      (CATS[item.cat] || "Autre").replace(/^[^\p{L}\p{N}]*/u, "");
+
+    const priorityName = item => ({
+      1: "Indispensable",
+      2: "Si possible",
+      3: "Bonus"
+    }[item.prio] || "Si possible");
+
+    function paintBackground() {
+      doc.setFillColor(...COLORS.paper);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+    }
+
+    function drawSeal(x, y) {
+      doc.setDrawColor(...COLORS.seal);
+      doc.setLineWidth(0.9);
+      doc.circle(x, y, 6.5, "S");
+      doc.setLineWidth(0.4);
+      doc.circle(x, y, 4.4, "S");
+      doc.setFillColor(...COLORS.seal);
+      doc.circle(x, y, 1, "F");
+    }
+
+    function drawHeader(pageNumber) {
+      paintBackground();
+
+      drawSeal(margin + 6, 22);
+
+      doc.setTextColor(...COLORS.ink);
+      doc.setFont("times", "bold");
+      doc.setFontSize(19);
+      doc.text("Liste shopping — Japon", margin + 17, 19);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...COLORS.gold);
+      doc.text(
+        "SOUVENIRS · ACHATS · LISTE DE SOUHAITS",
+        margin + 17,
+        25
+      );
+
+      doc.setDrawColor(...COLORS.line);
+      doc.setLineWidth(0.3);
+      doc.line(margin, 34, pageWidth - margin, 34);
+
+      doc.setFontSize(8);
+      doc.setTextColor(...COLORS.muted);
+      doc.text(
+        `Généré le ${new Date().toLocaleDateString("fr-FR")}`,
+        pageWidth - margin,
+        29,
+        { align: "right" }
+      );
+    }
+
+    function drawFooter(page, totalPages) {
+      doc.setDrawColor(...COLORS.line);
+      doc.setLineWidth(0.25);
+      doc.line(margin, pageHeight - 14, pageWidth - margin, pageHeight - 14);
+
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...COLORS.muted);
+      doc.text("Généré par le planner shopping Japon 2027", margin, pageHeight - 9);
+      doc.text(`${page} / ${totalPages}`, pageWidth - margin, pageHeight - 9, {
+        align: "right"
+      });
+    }
+
+    let y = 42;
+
+    drawHeader(1);
+
+    // Résumé en trois blocs
+    const summaryY = y;
+    const gap = 3;
+    const cardWidth = (contentWidth - gap * 2) / 3;
+
+    const summaries = [
+      {
+        label: "ARTICLES",
+        value: `${allItems.length}`,
+        detail: `${allItems.filter(item => !item.done).length} restant(s)`
+      },
+      {
+        label: "RESTE À ACHETER",
+        value: `${money(remainingYen)} ¥`,
+        detail: `≈ ${decimal(euro(remainingYen))} €`
+      },
+      {
+        label: "BUDGET TOTAL",
+        value: S.budget ? `${decimal(S.budget)} €` : "Non défini",
+        detail: S.budget
+          ? `${decimal(euro(totalYen))} € engagés`
+          : "Aucun plafond renseigné"
+      }
+    ];
+
+    summaries.forEach((card, index) => {
+      const x = margin + index * (cardWidth + gap);
+
+      doc.setFillColor(...COLORS.white);
+      doc.setDrawColor(...COLORS.line);
+      doc.roundedRect(x, summaryY, cardWidth, 23, 2, 2, "FD");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...COLORS.gold);
+      doc.text(card.label, x + 3, summaryY + 6);
+
+      doc.setFont("times", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(...COLORS.ink);
+      doc.text(card.value, x + 3, summaryY + 13);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...COLORS.muted);
+      doc.text(card.detail, x + 3, summaryY + 19);
+    });
+
+    y += 32;
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...COLORS.indigo);
+    doc.text("Ma liste de souhaits", margin, y);
+    y += 7;
+
+    // Colonnes du tableau
+    const columns = {
+      item: margin,
+      city: margin + 91,
+      qty: margin + 119,
+      price: margin + 139,
+      status: margin + 160
+    };
+
+    const headerHeight = 8;
+    const rowBottom = pageHeight - 21;
+
+    function drawTableHeader() {
+      doc.setFillColor(239, 234, 224);
+      doc.roundedRect(margin, y - 5, contentWidth, headerHeight, 1.5, 1.5, "F");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...COLORS.indigo);
+
+      doc.text("ARTICLE / DÉTAILS", columns.item + 3, y);
+      doc.text("VILLE", columns.city, y);
+      doc.text("QTÉ", columns.qty, y, { align: "center" });
+      doc.text("PRIX TOTAL", columns.price, y);
+      doc.text("STATUT", columns.status, y);
+
+      y += 7;
+    }
+
+    function newPage() {
+      doc.addPage();
+      drawHeader(doc.internal.getNumberOfPages());
+      y = 43;
+      drawTableHeader();
+    }
+
+    drawTableHeader();
+
+    if (allItems.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      doc.setTextColor(...COLORS.muted);
+      doc.text("Aucun article dans la liste pour le moment.", margin + 2, y + 5);
+      y += 14;
+    }
+
+    allItems.forEach(item => {
+      const details = [
+        categoryName(item),
+        priorityName(item),
+        item.shop ? `Boutique : ${item.shop}` : "",
+        item.who ? `Pour : ${item.who}` : "",
+        item.wt ? `Poids : ${money(item.wt * item.qty)} g` : ""
+      ].filter(Boolean).join(" · ");
+
+      const detailLines = doc.splitTextToSize(details, 64);
+      const nameLines = doc.splitTextToSize(item.name || "Sans nom", 64);
+
+      const textHeight = nameLines.length * 4.2 + detailLines.length * 3.4;
+      const rowHeight = Math.max(15, textHeight + 5);
+
+      if (y + rowHeight > rowBottom) {
+        newPage();
+      }
+
+      // Séparation visuelle des articles
+      doc.setDrawColor(...COLORS.line);
+      doc.setLineWidth(0.2);
+      doc.line(margin, y + rowHeight - 2, pageWidth - margin, y + rowHeight - 2);
+
+      if (item.done) {
+        doc.setFillColor(240, 240, 236);
+        doc.roundedRect(margin, y - 4, contentWidth, rowHeight, 1, 1, "F");
+      }
+
+      let textX = columns.item + 3;
+
+      // Miniature facultative
+      if (IMG_RE.test(item.img || "")) {
+        try {
+          doc.addImage(item.img, "JPEG", textX, y - 3, 11, 11);
+          textX += 14;
+        } catch (error) {
+          console.warn("Photo ignorée dans le PDF :", error);
+        }
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...(item.done ? COLORS.muted : COLORS.ink));
+      doc.text(nameLines, textX, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.8);
+      doc.setTextColor(...COLORS.muted);
+      doc.text(detailLines, textX, y + nameLines.length * 4.2);
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(...COLORS.ink);
+      doc.text(cityName(item), columns.city, y + 1);
+
+      doc.text(String(item.qty), columns.qty, y + 1, { align: "center" });
+
+      if (item.price) {
+        doc.setFont("helvetica", "bold");
+        doc.text(`${money(item.price * item.qty)} ¥`, columns.price, y);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6.5);
+        doc.setTextColor(...COLORS.muted);
+        doc.text(
+          `≈ ${decimal(euro(item.price * item.qty))} €`,
+          columns.price,
+          y + 4
+        );
+      } else {
+        doc.text("—", columns.price, y + 1);
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(6.5);
+      doc.setTextColor(...(item.done ? COLORS.green : COLORS.seal));
+      doc.text(item.done ? "Acheté" : "À acheter", columns.status, y + 1);
+
+      y += rowHeight;
+    });
+
+    // Informations récapitulatives
+    if (y + 44 > rowBottom) {
+      newPage();
+    } else {
+      y += 7;
+    }
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...COLORS.indigo);
+    doc.text("Budget et bagages", margin, y);
+    y += 8;
+
+    const info = [
+      ["Taux de conversion", `1 € = ${money(rate)} ¥`],
+      ["Valeur totale de la liste", `${money(totalYen)} ¥ · ${decimal(euro(totalYen))} €`],
+      ["Reste à acheter", `${money(remainingYen)} ¥ · ${decimal(euro(remainingYen))} €`],
+      ["Poids total des articles", `${decimal(totalWeight)} kg`],
+      ["Poids restant à acheter", `${decimal(remainingWeight)} kg`],
+      ["Franchise bagages", S.kg ? `${decimal(S.kg)} kg` : "Non définie"],
+      ["Budget renseigné", S.budget ? `${decimal(S.budget)} €` : "Non défini"],
+      [
+        "Écart avec le budget",
+        S.budget
+          ? `${decimal(S.budget - euro(totalYen))} €`
+          : "Non calculé"
+      ]
+    ];
+
+    info.forEach(([label, value]) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...COLORS.muted);
+      doc.text(label, margin + 2, y);
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.ink);
+      doc.text(value, pageWidth - margin - 2, y, { align: "right" });
+
+      y += 6;
+    });
+
+    // Pieds de page sur toutes les pages
+    const totalPages = doc.internal.getNumberOfPages();
+
+    for (let page = 1; page <= totalPages; page++) {
+      doc.setPage(page);
+      drawFooter(page, totalPages);
+    }
+
+    // Téléchargement direct, sans fenêtre d'impression
+    doc.save("japon-liste-shopping.pdf");
+  };
   
   // Import JSON
   

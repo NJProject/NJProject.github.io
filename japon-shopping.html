@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Souvenirs du Japon</title>
 <link rel="stylesheet" href="/assets/japon-shopping.css">
@@ -60,13 +62,14 @@
 
 <div class="tools">
   <button id="exp">Exporter JSON</button>
-  <button id="expPdf" class="p">Exporter en PDF</button>
+  <button id="expPdf" class="pdf-export">Télécharger le PDF</button>
   <button id="imp">Importer</button>
   <button id="clr">Retirer les achetés</button>
   <button id="shr">Copier la liste</button>
   <input type="file" id="file" accept=".json" hidden>
 </div>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="/assets/japon-shopping.js" defer></script>
 </body>
 </html>
