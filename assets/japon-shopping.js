@@ -474,6 +474,21 @@ $("expPdf").onclick = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
+  // Remplacement automatique des caractères non pris en charge
+const originalText = doc.text.bind(doc);
+
+doc.text = (...args) => {
+  if (typeof args[0] === "string") {
+    args[0] = args[0].replace(/≈/g, "env.");
+  } else if (Array.isArray(args[0])) {
+    args[0] = args[0].map(line =>
+      typeof line === "string" ? line.replace(/≈/g, "env.") : line
+    );
+  }
+
+  return originalText(...args);
+};
+
   const COLORS = {
     ink: [27, 42, 65],
     indigo: [37, 60, 99],
@@ -517,9 +532,13 @@ $("expPdf").onclick = () => {
     .reduce((sum, item) => sum + item.wt * item.qty, 0) / 1000;
 
   const euro = yen => yen / rate;
-  const money = value => Math.round(value).toLocaleString("fr-FR");
+  const formatNumber = value =>
+    value.toLocaleString("fr-FR").replace(/[\u202F\u00A0]/g, " ");
+  
+  const money = value => formatNumber(Math.round(value));
+  
   const decimal = value =>
-    (Math.round(value * 10) / 10).toLocaleString("fr-FR");
+    formatNumber(Math.round(value * 10) / 10);
 
   const cityName = item => CITIES[item.city] || "Sans préférence";
 
@@ -734,10 +753,11 @@ $("expPdf").onclick = () => {
     // Préparation des textes avec largeur adaptée
     const hasImage = IMG_RE.test(item.img || "");
     const textX = columns.item + (hasImage ? 14 : 0);
-    const availableWidth = columns.city - textX - 5;
+    const availableWidth = columns.city - textX - 3;
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
+    doc.text(nameLines, textX, y + 1);
     const nameLines = doc.splitTextToSize(
       item.name || "Sans nom",
       availableWidth
@@ -913,8 +933,44 @@ $("expPdf").onclick = () => {
     ]
   ];
 
+  const infoTop = y;
   const infoHeight = 8;
-  const infoBoxHeight = info.length * infoHeight + 5;
+  const paddingTop = 7;
+  const paddingBottom = 7;
+  
+  const infoBoxHeight =
+    paddingTop + info.length * infoHeight + paddingBottom;
+  
+  doc.setFillColor(...COLORS.white);
+  doc.setDrawColor(...COLORS.line);
+  
+  doc.roundedRect(
+    margin,
+    infoTop,
+    contentWidth,
+    infoBoxHeight,
+    2,
+    2,
+    "FD"
+  );
+  
+  info.forEach(([label, value], index) => {
+    const lineY = infoTop + paddingTop + index * infoHeight + 2;
+  
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...COLORS.muted);
+    doc.text(label, margin + 5, lineY);
+  
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.ink);
+    doc.text(
+      value,
+      pageWidth - margin - 5,
+      lineY,
+      { align: "right" }
+    );
+  });
 
   doc.setFillColor(...COLORS.white);
   doc.setDrawColor(...COLORS.line);
