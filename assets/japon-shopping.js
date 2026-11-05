@@ -1,4 +1,3 @@
-
 const CATS = [
     "🍫 Snacks & sucreries",
     "🍵 Thé & alimentation",
@@ -14,6 +13,51 @@ const CATS = [
   
   const PR = ["", "⭐", "👍", "💭"];
   
+  let pendingImg = "";
+  const IMG_RE = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
+  
+  function compressImage(file, max = 320, q = 0.72) {
+    return new Promise((resolve, reject) => {
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return reject(new Error("Format non supporté (JPG, PNG ou WebP)."));
+      if (file.size > 10 * 1024 * 1024) return reject(new Error("Fichier trop lourd (10 Mo max)."));
+      const url = URL.createObjectURL(file);
+      const im = new Image();
+      im.onload = () => {
+        const r = Math.min(1, max / Math.max(im.width, im.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(im.width * r);
+        c.height = Math.round(im.height * r);
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL("image/jpeg", q));
+      };
+      im.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image illisible.")); };
+      im.src = url;
+    });
+  }
+  
+  // Valide chaque article venant du stockage ou d'un fichier importé
+  function cleanItem(i) {
+    const city = Number(i.city);
+    return {
+      id: Number(i.id) || Date.now() + Math.random(),
+      done: !!i.done,
+      name: String(i.name || "").slice(0, 120),
+      cat: Math.min(Math.max(parseInt(i.cat) || 0, 0), CATS.length - 1),
+      price: Math.max(0, +i.price || 0),
+      qty: Math.max(1, Math.min(999, +i.qty || 1)),
+      prio: [1, 2, 3].includes(+i.prio) ? +i.prio : 2,
+      city: Number.isInteger(city) && city >= 0 && city <= 5 ? city : 5,
+      wt: Math.max(0, +i.wt || 0),
+      shop: String(i.shop || "").slice(0, 120),
+      who: String(i.who || "").slice(0, 120),
+      img: IMG_RE.test(i.img || "") ? i.img : ""
+    };
+  }
+
   let S = {
     items: [],
     rate: 165,
@@ -31,15 +75,14 @@ const CATS = [
   } catch (error) {
     console.warn("Impossible de charger les données sauvegardées.", error);
   }
+
+  S.items = (Array.isArray(S.items) ? S.items : []).slice(0, 500).map(cleanItem);
   
   const $ = id => document.getElementById(id);
   
   const save = () => {
-    try {
-      localStorage.setItem("japon-shop", JSON.stringify(S));
-    } catch (error) {
-      console.warn("Impossible de sauvegarder les données.", error);
-    }
+    try { localStorage.setItem("japon-shop", JSON.stringify(S)); }
+    catch (error) { alert("Stockage plein : retire quelques photos ou exporte ta liste."); }
   };
   
   const esc = value =>
@@ -214,7 +257,9 @@ const CATS = [
               ${item.done ? "checked" : ""}
               aria-label="Acheté"
             >
-  
+
+            ${IMG_RE.test(item.img || "") ? `<img class="thumb" src="${item.img}" alt="">` : ""}
+
             <div class="bd">
               <div class="nm">
                 ${PR[item.prio]} ${esc(item.name)}
@@ -282,6 +327,7 @@ const CATS = [
     $("wt").value = item.wt || "";
     $("shop").value = item.shop || "";
     $("for").value = item.who || "";
+    pendingImg = item.img || ""; showPrev();
   
     setMode();
   
@@ -321,7 +367,8 @@ const CATS = [
         city: +$("city").value,
         wt: +$("wt").value || 0,
         shop: $("shop").value.trim(),
-        who: $("for").value.trim()
+        who: $("for").value.trim(),
+        img: pendingImg,
       }
     );
   
@@ -334,6 +381,8 @@ const CATS = [
     );
   
     $("qty").value = 1;
+
+    pendingImg = ""; showPrev();
   
     setMode();
     save();
@@ -438,7 +487,10 @@ const CATS = [
         const data = JSON.parse(reader.result);
   
         if (Array.isArray(data.items)) {
-          S = Object.assign(S, data);
+          S.items = data.items.slice(0, 500).map(cleanItem);
+          S.rate = Math.max(1, +data.rate || 165);
+          S.budget = Math.max(0, +data.budget || 0);
+          S.kg = Math.max(0, +data.kg || 0);
           $("rate").value = S.rate;
           save();
           render();
@@ -548,6 +600,23 @@ const CATS = [
   };
   
   // Premier affichage
-  
+  function showPrev() {
+    const box = $("imgPrev");
+    if (IMG_RE.test(pendingImg)) {
+      box.querySelector("img").src = pendingImg;
+      box.hidden = false;
+    } else {
+      box.hidden = true;
+      $("img").value = "";
+    }
+  }
+  $("img").onchange = async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    try { pendingImg = await compressImage(f); showPrev(); }
+    catch (err) { alert(err.message); e.target.value = ""; }
+  };
+  $("imgClr").onclick = () => { pendingImg = ""; showPrev(); };
+
   render();
   

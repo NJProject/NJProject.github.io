@@ -91,5 +91,5 @@ Excursions : classées par destination (Kamakura, Nikko, Yokohama, Takao & Mitak
 cd japan-planner
 npm install
 npm run dev      # serveur local
-npm run build    # génère planner-build/ (ignoré par Git)
+npm run build    # génère ../planner/ (versionné, servi par GitHub Pages)
 ```

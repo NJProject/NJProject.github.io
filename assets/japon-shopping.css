@@ -373,6 +373,9 @@
   .back-home:hover {
     background: var(--ac2);
   }
+
+  .thumb{width:56px;height:56px;object-fit:cover;border-radius:8px;flex:none;border:1px solid var(--bd)}
+#imgPrev{display:flex;align-items:center;gap:10px}
   
   @media (max-width: 480px) {
     .back-home {

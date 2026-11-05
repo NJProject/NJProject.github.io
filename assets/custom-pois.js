@@ -1,6 +1,6 @@
 // custom-pois.js
 import { db } from "./firebase-config.js";
-import { attachVoting } from "./votes.js?v=5";
+import { attachVoting } from "./votes.js?v=6";
 import {
   collection, query, where, onSnapshot,
   doc, setDoc, deleteDoc, serverTimestamp
@@ -110,7 +110,7 @@ function buildCard(id, data, cats, { onEdit, onDelete }) {
     card.appendChild(meta);
   }
 
-  if (data.link) {
+  if (data.link && /^https?:\/\//i.test(data.link)) {
     const linkWrap = document.createElement("div");
     linkWrap.className = "poi-link";
     const a = document.createElement("a");

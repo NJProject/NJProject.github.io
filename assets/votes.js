@@ -6,6 +6,10 @@ import {
 
 const NAME_KEY = "voterName";
 
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const NAME_RE = /^[\p{L}\p{N} '’-]{1,24}$/u; // pas de "." : il casserait les chemins Firestore `voters.${me}`
+const isValidName = n => NAME_RE.test(n);
+
 function slugify(str) {
   return str
     .toLowerCase()
@@ -20,7 +24,8 @@ function getCityKey() {
 }
 
 function getVoterName() {
-  return (localStorage.getItem(NAME_KEY) || "").trim();
+  const n = (localStorage.getItem(NAME_KEY) || "").trim();
+  return isValidName(n) ? n : "";
 }
 
 function setVoterName(name) {
@@ -36,7 +41,7 @@ async function fetchKnownVoterNames() {
       const voters = docSnap.data().voters || {};
       Object.keys(voters).forEach(n => names.add(n));
     });
-    return [...names].sort((a, b) => a.localeCompare(b));
+    return [...names].filter(isValidName).sort((a, b) => a.localeCompare(b));
   } catch (e) {
     console.error("Impossible de récupérer les prénoms existants :", e);
     return [];
@@ -96,7 +101,7 @@ function buildNameModal() {
 
     const names = await fetchKnownVoterNames();
     select.innerHTML = '<option value="">— Choisir un prénom déjà utilisé —</option>'
-      + names.map(n => `<option value="${n}">${n}</option>`).join("");
+      + names.map(n => '<option value="${esc(n)}">${esc(n)}</option>');
 
     overlay.hidden = false;
     document.addEventListener("keydown", onKeydown);
@@ -112,7 +117,7 @@ function buildNameBadge(openNameModal) {
   const current = getVoterName();
   badge.innerHTML = `
     <span class="voter-badge-icon">👤</span>
-    <span class="voter-badge-name">${current || "Définir mon nom"}</span>
+    <span class="voter-badge-name">${esc(current) || "Définir mon nom"}</span>
     <button type="button" class="voter-badge-edit" aria-label="Changer de nom">✏️</button>
   `;
   document.body.appendChild(badge);
@@ -124,7 +129,7 @@ function buildNameBadge(openNameModal) {
     const input = await openNameModal(getVoterName());
     if (input === null) return;
     const trimmed = input.trim().slice(0, 24);
-    if (!trimmed) return;
+    if (!isValidName(trimmed)) { alert("Prénom invalide (lettres, chiffres, espace, ' ou -, 24 max)."); return; }
     setVoterName(trimmed);
     nameEl.textContent = trimmed;
     document.dispatchEvent(new CustomEvent("voterNameChanged"));

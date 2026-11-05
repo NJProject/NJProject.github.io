@@ -27,8 +27,8 @@ CITY_NAV = [
 ]
 
 # À incrémenter à chaque fois que votes.js ou custom-pois.js changent de version
-VOTES_JS_VERSION = 5
-CUSTOM_POIS_JS_VERSION = 2
+VOTES_JS_VERSION = 6
+CUSTOM_POIS_JS_VERSION = 3
 def poi(icon, title, cat, desc, meta=None, link=None, link_label="Réserver / infos ↗"):
     return {"icon": icon, "title": title, "cat": cat, "desc": desc, "meta": meta, "link": link, "link_label": link_label}
 
@@ -260,6 +260,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <meta property="og:title" content="{name} — Japon 2027">
 <meta property="og:description" content="Points d'intérêt à {name} pour le groupe — touristique, culturel, commerces, gastronomie, loisirs.">
 <meta property="og:url" content="https://njproject.github.io/{key}.html">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>{name} — Japon 2027</title>
 {favicons}
 <link rel="stylesheet" href="/assets/style.css">

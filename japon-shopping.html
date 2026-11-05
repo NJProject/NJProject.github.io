@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Souvenirs du Japon</title>
 <link rel="stylesheet" href="/assets/japon-shopping.css">
-<script src="/assets/japon-shopping.js" defer></script>
 </head>
 <body>
 <main>
@@ -26,17 +26,23 @@
 <div id="budInfo"></div><div id="wgtInfo"></div>
 
 <div class="form">
-<input class="full" id="name" placeholder="Que veux-tu ramener ? (ex. : KitKat matcha)">
-<input id="price" type="number" min="0" placeholder="Prix en ¥ (facultatif)">
-<input id="qty" type="number" min="1" value="1" aria-label="Quantité" placeholder="Quantité">
-<details class="full more"><summary>＋ Plus de détails (catégorie, ville, poids…)</summary><div class="grid2">
-<select id="cat"></select>
-<select id="prio"><option value="1">⭐ Indispensable</option><option value="2" selected>👍 Si possible</option><option value="3">💭 Bonus</option></select>
-<select id="city"></select><input id="wt" type="number" min="0" placeholder="Poids unitaire (g)">
-<input class="full" id="shop" placeholder="Boutique ou quartier (facultatif)">
-<input class="full" id="for" placeholder="Pour qui ? (facultatif)"></div></details>
-<button class="p full" id="add">Ajouter à la liste</button>
-<button class="full" id="cancel" hidden>Annuler la modification</button>
+    <input class="full" id="name" placeholder="Que veux-tu ramener ? (ex. : KitKat matcha)">
+    <input id="price" type="number" min="0" placeholder="Prix en ¥ (facultatif)">
+    <input id="qty" type="number" min="1" value="1" aria-label="Quantité" placeholder="Quantité">
+    <details class="full more"><summary>＋ Plus de détails (catégorie, ville, poids…)</summary>
+        <div class="grid2">
+            <select id="cat"></select>
+            <select id="prio"><option value="1">⭐ Indispensable</option><option value="2" selected>👍 Si possible</option><option value="3">💭 Bonus</option></select>
+            <select id="city"></select><input id="wt" type="number" min="0" placeholder="Poids unitaire (g)">
+            <input class="full" id="shop" placeholder="Boutique ou quartier (facultatif)">
+            <input class="full" id="for" placeholder="Pour qui ? (facultatif)">
+            <label class="full">📷 Photo (facultatif)
+                <input id="img" type="file" accept="image/jpeg,image/png,image/webp"></label>
+                <div class="full" id="imgPrev" hidden><img class="thumb" alt="Aperçu"> <button type="button" id="imgClr">Retirer la photo</button></div>
+        </div>
+    </details>
+    <button class="p full" id="add">Ajouter à la liste</button>
+    <button class="full" id="cancel" hidden>Annuler la modification</button>
 </div>
 
 <div class="sortrow">Trier par <select id="sort"><option value="prio">Priorité</option><option value="city">Ville / étape</option></select></div>
