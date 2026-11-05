@@ -462,18 +462,307 @@ const CATS = [
     }
   };
   
-  // Export JSON
-  
-  $("exp").onclick = () => {
-    const link = document.createElement("a");
-  
-    link.href =
-      "data:application/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(S));
-  
-    link.download = "japon-liste.json";
-    link.click();
+
+  // Export PDF
+  $("expPdf").onclick = () => {
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      alert("Autorise les fenêtres pop-up pour exporter le PDF.");
+      return;
+    }
+
+    // Tri des articles selon le tri sélectionné
+    const items = [...S.items].sort(
+      sort === "city"
+        ? (a, b) =>
+            a.city - b.city ||
+            a.done - b.done ||
+            a.prio - b.prio
+        : (a, b) =>
+            a.done - b.done ||
+            a.prio - b.prio ||
+            a.cat - b.cat
+    );
+
+    const totalYen = items.reduce(
+      (total, item) => total + item.price * item.qty,
+      0
+    );
+
+    const remainingYen = items
+      .filter(item => !item.done)
+      .reduce(
+        (total, item) => total + item.price * item.qty,
+        0
+      );
+
+    const totalWeight = items.reduce(
+      (total, item) => total + item.wt * item.qty,
+      0
+    ) / 1000;
+
+    const rows = items.map(item => {
+      const city = CITIES[item.city] || "Sans préférence";
+      const category = CATS[item.cat] || "📦 Autre";
+      const priority = PR[item.prio] || "";
+
+      const details = [
+        category,
+        item.shop ? "Boutique : " + esc(item.shop) : "",
+        item.who ? "Pour : " + esc(item.who) : "",
+        item.wt ? item.wt * item.qty + " g" : ""
+      ].filter(Boolean).join(" · ");
+
+      const photo = IMG_RE.test(item.img || "")
+        ? `<img src="${item.img}" alt="">`
+        : "";
+
+      return `
+        <tr class="${item.done ? "done" : ""}">
+          <td>
+            <div class="product">
+              ${photo}
+              <div>
+                <strong>${priority} ${esc(item.name)}</strong>
+                <small>${details}</small>
+              </div>
+            </div>
+          </td>
+          <td>${esc(city)}</td>
+          <td class="center">${item.qty}</td>
+          <td class="price">
+            ${item.price
+              ? fmt(item.price * item.qty) + " ¥"
+              : "—"}
+          </td>
+          <td class="center">
+            ${item.done ? "✓ Acheté" : "À acheter"}
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    const budgetInfo = S.budget
+      ? `${fmt1(totalYen / (S.rate || 165))} € / ${fmt1(S.budget)} €`
+      : "Non défini";
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <title>Liste shopping Japon</title>
+        <style>
+          @page {
+            size: A4;
+            margin: 15mm;
+          }
+
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            font-family: Arial, sans-serif;
+            color: #1B2A41;
+            font-size: 11px;
+          }
+
+          h1 {
+            font-family: Georgia, serif;
+            font-size: 25px;
+            margin: 0 0 5px;
+            color: #2F4B7C;
+          }
+
+          .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+          }
+
+          .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+          }
+
+          .summary div {
+            border: 1px solid #DCD6C6;
+            border-radius: 8px;
+            padding: 10px;
+          }
+
+          .summary strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 4px;
+          }
+
+          h2 {
+            font-family: Georgia, serif;
+            font-size: 15px;
+            margin: 20px 0 8px;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th {
+            background: #FBEDEA;
+            color: #1B2A41;
+            text-align: left;
+          }
+
+          th, td {
+            border-bottom: 1px solid #DCD6C6;
+            padding: 8px 6px;
+            vertical-align: middle;
+          }
+
+          tr {
+            break-inside: avoid;
+          }
+
+          .product {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .product img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 5px;
+          }
+
+          .product strong {
+            display: block;
+            font-size: 11px;
+          }
+
+          small {
+            display: block;
+            color: #666;
+            font-size: 9px;
+            margin-top: 3px;
+          }
+
+          .center {
+            text-align: center;
+          }
+
+          .price {
+            text-align: right;
+            white-space: nowrap;
+          }
+
+          .done {
+            color: #888;
+            background: #f5f5f5;
+          }
+
+          .done strong {
+            text-decoration: line-through;
+          }
+
+          .footer {
+            margin-top: 20px;
+            color: #777;
+            font-size: 9px;
+            text-align: center;
+          }
+
+          @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>🎎 Liste shopping — Japon</h1>
+        <p class="subtitle">
+          Liste de souhaits · ${new Date().toLocaleDateString("fr-FR")}
+        </p>
+
+        <div class="summary">
+          <div>
+            <strong>${items.length}</strong>
+            Articles au total
+          </div>
+          <div>
+            <strong>${fmt(remainingYen)} ¥</strong>
+            Reste à acheter
+          </div>
+          <div>
+            <strong>${fmt1(remainingYen / (S.rate || 165))} €</strong>
+            Estimation restante
+          </div>
+        </div>
+
+        <h2>Ma liste de souhaits</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Article et détails</th>
+              <th>Ville</th>
+              <th>Qté</th>
+              <th>Prix total</th>
+              <th>État</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows || `
+              <tr>
+                <td colspan="5">Aucun article dans la liste.</td>
+              </tr>
+            `}
+          </tbody>
+        </table>
+
+        <h2>Budget et bagages</h2>
+
+        <p>
+          Taux de conversion : 1 € = ${fmt(S.rate)} ¥
+        </p>
+        <p>
+          Budget : ${budgetInfo}
+        </p>
+        <p>
+          Valeur totale estimée : ${fmt1(totalYen / (S.rate || 165))} €
+        </p>
+        <p>
+          Poids total estimé : ${fmt1(totalWeight)} kg
+          ${S.kg ? " / " + fmt1(S.kg) + " kg autorisés" : ""}
+        </p>
+
+        <div class="footer">
+          Liste shopping Japon · Générée depuis le planner
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 300);
+    };
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
+
   
   // Import JSON
   
