@@ -412,6 +412,11 @@
   filter: brightness(1.12);
 }
 
+[hidden]{display:none !important}
+.acct{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:14px;display:grid;gap:8px}
+.acct-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acct small{color:var(--mu);font-size:12px}
+
 @media (max-width: 480px) {
   .tools button {
     flex: 1 1 100%;

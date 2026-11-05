@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta http-equiv="Content-Security-Policy"
-  content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <title>Souvenirs du Japon</title>
 <link rel="stylesheet" href="/assets/japon-shopping.css">
 </head>
@@ -16,6 +14,22 @@
 <button class="tg" id="theme" aria-label="Changer de thème"></button>
 <h1>🎎 À ramener du Japon</h1>
 <p class="sub">Ta liste d’envies, tes budgets et ce qui est déjà dans la valise.</p>
+
+<div class="acct">
+  <div id="acctOut">
+    <input id="acEmail" type="text" placeholder="Pseudo (ton prénom)" autocomplete="username" maxlength="24">
+    <input id="acPass" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
+    <div class="acct-row">
+      <button class="p" id="acIn" type="button">Se connecter</button>
+      <button id="acUp" type="button">Créer un compte</button>
+    </div>
+  </div>
+  <div class="acct-row" id="acctIn" hidden>
+    <span id="acUser"></span>
+    <button id="acOut" type="button">Se déconnecter</button>
+  </div>
+  <small id="acStatus">Non connecté : la liste reste sur cet appareil.</small>
+</div>
 
 <div class="stats">
 <div class="stat"><b id="sN">0</b><span>articles</span></div>
@@ -71,5 +85,6 @@
 </main>
 <script src="/assets/vendor/jspdf.umd.min.js"></script>
 <script src="/assets/japon-shopping.js" defer></script>
+<script type="module" src="/assets/shopping-sync.js"></script>
 </body>
 </html>

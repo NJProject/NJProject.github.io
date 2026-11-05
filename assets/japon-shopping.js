@@ -83,6 +83,7 @@ const CATS = [
   const save = () => {
     try { localStorage.setItem("japon-shop", JSON.stringify(S)); }
     catch (error) { alert("Stockage plein : retire quelques photos ou exporte ta liste."); }
+    document.dispatchEvent(new CustomEvent("shop-changed"));
   };
   
   const esc = value =>
@@ -1127,6 +1128,21 @@ doc.text = (...args) => {
   $("imgClr").onclick = () => { pendingImg = ""; showPrev(); };
 
   $("imgPick").onclick = () => $("img").click();
+
+  window.shopBridge = {
+    get: () => ({ items: S.items, rate: S.rate, budget: S.budget, kg: S.kg }),
+    apply: (items, settings) => {
+      S.items = items.slice(0, 500).map(cleanItem);
+      if (settings) {
+        S.rate = Math.max(1, +settings.rate || 165);
+        S.budget = Math.max(0, +settings.budget || 0);
+        S.kg = Math.max(0, +settings.kg || 0);
+        $("rate").value = S.rate;
+      }
+      try { localStorage.setItem("japon-shop", JSON.stringify(S)); } catch (e) {}
+      render();
+    }
+  };
 
   // Premier affichage
   showPrev();
