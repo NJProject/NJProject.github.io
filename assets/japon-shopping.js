@@ -598,8 +598,7 @@ const CATS = [
     $("qty").value = 1;
     setMode();
   };
-  
-  // Premier affichage
+
   function showPrev() {
     const has = IMG_RE.test(pendingImg);
     $("photoImg").hidden = !has;
@@ -620,5 +619,7 @@ const CATS = [
 
   $("imgPick").onclick = () => $("img").click();
 
+  // Premier affichage
+  showPrev();
   render();
   

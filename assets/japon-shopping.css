@@ -397,6 +397,9 @@
 .photo-rm{border-color:var(--bd);color:var(--mu)}
 .photo-rm:hover{background:var(--ac2);border-color:var(--ac);color:var(--ac)}
 .photo-hint{flex-basis:100%;color:var(--mu);font-size:12px}
+.photo-img[hidden],
+.photo-empty[hidden],
+.photo-btn[hidden]{display:none}
   
   @media (max-width: 480px) {
     .back-home {
