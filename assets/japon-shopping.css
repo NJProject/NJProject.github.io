@@ -431,7 +431,7 @@
 
 /* Grand écran : panneau fixe dans la marge gauche */
 @media (min-width:1100px){
-  .acct{position:fixed;left:24px;top:90px;width:270px;margin:0;z-index:5}
+  .acct{position:fixed;left:24px;top:90px;width:clamp(270px,calc((100vw - 760px) / 2 - 44px),380px);margin:0;z-index:5}
 }
 
 /* Mobile / tablette : badge + popup */
@@ -447,12 +447,15 @@
   .acct{display:none}
   .acct.open{
     display:grid;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(92vw,380px);max-height:90vh;overflow:auto;margin:0;z-index:30;
+    width:min(94vw,480px);max-height:90vh;overflow:auto;margin:0;z-index:30;
     box-shadow:0 10px 40px rgba(0,0,0,.35);
   }
   .ac-close{display:block;justify-self:end;background:none;border:0;padding:4px 8px;color:var(--mu);font-size:16px}
   .ac-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
 }
+
+.acct input{width:100%;box-sizing:border-box}
+.acct-row button{min-width:130px}
 
 /* Confirmation (tous écrans) */
 .ac-toast{
