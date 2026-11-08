@@ -413,9 +413,15 @@
 }
 
 [hidden]{display:none !important}
-.acct{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:14px;display:grid;gap:8px}
+.acct{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px 18px 14px;margin-bottom:14px;display:grid;gap:12px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.ac-title{font-size:16px;font-weight:700}
+.ac-lead{margin:0;color:var(--mu);font-size:13px}
+.ac-field{display:grid;gap:5px;font-size:12px;font-weight:600;color:var(--mu)}
+.ac-warn{background:var(--ac2);border-left:3px solid var(--ac);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.45;color:var(--tx,inherit)}
 .acct-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.acct small{color:var(--mu);font-size:12px}
+.acct-row button{flex:1 1 auto}
+.ac-user{display:grid;gap:10px;font-size:14px;font-weight:600}
+.acct small{color:var(--mu);font-size:12px;line-height:1.4}
 
 .pw-wrap{position:relative}
 .pw-wrap input{padding-right:44px}
@@ -425,7 +431,7 @@
 
 /* Grand écran : panneau fixe dans la marge gauche */
 @media (min-width:1100px){
-  .acct{position:fixed;left:24px;top:90px;width:250px;margin:0;z-index:5}
+  .acct{position:fixed;left:24px;top:90px;width:270px;margin:0;z-index:5}
 }
 
 /* Mobile / tablette : badge + popup */

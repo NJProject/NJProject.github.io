@@ -21,18 +21,25 @@
 
 <div class="acct" id="acct">
   <button type="button" class="ac-close" id="acClose" aria-label="Fermer">✕</button>
+  <div class="ac-title">👤 Mon compte</div>
   <div id="acctOut">
-    <input id="acEmail" type="text" placeholder="Pseudo (ton prénom)" autocomplete="username" maxlength="24">
-    <div class="pw-wrap">
-      <input id="acPass" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
-      <button type="button" id="acEye" class="pw-eye" aria-label="Afficher le mot de passe" aria-pressed="false">👁</button>
-    </div>
+    <p class="ac-lead">Retrouve ta liste sur tous tes appareils.</p>
+    <label class="ac-field">Pseudo
+      <input id="acEmail" type="text" placeholder="Ton prénom" autocomplete="username" maxlength="24">
+    </label>
+    <label class="ac-field">Mot de passe
+      <div class="pw-wrap">
+        <input id="acPass" type="password" placeholder="6 caractères minimum" autocomplete="current-password">
+        <button type="button" id="acEye" class="pw-eye" aria-label="Afficher le mot de passe" aria-pressed="false">👁</button>
+      </div>
+    </label>
+    <div class="ac-warn">⚠️ <b>Note bien ton mot de passe :</b> il ne peut pas être réinitialisé (aucun e-mail n'est enregistré). En cas d'oubli, le compte et sa liste en ligne sont perdus.</div>
     <div class="acct-row">
       <button class="p" id="acIn" type="button">Se connecter</button>
       <button id="acUp" type="button">Créer un compte</button>
     </div>
   </div>
-  <div class="acct-row" id="acctIn" hidden>
+  <div class="ac-user" id="acctIn" hidden>
     <span id="acUser"></span>
     <button id="acOut" type="button">Se déconnecter</button>
   </div>
