@@ -1144,6 +1144,13 @@ doc.text = (...args) => {
     }
   };
 
+  $("acEye").onclick = () => {
+    const p = $("acPass"), show = p.type === "password";
+    p.type = show ? "text" : "password";
+    $("acEye").setAttribute("aria-pressed", show);
+    $("acEye").textContent = show ? "🙈" : "👁";
+  };
+
   // Premier affichage
   showPrev();
   render();

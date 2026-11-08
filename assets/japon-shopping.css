@@ -417,6 +417,45 @@
 .acct-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .acct small{color:var(--mu);font-size:12px}
 
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:44px}
+.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:0;padding:6px 10px;font-size:16px;color:var(--mu);cursor:pointer}
+
+.ac-badge,.ac-close,.ac-backdrop,.ac-toast{display:none}
+
+/* Grand écran : panneau fixe dans la marge gauche */
+@media (min-width:1100px){
+  .acct{position:fixed;left:24px;top:90px;width:250px;margin:0;z-index:5}
+}
+
+/* Mobile / tablette : badge + popup */
+@media (max-width:1099px){
+  .ac-badge{
+    display:block;position:fixed;right:12px;
+    bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:15;
+    background:var(--card);color:var(--in);border:1px solid var(--bd);
+    border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;
+    box-shadow:0 2px 10px rgba(0,0,0,.18);
+  }
+  .ac-badge.on{color:var(--ok,#2e7d32);border-color:var(--ok,#2e7d32)}
+  .acct{display:none}
+  .acct.open{
+    display:grid;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(92vw,380px);max-height:90vh;overflow:auto;margin:0;z-index:30;
+    box-shadow:0 10px 40px rgba(0,0,0,.35);
+  }
+  .ac-close{display:block;justify-self:end;background:none;border:0;padding:4px 8px;color:var(--mu);font-size:16px}
+  .ac-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
+}
+
+/* Confirmation (tous écrans) */
+.ac-toast{
+  position:fixed;right:12px;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:40;
+  background:var(--ok,#2e7d32);color:#fff;border-radius:12px;padding:10px 14px;
+  font-size:13px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.ac-toast.show{display:block}
+
 @media (max-width: 480px) {
   .tools button {
     flex: 1 1 100%;

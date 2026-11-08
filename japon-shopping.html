@@ -15,10 +15,18 @@
 <h1>🎎 À ramener du Japon</h1>
 <p class="sub">Ta liste d’envies, tes budgets et ce qui est déjà dans la valise.</p>
 
-<div class="acct">
+<button type="button" class="ac-badge" id="acBadge">👤 Se connecter</button>
+<div class="ac-backdrop" id="acBack"></div>
+<div class="ac-toast" id="acToast" role="status"></div>
+
+<div class="acct" id="acct">
+  <button type="button" class="ac-close" id="acClose" aria-label="Fermer">✕</button>
   <div id="acctOut">
     <input id="acEmail" type="text" placeholder="Pseudo (ton prénom)" autocomplete="username" maxlength="24">
-    <input id="acPass" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
+    <div class="pw-wrap">
+      <input id="acPass" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
+      <button type="button" id="acEye" class="pw-eye" aria-label="Afficher le mot de passe" aria-pressed="false">👁</button>
+    </div>
     <div class="acct-row">
       <button class="p" id="acIn" type="button">Se connecter</button>
       <button id="acUp" type="button">Créer un compte</button>

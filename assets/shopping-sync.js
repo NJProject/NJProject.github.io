@@ -13,6 +13,20 @@ const $ = id => document.getElementById(id);
 const B = () => window.shopBridge;
 const status = t => { $("acStatus").textContent = t; };
 
+const panel = $("acct"), badge = $("acBadge"), back = $("acBack"), toast = $("acToast");
+let justSignedIn = false, toastTimer;
+const openPanel = () => { panel.classList.add("open"); back.classList.add("show"); };
+const closePanel = () => { panel.classList.remove("open"); back.classList.remove("show"); };
+const showToast = t => {
+  toast.textContent = t; toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 3000);
+};
+badge.onclick = openPanel;
+$("acClose").onclick = closePanel;
+back.onclick = closePanel;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+
 let uid = null, unsubs = [], synced = new Map(), settingsSynced = "";
 let itemsReady = false, settingsReady = false;
 const settingsOf = s => JSON.stringify({ rate: s.rate, budget: s.budget, kg: s.kg });
@@ -91,10 +105,17 @@ onAuthStateChanged(auth, user => {
   $("acctIn").hidden = !user;
   if (user) {
     uid = user.uid;
-    $("acUser").textContent = "Connecté : " + user.email.split("@")[0];
+    const name = user.email.split("@")[0];
+    $("acUser").textContent = "Connecté : " + name;
+    badge.textContent = "✓ " + name;
+    badge.classList.add("on");
     status("Synchronisation…");
     listen();
+    closePanel();
+    if (justSignedIn) { showToast("Connecté : " + name + " ✓"); justSignedIn = false; }
   } else {
+    badge.textContent = "👤 Se connecter";
+    badge.classList.remove("on");
     status("Non connecté : la liste reste sur cet appareil.");
   }
 });
@@ -114,9 +135,11 @@ const errMsg = e => ({
 }[e.code] || "Erreur : " + e.code);
 
 $("acIn").onclick = async () => {
+  justSignedIn = true;
   try { await signInWithEmailAndPassword(auth, ...creds()); } catch (e) { status(errMsg(e)); }
 };
 $("acUp").onclick = async () => {
+  justSignedIn = true;
   try { await createUserWithEmailAndPassword(auth, ...creds()); } catch (e) { status(errMsg(e)); }
 };
 $("acOut").onclick = async () => {
